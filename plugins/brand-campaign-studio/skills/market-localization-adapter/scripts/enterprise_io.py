@@ -1457,11 +1457,9 @@ def _kv_sheet_to_map(rows: list[dict[str, Any]], *, value_as_int: bool = False) 
                 break
         if key and val is not None:
             k_str = str(key).strip().upper()
-            try:
-                fval = float(str(val).replace(",", "").strip())
+            fval = _safe_float_io(val)
+            if fval is not None:
                 out[k_str] = int(round(fval)) if value_as_int else fval
-            except ValueError:
-                pass
     return out
 
 
@@ -1548,8 +1546,8 @@ def _synthesize_docx_clauses(doc: dict[str, Any]) -> list[dict[str, Any]]:
     family_map = [
         ("limitation_of_liability", ("limitation of liability", "liability cap", "aggregate liability")),
         ("auto_renewal", ("auto-renewal", "automatic renewal", "renewal", "term and termination")),
+        ("dpa_breach_notification", ("breach notification", "security breach", "data breach", "personal data breach", "security incident", "incident notification", "data processing", "dpa")),
         ("data_rights_ai_training", ("ai training", "machine learning", "model training", "data rights", "intellectual property", "customer data", "customer content")),
-        ("dpa_breach_notification", ("breach notification", "security incident", "data processing", "dpa")),
         ("governing_law", ("governing law", "jurisdiction", "venue", "dispute resolution")),
         ("indemnification", ("indemnification", "indemnity", "hold harmless")),
     ]
@@ -1685,6 +1683,29 @@ def _synthesize_docx_clauses(doc: dict[str, Any]) -> list[dict[str, Any]]:
     return clauses
 
 
+def _safe_float_io(val: Any) -> float | None:
+    """Parse accounting negatives like ($12,450.00) or plain numbers to float."""
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        return float(val)
+    s = str(val).strip()
+    if not s or s.lower() in {"nan", "inf", "-inf", "+inf", "null", "none", "n/a", "-", "--"}:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    s = s.replace("$", "").replace("€", "").replace("£", "").replace("¥", "").replace(",", "").replace(" ", "")
+    if not s:
+        return None
+    try:
+        out = float(s)
+        return -abs(out) if neg else out
+    except ValueError:
+        return None
+
+
 def _rollup_nested_records(payload: dict[str, Any], *, skill_id: str | None) -> dict[str, Any]:
     """Assemble nested child lists/dicts when multi-tab workbooks or flat CSVs split parent/child rows."""
     if skill_id == "pnl-budget-variance-bridge" and "lines" in payload:
@@ -1709,11 +1730,10 @@ def _rollup_nested_records(payload: dict[str, Any], *, skill_id: str | None) -> 
                             po["ordered_qty"] = po[qk]
                             break
                 if po.get("unit_price") in (None, "") and po.get("amount") not in (None, ""):
-                    try:
-                        q_val = float(po.get("ordered_qty") or 1) or 1.0
-                        po["unit_price"] = float(po["amount"]) / q_val
-                    except (TypeError, ValueError):
-                        pass
+                    amt_f = _safe_float_io(po["amount"])
+                    qty_f = _safe_float_io(po.get("ordered_qty"))
+                    if amt_f is not None:
+                        po["unit_price"] = amt_f / (qty_f if qty_f and qty_f > 0 else 1.0)
         for gr in payload.get("goods_receipts") or []:
             if isinstance(gr, dict) and gr.get("received_qty") in (None, ""):
                 for qk in ("quantity", "qty", "menge", "invoiced_qty"):
@@ -1733,18 +1753,14 @@ def _rollup_nested_records(payload: dict[str, Any], *, skill_id: str | None) -> 
                         if inv.get(ak) not in (None, ""):
                             amt_val = inv[ak]
                             break
-                    if amt_val is not None:
-                        try:
-                            amt_f = float(amt_val)
-                            qty_raw = inv.get("invoiced_qty")
-                            qty_f = float(qty_raw) if qty_raw not in (None, "") else 0.0
-                            if qty_f > 0:
-                                inv["unit_price"] = amt_f / qty_f
-                            else:
-                                inv["invoiced_qty"] = 1.0
-                                inv["unit_price"] = amt_f
-                        except (TypeError, ValueError):
-                            pass
+                    amt_f = _safe_float_io(amt_val)
+                    if amt_f is not None:
+                        qty_f = _safe_float_io(inv.get("invoiced_qty")) or 0.0
+                        if qty_f > 0:
+                            inv["unit_price"] = amt_f / qty_f
+                        else:
+                            inv["invoiced_qty"] = 1.0
+                            inv["unit_price"] = amt_f
 
     if skill_id == "deal-desk-quote-guard" and "quotes" in payload:
         raw_quotes = payload.get("quotes") or []
@@ -1925,12 +1941,25 @@ def _rollup_nested_records(payload: dict[str, Any], *, skill_id: str | None) -> 
     return payload
 
 
+def _resolve_sheet_name(sheet_order: list[str], sheet: str | int) -> str:
+    """Resolve an Excel worksheet by exact/case-insensitive name OR 0-based numeric tab index."""
+    s_req = str(sheet).strip()
+    exact = next((s for s in sheet_order if s == s_req or s.lower() == s_req.lower() or s.strip().lower() == s_req.lower()), None)
+    if exact is not None:
+        return exact
+    if re.fullmatch(r"\d+", s_req):
+        idx = int(s_req)
+        if 0 <= idx < len(sheet_order):
+            return sheet_order[idx]
+    raise KeyError(f"Worksheet {sheet!r} not found. Available sheets: {sheet_order}")
+
+
 def _route_workbook_to_payload(
     wb: dict[str, Any],
     *,
     skill_id: str | None,
     primary_key: str | None,
-    sheet: str | None,
+    sheet: str | int | None,
     sheet_routes: dict[str, tuple[str, ...]],
     merge_matching_sheets: set[str],
     scalar_keys: tuple[str, ...],
@@ -1948,11 +1977,9 @@ def _route_workbook_to_payload(
         if trunc_key in wb["metadata_kv"]:
             payload[trunc_key] = wb["metadata_kv"][trunc_key]
 
-    # Single explicit sheet request
-    if sheet:
-        exact = next((s for s in sheet_order if s == sheet or s.lower() == sheet.lower()), None)
-        if exact is None:
-            raise KeyError(f"Worksheet {sheet!r} not found. Available sheets: {sheet_order}")
+    # Single explicit sheet request (by name or 0-based index)
+    if sheet is not None and str(sheet).strip() != "":
+        exact = _resolve_sheet_name(sheet_order, sheet)
         target_key = primary_key or "rows"
         payload[target_key] = sheets[exact]
         return _rollup_nested_records(payload, skill_id=skill_id)
@@ -2140,7 +2167,7 @@ def load_enterprise_payload(
     *,
     skill_id: str | None = None,
     primary_key: str | None = None,
-    sheet: str | None = None,
+    sheet: str | int | None = None,
     sheet_routes: dict[str, tuple[str, ...]] | None = None,
     field_aliases: dict[str, str] | None = None,
     raw_text_key: str | None = None,
@@ -2226,7 +2253,7 @@ def load_enterprise_payload(
 def read_enterprise_table(
     path: str | Path,
     *,
-    sheet: str | None = None,
+    sheet: str | int | None = None,
     field_aliases: dict[str, str] | None = None,
     fallback_keys: tuple[str, ...] = ("rows", "items", "records"),
 ) -> list[dict[str, Any]]:
@@ -2237,10 +2264,9 @@ def read_enterprise_table(
         wb = read_xlsx_workbook(p, field_aliases=field_aliases)
         if not wb["sheet_order"]:
             return []
-        if sheet:
-            exact = next((s for s in wb["sheet_order"] if s.lower() == sheet.lower()), None)
-            if exact:
-                return wb["sheets"][exact]
+        if sheet is not None and str(sheet).strip() != "":
+            exact = _resolve_sheet_name(wb["sheet_order"], sheet)
+            return wb["sheets"][exact]
         return wb["sheets"][wb["sheet_order"][0]]
     if suffix == ".docx":
         doc = read_docx(p, field_aliases=field_aliases)
@@ -2261,7 +2287,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect enterprise .xlsx, .docx, .csv, or .json files.")
     parser.add_argument("input", type=Path, help="Input file path (.xlsx, .docx, .csv, .tsv, .json, .jsonl)")
     parser.add_argument("--skill", help="Optional skill_id routing profile")
-    parser.add_argument("--sheet", help="Optional .xlsx worksheet name")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name or 0-based tab index")
     parser.add_argument("--summary", action="store_true", help="Print structural summary only")
     args = parser.parse_args(argv)
 

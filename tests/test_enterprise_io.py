@@ -671,3 +671,161 @@ def test_bom_csv_tsv_jsonl_sql_diff_and_workspace_cli_cwd(tmp_path: Path) -> Non
     out = json.loads(proc.stdout)
     assert out["summary"]["actual_cost_usd"] == 150000.0
     assert out["summary"]["budget_cost_usd"] == 100000.0
+
+
+def test_large_scale_6_tab_4200_row_xlsx_and_sheet_index_lookup(tmp_path: Path) -> None:
+    # Build a realistic 6-tab 4,200+ row .xlsx workbook with title banners (rows 1-3),
+    # mixed sharedStrings & inlineStr, accounting negatives "($12,450.00)", formula caches, and date serials.
+    na_rows: list[list[Any]] = [
+        [{"type": "shared", "v": "Apex Global Enterprise FY26 Close"}],
+        ["Org Configured", "false"],
+        [],
+        ["Account ID", "Parent Account", "Account Name", "Category", "Currency", "Actual Local", "Budget Local", "Posting Date"],
+    ]
+    for i in range(1400):
+        # Include accounting negative format strings and formula cached values
+        act: Any = "($12,450.00)" if i == 0 else ({"type": "formula", "f": f"E{i+5}*1.0", "v": 1000.0} if i % 50 == 0 else 1000.0)
+        bud = -10000.0 if i == 0 else 1000.0
+        na_rows.append([
+            f"610{i % 10}",
+            "OPEX",
+            {"type": "shared" if i % 2 == 0 else "inline", "v": f"NA Retail Store {i:04d}"},
+            "opex",
+            "USD",
+            act,
+            bud,
+            {"type": "date_serial", "v": 46336, "style": 1},
+        ])
+
+    apac_rows: list[list[Any]] = [
+        ["Account ID", "Parent Account", "Account Name", "Category", "Currency", "Actual Local", "Budget Local"],
+    ]
+    for i in range(1400):
+        apac_rows.append([f"620{i % 10}", "OPEX", f"APAC Fulfillment {i:04d}", "opex", "JPY", 150000.0, 150000.0])
+
+    emea_rows: list[list[Any]] = [
+        ["Account ID", "Parent Account", "Account Name", "Category", "Currency", "Actual Local", "Budget Local"],
+    ]
+    for i in range(1400):
+        emea_rows.append([f"630{i % 10}", "OPEX", f"EMEA Logistics {i:04d}", "opex", "EUR", 900.0, 900.0])
+
+    ar_rows: list[list[Any]] = [
+        ["Apex Global AR Open Ledger"],
+        [],
+        ["Customer ID", "Customer Name", "Open Amount USD", "Due Date", "Disputed"],
+    ]
+    for i in range(250):
+        ar_rows.append([f"CUST-{i:04d}", f"Enterprise Account {i}", 10000.0 if i < 10 else 2500.0, "2026-07-01" if i == 0 else "2026-10-15", "false"])
+
+    large_wb = _build_xlsx(
+        tmp_path / "apex_enterprise_4200.xlsx",
+        [
+            {
+                "name": "Consolidated_Summary",
+                "raw_rows": [
+                    ["Apex Global Consolidated P&L"],
+                    ["Account ID", "Account Name", "Category", "Currency", "Actual Local", "Budget Local", "FX Rate Actual", "FX Rate Budget"],
+                    # Exact leaf USD total:
+                    # NA: (-12450 + 1399*1000) = 1,386,550 USD; Budget: (-10000 + 1399*1000) = 1,389,000 USD
+                    # APAC: 1400*150,000 JPY * 0.0066666667 = 1,400,000 USD
+                    # EMEA: 1400*900 EUR * 1.1 = 1,386,000 USD
+                    # Plant intentional summary discrepancy vs 4,000,000 reported:
+                    ["OPEX", "Total Operating Expenses", "opex", "USD", 4000000.0, 4175000.0, 1.0, 1.0],
+                ],
+            },
+            {"name": "NA_Retail_GL", "raw_rows": na_rows},
+            {"name": "APAC_Ops_GL", "raw_rows": apac_rows},
+            {"name": "EMEA_GL", "raw_rows": emea_rows},
+            {"name": "FX_Schedule", "raw_rows": [["Currency", "FX Rate"], ["USD", 1.0], ["JPY", 0.0066666667], ["EUR", 1.1]]},
+            {"name": "AR_Open_Invoices", "raw_rows": ar_rows},
+        ],
+    )
+
+    wb = enterprise_io.read_xlsx_workbook(large_wb)
+    assert len(wb["sheet_order"]) == 6
+    total_gl_rows = len(wb["sheets"]["NA_Retail_GL"]) + len(wb["sheets"]["APAC_Ops_GL"]) + len(wb["sheets"]["EMEA_GL"])
+    assert total_gl_rows == 4200
+    assert wb["sheets"]["NA_Retail_GL"][0]["actual_local"] == "($12,450.00)"
+    assert wb["sheets"]["NA_Retail_GL"][0]["posting_date"] == "2026-11-10"
+
+    pnl_mod = _load_mod("plugins/finance-variance-recon/skills/pnl-budget-variance-bridge/scripts/pnl_variance_engine.py", "m_pnl_large")
+    res_all = pnl_mod.analyze(large_wb)
+    assert res_all["summary"]["leaf_line_count"] == 4200
+    # 1,386,550 + 1,400,000 + 1,386,000 = 4,172,550.00 leaf actual USD vs 4,000,000.00 summary
+    assert abs(res_all["summary"]["actual_cost_usd"] - 4172550.0) < 5.0
+    assert res_all["summary"]["hierarchy_break_count"] == 1
+
+    # Numeric 0-based --sheet index resolution (tab index 1 == NA_Retail_GL, tab index 5 == AR_Open_Invoices)
+    res_idx1 = pnl_mod.analyze(large_wb, sheet="1")
+    assert res_idx1["summary"]["leaf_line_count"] == 1400
+    assert abs(res_idx1["summary"]["actual_cost_usd"] - 1386550.0) < 1e-2
+
+    ar_mod = _load_mod("plugins/finance-variance-recon/skills/ar-aging-collections-audit/scripts/aging_bucket_auditor.py", "m_ar_idx")
+    ar_by_name = ar_mod.analyze(large_wb, sheet="AR_Open_Invoices", as_of_date="2026-11-10")
+    ar_by_idx = ar_mod.analyze(large_wb, sheet=5, as_of_date="2026-11-10")
+    assert ar_by_name["summary"]["gross_positive_ar_usd"] == ar_by_idx["summary"]["gross_positive_ar_usd"]
+    assert abs(ar_by_idx["summary"]["gross_positive_ar_usd"] - (10 * 10000.0 + 240 * 2500.0)) < 1e-2
+
+    # CLI execution from tmp_path using integer --sheet 5 on a table-only reader
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "shared" / "scripts" / "enterprise_io.py"), str(large_wb), "--sheet", "5", "--skill", "ar-aging-collections-audit"],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    cli_payload = json.loads(proc.stdout)
+    assert len(cli_payload["open_items"]) == 250
+
+    with pytest.raises(KeyError, match="not found"):
+        enterprise_io.read_enterprise_table(large_wb, sheet="99")
+
+
+def test_large_scale_multipage_docx_sections_and_tables(tmp_path: Path) -> None:
+    paragraphs: list[tuple[str, str | None]] = [
+        ("Apex Global Master Services & Oncology Clinical Addendum", "Title"),
+        ("Contract ID: MSA-APEX-LARGE-2026", None),
+        ("Protocol ID: APX-LARGE-900", None),
+        ("Target Sample Size: 480 subjects across a 24-month enrollment window.", None),
+    ]
+    for i in range(1, 13):
+        paragraphs.append((f"Section {i}: Commercial and Operational Provisions Part {i}", "Heading1"))
+        if i == 8:
+            paragraphs.append(("Vendor aggregate liability shall not exceed six (6) months of trailing fees.", None))
+        elif i == 11:
+            paragraphs.append(("Vendor shall NOT use Customer Data or prompts to train Vendor foundation AI models.", None))
+        elif i == 12:
+            paragraphs.append(("Vendor will notify Customer of a security breach within forty-eight (48) hours.", None))
+        else:
+            filler = " ".join(
+                f"Standard governance paragraph clause {i}.{j} documenting audit trails, SOC2 controls, and milestone SLAs."
+                for j in range(1, 18)
+            )
+            paragraphs.append((filler, None))
+
+    large_docx = _build_docx(
+        tmp_path / "large_enterprise_protocol.docx",
+        paragraphs=paragraphs,
+        tables=[
+            [["Visit ID", "Window Start Day", "Window End Day", "Procedures"], ["SCR", -21, 0, "ecg;cbc"], ["WK24", 160, 175, "cbc"]],
+            [["Endpoint ID", "Endpoint Type", "Target Visit Day", "Required Procedures"], ["EP-OS", "PRIMARY", 168, "mri_scan;cbc"]],
+            [["Site ID", "IRB Approved", "Projected Monthly Screened", "Screen Fail Rate Pct"], ["SITE-TYO", "true", 25, 20]],
+        ],
+        footnotes=["Footnote 1: Site TYO operates under PMDA local appendix requirements."],
+    )
+    doc = enterprise_io.read_docx(large_docx)
+    assert len(doc["headings"]) >= 12
+    assert len(doc["sections"]) >= 12
+    assert len(doc["tables"]) == 3
+    assert len(doc["full_text"].split()) > 1500
+
+    clin_mod = _load_mod("plugins/healthcare-clinical-regulatory/skills/clinical-protocol-feasibility/scripts/soa_endpoint_validator.py", "m_clin_large")
+    clin_res = clin_mod.analyze(large_docx)
+    assert clin_res["summary"]["soa_endpoint_gap_count"] == 1  # mri_scan missing at WK24!
+
+    legal_mod = _load_mod("plugins/legal-contract-desk/skills/contract-playbook-redliner/scripts/clause_risk_matrix.py", "m_legal_large")
+    legal_res = legal_mod.analyze(large_docx)
+    by_fam = {c["clause_family"]: c for c in legal_res["clause_evaluations"]}
+    assert by_fam["limitation_of_liability"]["risk_score"] == 3  # 6 months in [6, 12) warning band
+    assert by_fam["data_rights_ai_training"]["risk_score"] == 1
+    assert by_fam["dpa_breach_notification"]["risk_score"] == 1  # 48h <= 72h

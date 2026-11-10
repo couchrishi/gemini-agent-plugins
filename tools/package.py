@@ -268,7 +268,7 @@ def render_bundle_skill_md(
             "",
             "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Because runtime shells start in `/workspace` while bundles and individual skills unpack under `skills/<slug>/` or `skills/user-skills/<slug>/`, always resolve `SKILL_DIR` dynamically before importing scripts or reading references.",
             "",
-            "- **Zero-dependency enterprise ingestion:** Every engine uses [enterprise_io.py](scripts/enterprise_io.py) to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabName>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet.",
+            "- **Zero-dependency enterprise ingestion:** Every engine uses [enterprise_io.py](scripts/enterprise_io.py) to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabNameOrIndex>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet by tab name or 0-based index.",
             "",
             "Using persistent `pyrepl`:",
             "",
@@ -316,7 +316,7 @@ def render_bundle_skill_md(
         )
     lines.extend(
         [
-            "# Or pass .xlsx / .docx / .csv directly (optional --sheet \"TabName\"):",
+            "# Or pass .xlsx / .docx / .csv directly (optional --sheet \"TabName\" or --sheet 0):",
             f"# python3 \"$SKILL_DIR/{first_script_rel}\" --input workbook.xlsx --config \"$SKILL_DIR/references/config.json\" --format markdown",
             "# Inspect CLI flags directly:",
         ]
