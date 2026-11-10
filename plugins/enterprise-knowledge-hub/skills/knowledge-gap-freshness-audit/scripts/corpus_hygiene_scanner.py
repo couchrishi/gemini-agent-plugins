@@ -21,6 +21,164 @@ DEFAULT_CONFIG: dict[str, Any] = {
 }
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -28,7 +186,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -43,6 +203,8 @@ def load_payload(input_arg: str | Path | dict[str, Any] | list[dict[str, Any]]) 
         with p.open("r", encoding="utf-8", newline="") as fh:
             return {"documents": list(csv.DictReader(fh))}
     data = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(data, (dict, list)):
+        return {}
     if isinstance(data, list):
         return {"documents": data}
     return data
@@ -61,17 +223,17 @@ def analyze(
     payload: str | Path | dict[str, Any] | list[dict[str, Any]],
     config: str | Path | dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload)
+    data = _strip_null_items(load_payload(payload))
     cfg, org_configured, banner = load_config(config)
     docs = data.get("documents") or data.get("records") or []
-    ticket_topics = data.get("ticket_topics", [])
-    inactive_owners = {str(o).lower() for o in data.get("inactive_owners", [])}
+    ticket_topics = _as_list(data.get("ticket_topics"))
+    inactive_owners = {str(o).lower() for o in _as_list(data.get("inactive_owners"))}
     as_of = _parse_date(data.get("as_of_date")) or dt.date(2026, 11, 10)
-    stale_days = int(cfg.get("stale_review_days", 180))
-    dup_threshold = float(cfg.get("duplicate_title_similarity_threshold", 0.82))
+    stale_days = _to_int(cfg.get("stale_review_days"), 180)
+    dup_threshold = _to_float(cfg.get("duplicate_title_similarity_threshold"), 0.82)
 
-    metadata = data.get("metadata", {})
-    total_available = int(metadata.get("total_available", len(docs)))
+    metadata = _as_dict(data.get("metadata"))
+    total_available = _to_int(metadata.get("total_available"), len(docs))
     truncated = bool(metadata.get("truncated", total_available > len(docs)))
     warnings: list[str] = []
     if truncated:
@@ -94,7 +256,7 @@ def analyze(
         owner_status = str(d.get("owner_status") or "active").lower()
         version = str(d.get("version") or "1.0")
         last_rev = _parse_date(d.get("last_reviewed_at"))
-        for t in d.get("topics", []):
+        for t in _as_list(d.get("topics")):
             covered_topics.add(str(t).lower())
         covered_topics.update(re.findall(r"[a-z0-9]{4,}", title.lower()))
 
@@ -152,7 +314,7 @@ def analyze(
             vol = 1
         elif isinstance(item, dict):
             topic = str(item.get("topic") or "").strip()
-            vol = int(item.get("ticket_count", 0))
+            vol = _to_int(item.get("ticket_count"), 0)
         else:
             continue
         t_words = set(re.findall(r"[a-z0-9]{4,}", topic.lower()))
@@ -181,7 +343,7 @@ def analyze(
         "unpublished_drafts": unpublished_drafts,
         "near_duplicates": near_duplicates,
         "unindexed_topics": unindexed_topics,
-        "truncation_warnings": warnings,
+        "truncation_warnings": _collect_truncation_warnings(data, count=len(docs), existing=warnings),
     }
 
 
@@ -203,7 +365,7 @@ def render_markdown(result: dict[str, Any]) -> str:
             "",
         ]
     )
-    for w in result.get("truncation_warnings", []):
+    for w in _as_list(result.get("truncation_warnings")):
         lines.append(f"> **WARNING:** {w}")
     if result["unindexed_topics"]:
         lines.extend(["## Top Unindexed Ticket Topics", "", "| Topic | Ticket Volume |", "| :--- | ---: |"])

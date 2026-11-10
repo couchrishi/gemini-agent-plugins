@@ -257,30 +257,67 @@ def render_bundle_skill_md(
     for b in plugin_meta["shared_baselines"]:
         lines.append(f"- [{b}](references/baselines/{b})")
 
+    first_script_rel = skill_entries[0]["script"]
+    first_module = posixpath.splitext(posixpath.basename(first_script_rel))[0]
+    first_skill_id = skill_entries[0]["id"]
     lines.extend(
         [
             "",
             "## In-Memory Python RAM Execution Pattern",
             "",
-            "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Inspect outputs and optionally visualize metrics with `emit_a2ui` or automate via `schedule_task`.",
+            "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Because runtime shells start in `/workspace` while bundles and individual skills unpack under `skills/<slug>/` or `skills/user-skills/<slug>/`, always resolve `SKILL_DIR` dynamically before importing scripts or reading references.",
             "",
             "Using persistent `pyrepl`:",
             "",
             "```python",
             "import json",
-            f"from scripts.{posixpath.splitext(posixpath.basename(skill_entries[0]['script']))[0]} import analyze",
-            "with open('references/config.json') as f:",
-            "    cfg = json.load(f)",
-            "# Pass loaded Mode A/B/C records in RAM without flooding context tokens",
+            "import sys",
+            "from pathlib import Path",
+            "",
+            "SKILL_DIR = next(",
+            "    (",
+            "        p",
+            "        for p in (",
+            f"            Path(\"skills/{plugin_id}\"),",
+            f"            Path(\"skills/user-skills/{plugin_id}\"),",
+            f"            Path(\"skills/{first_skill_id}\"),",
+            f"            Path(\"skills/user-skills/{first_skill_id}\"),",
+            "            Path(\".\"),",
+            "        )",
+            f"        if (p / \"{first_script_rel}\").is_file()",
+            "    ),",
+            f"    next((p.parent.parent for p in Path(\"skills\").rglob(\"{first_script_rel}\")), Path(\".\")),",
+            ")",
+            "sys.modules.pop(\"scripts\", None)",
+            "sys.path.insert(0, str(SKILL_DIR))",
+            f"from scripts.{first_module} import analyze, render_markdown",
+            "",
+            "cfg = json.loads((SKILL_DIR / \"references\" / \"config.json\").read_text(encoding=\"utf-8\"))",
+            "# Pass loaded Mode A/B/C payload in RAM without flooding prompt tokens:",
+            "# result = analyze(payload, config=SKILL_DIR / \"references\" / \"config.json\")",
+            "# print(render_markdown(result))",
             "```",
             "",
-            "Using CLI fallback (`python3`):",
+            "Using CLI fallback (`python3` from `/workspace` or bundle root):",
             "",
             "```bash",
+            "SKILL_DIR=\".\"",
+            f"for d in skills/{plugin_id} skills/user-skills/{plugin_id} skills/*; do",
+            f"  [ -f \"$d/{first_script_rel}\" ] && SKILL_DIR=\"$d\" && break",
+            "done",
         ]
     )
     for s in skill_entries:
-        lines.append(f"python3 {s['script']} --help")
+        lines.append(
+            f"python3 \"$SKILL_DIR/{s['script']}\" --input payload.json --config \"$SKILL_DIR/references/config.json\" --format markdown"
+        )
+    lines.extend(
+        [
+            "# Or inspect CLI flags directly:",
+        ]
+    )
+    for s in skill_entries:
+        lines.append(f"python3 \"$SKILL_DIR/{s['script']}\" --help")
     lines.extend(
         [
             "```",

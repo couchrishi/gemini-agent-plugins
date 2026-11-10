@@ -26,6 +26,164 @@ DEFAULT_CONFIG: dict[str, Any] = {
 }
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -33,7 +191,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -41,20 +201,21 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
 def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
-    return json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    _loaded = json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    return _loaded if isinstance(_loaded, dict) else {}
 
 
 def analyze(
     payload: str | Path | dict[str, Any],
     config: str | Path | dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload)
+    data = _strip_null_items(load_payload(payload))
     cfg, org_configured, banner = load_config(config)
 
     as_of_str = str(data.get("as_of_date") or "2026-10-15")
-    as_of_dt = date.fromisoformat(as_of_str[:10])
-    max_fa_cap = float(data.get("sponsor_fa_cap_pct") or cfg.get("max_indirect_fa_rate_pct", 52.0))
-    max_age_days = int(cfg.get("max_evidence_age_days", 365))
+    as_of_dt = _safe_date(as_of_str) or date(2026, 10, 15)
+    max_fa_cap = (_to_float(data.get("sponsor_fa_cap_pct")) or cfg.get("max_indirect_fa_rate_pct", 52.0))
+    max_age_days = _to_int(cfg.get("max_evidence_age_days"), 365)
     unallowable_cats = {c.lower() for c in cfg.get("unallowable_categories", DEFAULT_CONFIG["unallowable_categories"])}
 
     budget_lines = data.get("budget_lines") or []
@@ -70,10 +231,10 @@ def analyze(
     for line in budget_lines:
         lid = str(line.get("line_id") or "BL-1")
         cat = str(line.get("category") or "general").lower()
-        amt = float(line.get("amount_usd") or 0.0)
+        amt = _to_float(line.get("amount_usd"), 0.0)
         is_indirect = bool(line.get("is_indirect_fa", False))
         mtdc_exempt = bool(line.get("mtdc_exempt", False))
-        cs_amt = float(line.get("cost_share_amount_usd") or 0.0)
+        cs_amt = _to_float(line.get("cost_share_amount_usd"), 0.0)
         cost_share_total += cs_amt
 
         if cat in unallowable_cats:
@@ -107,8 +268,8 @@ def analyze(
             }
         )
 
-    req_match_pct = float(data.get("required_cost_share_pct") or 0.0)
-    total_direct_cost = mtdc_base + sum(float(l.get("amount_usd") or 0.0) for l in budget_lines if l.get("mtdc_exempt"))
+    req_match_pct = _to_float(data.get("required_cost_share_pct"), 0.0)
+    total_direct_cost = mtdc_base + sum(_to_float(l.get("amount_usd"), 0.0) for l in budget_lines if l.get("mtdc_exempt"))
     actual_match_pct = (cost_share_total / total_direct_cost * 100.0) if total_direct_cost > 0 else 0.0
     if req_match_pct > 0 and actual_match_pct < req_match_pct:
         budget_findings.append(
@@ -124,7 +285,7 @@ def analyze(
     pi_findings: list[dict[str, Any]] = []
     for pi in pi_allocations:
         name = str(pi.get("pi_name") or pi.get("researcher_id") or "PI-1")
-        total_pct = float(pi.get("proposed_effort_pct") or 0.0) + float(pi.get("existing_commitments_pct") or 0.0)
+        total_pct = _to_float(pi.get("proposed_effort_pct"), 0.0) + _to_float(pi.get("existing_commitments_pct"), 0.0)
         if total_pct > 100.0:
             pi_findings.append({"pi_name": name, "total_effort_pct": round(total_pct, 1), "issue": "PI_OVERALLOCATED_GT_100_PCT"})
 
@@ -133,7 +294,8 @@ def analyze(
         aid = str(art.get("artifact_id") or "ART-1")
         status = str(art.get("status") or "PRESENT").upper()
         last_upd = art.get("last_verified_date")
-        age_days = (as_of_dt - date.fromisoformat(str(last_upd)[:10])).days if last_upd else None
+        _upd_dt = _safe_date(last_upd)
+        age_days = (as_of_dt - _upd_dt).days if _upd_dt else None
         if status != "PRESENT":
             artifact_findings.append({"artifact_id": aid, "status": "MISSING_REQUIRED_EVIDENCE", "age_days": age_days})
         elif age_days is not None and age_days > max_age_days:
@@ -159,7 +321,7 @@ def analyze(
         "budget_findings": budget_findings,
         "pi_effort_findings": pi_findings,
         "accreditation_artifact_findings": artifact_findings,
-        "truncation_warnings": ["Grant sub-ledger truncated; F&A ceiling calculation may be incomplete."] if data.get("truncated") else [],
+        "truncation_warnings": _collect_truncation_warnings(data, count=len(budget_lines), existing=["Grant sub-ledger truncated; F&A ceiling calculation may be incomplete."] if data.get("truncated") else []),
     }
 
 
@@ -188,6 +350,10 @@ def render_markdown(result: dict[str, Any]) -> str:
         lines.append(f"| Evidence | `{af['artifact_id']}` | {af['status']} | {af['age_days'] or 'N/A'}d |")
     if s["blocker_count"] == 0:
         lines.append("| All | `OK` | All budget, effort, and evidence checks passed | 0 |")
+    if result.get("truncation_warnings"):
+        lines.extend(["", "## Data Completeness & Truncation Warnings"])
+        for w in result["truncation_warnings"]:
+            lines.append(f"- {w}")
     return "\n".join(lines) + "\n"
 
 

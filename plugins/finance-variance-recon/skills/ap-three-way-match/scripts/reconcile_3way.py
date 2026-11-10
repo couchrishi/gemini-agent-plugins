@@ -37,6 +37,164 @@ DEFAULT_DECIMALS = {
 }
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -44,7 +202,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -95,11 +255,11 @@ def _normalize_amount(
 ) -> tuple[float, float]:
     """Return (actual_local_amount, usd_equivalent) after TCURX decimal shift and SHKZG sign normalization."""
     curr = currency.upper().strip() or "USD"
-    decimals = int(decimals_map.get(curr, DEFAULT_DECIMALS.get(curr, 2)))
+    decimals = _to_int(decimals_map.get(curr), DEFAULT_DECIMALS.get(curr, 2))
     scaled = raw_amount * (10 ** (2 - decimals)) if sap_raw_encoding else raw_amount
     sign = -1.0 if (shkzg or "").strip().upper() == "H" else 1.0
     local_amt = scaled * sign
-    rate_to_usd = float(fx_rates.get(curr, 1.0))
+    rate_to_usd = _to_float(fx_rates.get(curr), 1.0)
     return local_amt, local_amt * rate_to_usd
 
 
@@ -111,22 +271,22 @@ def analyze(
     gr_path: str | Path | None = None,
     invoice_path: str | Path | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path)
+    data = _strip_null_items(load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path))
     cfg, org_configured, banner = load_config(config)
 
-    fx_rates = {str(k).upper(): float(v) for k, v in data.get("fx_rates", {"USD": 1.0}).items()}
-    decimals_map = {str(k).upper(): int(v) for k, v in data.get("decimal_places", {}).items()}
-    price_tol_pct = float(cfg.get("price_tolerance_pct", 0.02))
-    price_tol_abs = float(cfg.get("price_tolerance_abs", 500.0))
-    qty_tol_pct = float(cfg.get("qty_tolerance_pct", 0.0))
-    dup_window_days = int(cfg.get("duplicate_date_window_days", 3))
+    fx_rates = {str(k).upper(): (_to_opt_float(v) if _to_opt_float(v) is not None else 1.0) for k, v in _as_dict(data.get("fx_rates"), {"USD": 1.0}).items()}
+    decimals_map = {str(k).upper(): (_to_opt_int(v) if _to_opt_int(v) is not None else 2) for k, v in _as_dict(data.get("decimal_places")).items()}
+    price_tol_pct = _to_float(cfg.get("price_tolerance_pct"), 0.02)
+    price_tol_abs = _to_float(cfg.get("price_tolerance_abs"), 500.0)
+    qty_tol_pct = _to_float(cfg.get("qty_tolerance_pct"), 0.0)
+    dup_window_days = _to_int(cfg.get("duplicate_date_window_days"), 3)
 
     po_index: dict[tuple[str, str], dict[str, Any]] = {}
-    for po in data.get("purchase_orders", []):
+    for po in _as_list(data.get("purchase_orders")):
         key = (str(po.get("po_number", "")).strip(), str(po.get("line_item", "10")).strip())
         curr = str(po.get("currency") or "USD").upper()
         _, unit_usd = _normalize_amount(
-            float(po.get("unit_price", 0.0)),
+            _to_float(po.get("unit_price"), 0.0),
             curr,
             sap_raw_encoding=bool(po.get("sap_raw_encoding", False)),
             shkzg=po.get("shkzg"),
@@ -137,15 +297,15 @@ def analyze(
             "po_number": key[0],
             "line_item": key[1],
             "vendor_id": str(po.get("vendor_id") or "").strip(),
-            "ordered_qty": float(po.get("ordered_qty", 0.0)),
+            "ordered_qty": _to_float(po.get("ordered_qty"), 0.0),
             "po_unit_price_usd": unit_usd,
             "currency": curr,
         }
 
     gr_index: dict[tuple[str, str], float] = {}
-    for gr in data.get("goods_receipts", []):
+    for gr in _as_list(data.get("goods_receipts")):
         key = (str(gr.get("po_number", "")).strip(), str(gr.get("line_item", "10")).strip())
-        qty = float(gr.get("received_qty", 0.0))
+        qty = _to_float(gr.get("received_qty"), 0.0)
         if str(gr.get("shkzg") or "").strip().upper() == "H":
             qty = -abs(qty)
         gr_index[key] = gr_index.get(key, 0.0) + qty
@@ -155,16 +315,16 @@ def analyze(
     seen_fuzzy: list[tuple[str, str, float, date | None]] = []
     normalized_invoices: list[dict[str, Any]] = []
 
-    for idx, inv in enumerate(data.get("invoices", [])):
+    for idx, inv in enumerate(_as_list(data.get("invoices"))):
         inv_id = str(inv.get("invoice_id") or f"INV-{idx + 1}")
         inv_num = str(inv.get("invoice_number") or inv_id).strip()
         vendor_id = str(inv.get("vendor_id") or "UNKNOWN").strip()
         curr = str(inv.get("currency") or "USD").upper()
         shkzg = inv.get("shkzg")
         raw_encoding = bool(inv.get("sap_raw_encoding", False))
-        qty = float(inv.get("invoiced_qty", 0.0))
-        raw_unit = float(inv.get("unit_price", 0.0))
-        raw_tax = float(inv.get("tax_amount", 0.0))
+        qty = _to_float(inv.get("invoiced_qty"), 0.0)
+        raw_unit = _to_float(inv.get("unit_price"), 0.0)
+        raw_tax = _to_float(inv.get("tax_amount"), 0.0)
 
         local_unit, unit_usd = _normalize_amount(
             raw_unit,
@@ -186,7 +346,7 @@ def analyze(
         is_credit = (str(inv.get("doc_type") or "").upper() == "CREDIT_MEMO") or (str(shkzg or "").upper() == "H")
 
         dt_str = str(inv.get("invoice_date") or "").strip()
-        inv_dt = date.fromisoformat(dt_str[:10]) if dt_str else None
+        inv_dt = _safe_date(dt_str)
 
         if not is_credit:
             seen_exact.setdefault((vendor_id, inv_num.upper()), []).append(inv_id)
@@ -238,7 +398,7 @@ def analyze(
             exceptions.append("FRAUD_HOLD_BANK_CHANGE: Unverified vendor remittance/bank modification request.")
 
         # Duplicate detection (exact + fuzzy date window)
-        exact_dups = seen_exact.get((vendor_id, item["inv_num"].upper()), [])
+        exact_dups = _as_list(seen_exact.get((vendor_id, item["inv_num"].upper())))
         if len(exact_dups) > 1 and exact_dups[0] != inv_id:
             exceptions.append(f"DUPLICATE_SUSPECT_EXACT: Matches {exact_dups[0]} on vendor+invoice_number.")
         else:
@@ -324,7 +484,7 @@ def analyze(
             ),
         },
         "reconciliation_results": matches,
-        "truncation_warnings": [],
+        "truncation_warnings": _collect_truncation_warnings(data, count=len(matches)),
     }
 
 
@@ -351,6 +511,10 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"| `{m['invoice_id']}` | `{m['vendor_id']}` | `{m['po_number']}` | {m['currency']} | "
             f"${m['normalized_amount_usd']:,.2f} | `{m['match_status']}` | {ex_str} |"
         )
+    if result.get("truncation_warnings"):
+        lines.extend(["", "## Data Completeness & Truncation Warnings"])
+        for w in result["truncation_warnings"]:
+            lines.append(f"- {w}")
     return "\n".join(lines) + "\n"
 
 

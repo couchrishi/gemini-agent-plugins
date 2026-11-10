@@ -19,6 +19,164 @@ DEFAULT_CONFIG: dict[str, Any] = {
 }
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -26,7 +184,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -34,20 +194,21 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
 def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
-    return json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    _loaded = json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    return _loaded if isinstance(_loaded, dict) else {}
 
 
 def analyze(
     payload: str | Path | dict[str, Any],
     config: str | Path | dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload)
+    data = _strip_null_items(load_payload(payload))
     cfg, org_configured, banner = load_config(config)
 
     dispatch_date_str = str(data.get("dispatch_date") or "2026-10-15")
-    dispatch_dt = date.fromisoformat(dispatch_date_str[:10])
+    dispatch_dt = _safe_date(dispatch_date_str) or date(2026, 11, 10)
     techs = data.get("technicians") or []
-    depot_stock = {str(k): int(v) for k, v in (data.get("depot_spares_qty") or {}).items()}
+    depot_stock = {str(k): _to_int(v) for k, v in (data.get("depot_spares_qty") or {}).items()}
     work_orders = data.get("work_orders") or []
     enforce_certs = bool(cfg.get("enforce_safety_cert_expiry", True))
 
@@ -61,7 +222,7 @@ def analyze(
 
         missing_spares: list[str] = []
         for sku, qty in req_spares.items():
-            if depot_stock.get(str(sku), 0) < int(qty):
+            if depot_stock.get(str(sku), 0) < _to_int(qty):
                 missing_spares.append(f"{sku} (need {qty}, stock {depot_stock.get(str(sku), 0)})")
 
         eligible_techs: list[dict[str, Any]] = []
@@ -78,8 +239,10 @@ def analyze(
                 exp = certs.get(rc)
                 if not exp:
                     expired.append(f"{rc} missing")
-                elif enforce_certs and date.fromisoformat(str(exp)[:10]) < dispatch_dt:
-                    expired.append(f"{rc} expired {exp}")
+                elif enforce_certs:
+                    exp_dt = _safe_date(exp)
+                    if exp_dt is None or exp_dt < dispatch_dt:
+                        expired.append(f"{rc} expired/invalid {exp}")
             if expired:
                 cert_failures.append(f"{tid}: {', '.join(expired)}")
                 continue
@@ -87,7 +250,7 @@ def analyze(
                 {
                     "tech_id": tid,
                     "name": str(tech.get("name") or tid),
-                    "travel_hours": float(tech.get("estimated_travel_hours") or 1.0),
+                    "travel_hours": (_to_float(tech.get("estimated_travel_hours")) or 1.0),
                 }
             )
 
@@ -128,7 +291,7 @@ def analyze(
             "blocked_count": sum(1 for e in evaluated if e["dispatch_status"] == "BLOCKED"),
         },
         "dispatch_plans": evaluated,
-        "truncation_warnings": ["WMS depot inventory feed truncated; confirm physical van bin counts before roll."] if data.get("truncated") else [],
+        "truncation_warnings": _collect_truncation_warnings(data, count=len(evaluated), existing=["WMS depot inventory feed truncated; confirm physical van bin counts before roll."] if data.get("truncated") else []),
     }
 
 
@@ -154,6 +317,10 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"`{d['dispatch_status']}` | {'; '.join(d['blockers']) or 'None'} |"
         )
     lines.extend(["", "Truck rolls and depot pick-ticket releases require HITL dispatch coordinator confirmation."])
+    if result.get("truncation_warnings"):
+        lines.extend(["", "## Data Completeness & Truncation Warnings"])
+        for w in result["truncation_warnings"]:
+            lines.append(f"- {w}")
     return "\n".join(lines) + "\n"
 
 

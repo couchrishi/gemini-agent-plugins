@@ -31,7 +31,7 @@ Prompting an agent without thresholds causes arbitrary risk ratings. Conversely,
 LLMs should synthesize, verify policy context, and explain decisions—never perform multi-currency arithmetic, aging buckets, BOM explosions, cohort retention, or cumulative beneficial-ownership graph traversals inside token prediction.
 
 - Every one of the 60 workflow skills executes a dedicated stdlib-first Python 3.11+ engine exporting `load_config`, `load_payload`, `analyze`, `render_markdown`, and an `argparse` `main` entrypoint (`--input`, `--config`, `--format json|markdown`, `--output`).
-- Inside Gemini Agent, the model imports the module inside persistent `pyrepl` RAM for iterative slice/dice exploration without losing state, falling back cleanly to `python3 scripts/<module>.py` when executed outside `pyrepl`.
+- Inside Gemini Agent, the model resolves the active skill folder under `/workspace/skills/<slug>/` (or `skills/user-skills/<slug>/`) inside persistent `pyrepl` RAM for iterative slice/dice exploration without losing state, falling back cleanly to `python3 "$SKILL_DIR/scripts/<module>.py"` when executed outside `pyrepl`.
 
 ## 4. Enterprise API & Analytical Trap Defenses
 

@@ -30,6 +30,164 @@ DEFAULT_STAGE_MEDIAN_DAYS = {
 }
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -37,7 +195,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -52,6 +212,8 @@ def load_payload(input_arg: str | Path | dict[str, Any] | list[dict[str, Any]]) 
         with p.open("r", encoding="utf-8", newline="") as fh:
             return {"opportunities": list(csv.DictReader(fh))}
     data = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(data, (dict, list)):
+        return {}
     if isinstance(data, list):
         return {"opportunities": data}
     return data
@@ -67,23 +229,23 @@ def analyze(
     payload: str | Path | dict[str, Any] | list[dict[str, Any]],
     config: str | Path | dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload)
+    data = _strip_null_items(load_payload(payload))
     cfg, org_configured, banner = load_config(config)
     opps = data.get("opportunities") or data.get("records") or []
-    fx_rates = {str(k).upper(): float(v) for k, v in data.get("fx_rates", {"USD": 1.0}).items()}
+    fx_rates = {str(k).upper(): (_to_opt_float(v) if _to_opt_float(v) is not None else 1.0) for k, v in _as_dict(data.get("fx_rates"), {"USD": 1.0}).items()}
     stage_medians = {
-        str(k).lower(): float(v)
+        str(k).lower(): _to_float(v)
         for k, v in data.get("stage_median_days", DEFAULT_STAGE_MEDIAN_DAYS).items()
     }
-    remaining_quota = float(data.get("remaining_quota_usd", 0.0))
+    remaining_quota = _to_float(data.get("remaining_quota_usd"), 0.0)
     target_ccy = str(cfg.get("target_currency", "USD")).upper()
-    stale_mult = float(cfg.get("stage_stale_multiplier", 1.5))
-    max_push = int(cfg.get("max_push_count_before_flag", 2))
-    min_contacts = int(cfg.get("min_commit_contacts", 2))
-    target_cov = float(cfg.get("target_pipeline_coverage_x", 3.0))
+    stale_mult = _to_float(cfg.get("stage_stale_multiplier"), 1.5)
+    max_push = _to_int(cfg.get("max_push_count_before_flag"), 2)
+    min_contacts = _to_int(cfg.get("min_commit_contacts"), 2)
+    target_cov = _to_float(cfg.get("target_pipeline_coverage_x"), 3.0)
 
-    metadata = data.get("metadata", {})
-    total_available = int(metadata.get("totalSize", metadata.get("total_available", len(opps))))
+    metadata = _as_dict(data.get("metadata"))
+    total_available = _to_int(metadata.get("totalSize"), metadata.get("total_available", len(opps)))
     truncated = bool(metadata.get("truncated", total_available > len(opps) or metadata.get("done") is False))
     warnings: list[str] = []
     if truncated:
@@ -110,9 +272,9 @@ def analyze(
         stage = str(o.get("stage") or "").strip()
         forecast_cat = str(o.get("forecast_category") or "Pipeline").strip()
         is_closed = _as_bool(o.get("is_closed", False))
-        prob = float(o.get("probability_pct", 0.0))
+        prob = _to_float(o.get("probability_pct"), 0.0)
         ccy = str(o.get("currency") or target_ccy).upper()
-        raw_amt = float(o.get("amount", 0.0))
+        raw_amt = _to_float(o.get("amount"), 0.0)
 
         flags: list[str] = []
         if ("closed" in stage.lower() and not is_closed) or (is_closed and prob not in {0.0, 100.0}):
@@ -137,16 +299,16 @@ def analyze(
             open_total_norm += norm_amt
             weighted_total_norm += norm_amt * (prob / 100.0)
 
-        days_in_stage = float(o.get("days_in_stage", 0.0))
+        days_in_stage = _to_float(o.get("days_in_stage"), 0.0)
         median = stage_medians.get(stage.lower().replace(" ", "_"), 21.0)
         if days_in_stage > median * stale_mult:
             flags.append(f"STALE_STAGE ({days_in_stage:.0f}d > {median * stale_mult:.1f}d)")
 
-        pushes = int(o.get("push_count", 0))
+        pushes = _to_int(o.get("push_count"), 0)
         if pushes >= max_push:
             flags.append(f"CHRONIC_SLIPPAGE (pushed {pushes}x)")
 
-        contacts = int(o.get("active_contact_count", 0))
+        contacts = _to_int(o.get("active_contact_count"), 0)
         if contacts < min_contacts and forecast_cat.lower() in {"commit", "bestcase", "best case"}:
             flags.append(f"SINGLE_THREADED ({contacts} contacts < {min_contacts})")
 
@@ -155,7 +317,7 @@ def analyze(
                 flags.append("MISSING_ECONOMIC_BUYER")
             if not str(o.get("next_step") or "").strip():
                 flags.append("MISSING_NEXT_STEP")
-            if int(o.get("days_since_activity", 0)) > 14:
+            if _to_int(o.get("days_since_activity"), 0) > 14:
                 flags.append(f"COMMIT_INACTIVE ({o.get('days_since_activity')}d)")
             if flags and fx_ok:
                 commit_at_risk_norm += norm_amt
@@ -196,7 +358,7 @@ def analyze(
             "fx_normalized": len(missing_fx) == 0,
         },
         "flagged_opportunities": flagged_opps,
-        "truncation_warnings": warnings,
+        "truncation_warnings": _collect_truncation_warnings(data, count=None, existing=warnings),
     }
 
 
@@ -223,6 +385,10 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"| `{f['opportunity_id']}` {f['name']} | {f['account_name']} | {f['forecast_category']} | "
             f"{amt_str} | {'; '.join(f['risk_flags'])} |"
         )
+    if result.get("truncation_warnings"):
+        lines.extend(["", "## Data Completeness & Truncation Warnings"])
+        for w in result["truncation_warnings"]:
+            lines.append(f"- {w}")
     return "\n".join(lines) + "\n"
 
 

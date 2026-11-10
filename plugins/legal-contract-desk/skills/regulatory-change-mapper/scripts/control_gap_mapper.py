@@ -18,6 +18,164 @@ DEFAULT_CONFIG: dict[str, Any] = {
 SEVERITY_WEIGHT = {"CRITICAL": 4.0, "HIGH": 3.0, "MEDIUM": 2.0, "LOW": 1.0}
 
 
+def _to_float(val: Any, default: Any = 0.0) -> float:
+    num = _to_opt_float(val)
+    if num is not None:
+        return num
+    d = _to_opt_float(default)
+    return d if d is not None else 0.0
+
+
+def _to_opt_float(val: Any) -> float | None:
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        num = float(val)
+        return None if (num != num or abs(num) == float("inf")) else num
+    s = str(val).strip()
+    if not s:
+        return None
+    neg = False
+    if s.startswith("(") and s.endswith(")"):
+        neg = True
+        s = s[1:-1].strip()
+    for ch in (",", "$", "€", "£", "¥", "%"):
+        s = s.replace(ch, "")
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        num = float(s)
+    except ValueError:
+        return None
+    if num != num or abs(num) == float("inf"):
+        return None
+    return -num if neg else num
+
+
+def _to_int(val: Any, default: Any = 0) -> int:
+    num = _to_opt_float(val)
+    if num is None:
+        num = _to_opt_float(default)
+    if num is None:
+        return 0
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return 0
+
+
+def _to_opt_int(val: Any) -> int | None:
+    num = _to_opt_float(val)
+    if num is None:
+        return None
+    try:
+        return int(round(num))
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _safe_date(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val.date()
+    if isinstance(val, _dt.date):
+        return val
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return _dt.date.fromisoformat(s[:10])
+    except ValueError:
+        return None
+
+
+def _safe_datetime(val: Any) -> Any:
+    import datetime as _dt
+    if val is None:
+        return None
+    if isinstance(val, _dt.datetime):
+        return val if val.tzinfo else val.replace(tzinfo=_dt.timezone.utc)
+    if isinstance(val, _dt.date):
+        return _dt.datetime(val.year, val.month, val.day, tzinfo=_dt.timezone.utc)
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        parsed = _dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def _strip_null_items(obj: Any) -> Any:
+    if isinstance(obj, list):
+        return [_strip_null_items(x) for x in obj if x is not None]
+    if isinstance(obj, dict):
+        return {k: _strip_null_items(v) for k, v in obj.items()}
+    return obj
+
+
+def _as_list(val: Any, default: list[Any] | None = None) -> list[Any]:
+    if isinstance(val, list):
+        return [x for x in val if x is not None]
+    if val is None:
+        return list(default) if default is not None else []
+    if isinstance(val, (tuple, set)):
+        return [x for x in val if x is not None]
+    return list(default) if default is not None else []
+
+
+def _as_dict_list(val: Any) -> list[dict[str, Any]]:
+    return [item for item in _as_list(val) if isinstance(item, dict)]
+
+
+def _as_dict(val: Any, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    if isinstance(val, dict):
+        return val
+    return dict(default) if default is not None else {}
+
+
+def _collect_truncation_warnings(
+    data: dict[str, Any],
+    *,
+    count: int | None = None,
+    existing: list[str] | None = None,
+) -> list[str]:
+    warnings = [str(w) for w in (existing or []) if w]
+    meta = _as_dict(data.get("metadata"))
+    trunc = bool(data.get("truncated")) or bool(meta.get("truncated"))
+    if (
+        data.get("done") is False
+        or meta.get("done") is False
+        or bool(data.get("next_page_token") or data.get("nextPageToken"))
+        or bool(meta.get("next_page_token") or meta.get("nextPageToken"))
+    ):
+        trunc = True
+    total_avail = data.get("total_available")
+    if total_avail is None:
+        total_avail = data.get("totalSize")
+    if total_avail is None:
+        total_avail = meta.get("total_available")
+    if total_avail is None:
+        total_avail = meta.get("totalSize")
+    avail_int = _to_opt_int(total_avail)
+    if avail_int is not None and count is not None and avail_int > count:
+        trunc = True
+    if trunc and not warnings:
+        if avail_int is not None and count is not None:
+            warnings.append(
+                f"TRUNCATION_WARNING: Returned {count} of {avail_int} available records; totals and counts represent a partial dataset only."
+            )
+        else:
+            warnings.append(
+                "TRUNCATION_WARNING: Upstream feed reported truncated or paginated output; totals and counts represent a partial dataset only."
+            )
+    return warnings
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -25,7 +183,9 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     elif config_arg is not None:
         p = Path(config_arg)
         if p.is_file():
-            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+            _loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(_loaded, dict):
+                cfg.update(_loaded)
     org_cfg = bool(cfg.get("org_configured", False))
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
@@ -33,14 +193,15 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
 def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
-    return json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    _loaded = json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    return _loaded if isinstance(_loaded, dict) else {}
 
 
 def _parse_date(val: Any) -> date | None:
     if not val:
         return None
     s = str(val).strip()
-    return date.fromisoformat(s[:10]) if s else None
+    return _safe_date(s)
 
 
 def analyze(
@@ -48,13 +209,13 @@ def analyze(
     config: str | Path | dict[str, Any] | None = None,
     as_of_date: str | None = None,
 ) -> dict[str, Any]:
-    data = load_payload(payload)
+    data = _strip_null_items(load_payload(payload))
     cfg, org_configured, banner = load_config(config)
     as_of = _parse_date(as_of_date or data.get("as_of_date")) or date(2026, 11, 10)
-    max_ev_days = int(cfg.get("max_control_evidence_days", 365))
+    max_ev_days = _to_int(cfg.get("max_control_evidence_days"), 365)
 
-    articles = data.get("articles", [])
-    controls = data.get("controls", [])
+    articles = _as_list(data.get("articles"))
+    controls = _as_list(data.get("controls"))
 
     # Index controls by mapped article_id and also evaluate individual control freshness
     article_to_controls: dict[str, list[dict[str, Any]]] = {}
@@ -90,7 +251,7 @@ def analyze(
             "last_tested_date": tested_dt.isoformat() if tested_dt else None,
         }
         control_health[cid] = info
-        for aid in ctrl.get("mapped_articles", []):
+        for aid in _as_list(ctrl.get("mapped_articles")):
             article_to_controls.setdefault(str(aid), []).append(info)
 
     mappings: list[dict[str, Any]] = []
@@ -101,9 +262,9 @@ def analyze(
         reg = str(art.get("regulation") or "Regulation")
         title = str(art.get("title") or aid)
         sev = str(art.get("severity") or "HIGH").upper()
-        req_domains = {str(d).lower() for d in art.get("required_domains", [])}
+        req_domains = {str(d).lower() for d in _as_list(art.get("required_domains"))}
 
-        linked = article_to_controls.get(aid, [])
+        linked = _as_list(article_to_controls.get(aid))
         active_impl = [c for c in linked if c["effective_status"] != "NOT_IMPLEMENTED"]
         covered_domains = {c["domain"] for c in active_impl}
         missing_domains = sorted(req_domains - covered_domains)
@@ -187,7 +348,7 @@ def analyze(
         },
         "article_mappings": mappings,
         "remediation_queue": remediation_queue,
-        "truncation_warnings": [],
+        "truncation_warnings": _collect_truncation_warnings(data, count=len(controls)),
     }
 
 
@@ -215,6 +376,10 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"| `{m['article_id']}` | {m['regulation']} | {m['severity']} | `{m['coverage_status']}` | "
             f"{ctrls} | {miss} | {m['remediation_priority_score']:.1f} |"
         )
+    if result.get("truncation_warnings"):
+        lines.extend(["", "## Data Completeness & Truncation Warnings"])
+        for w in result["truncation_warnings"]:
+            lines.append(f"- {w}")
     return "\n".join(lines) + "\n"
 
 
