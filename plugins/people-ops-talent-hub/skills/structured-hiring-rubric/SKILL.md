@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Audits 1-4 interview scorecards for >=2.0 dispersion, thin behavioral evidence (<40 chars), and protected-class bias signals. Audits structured interview scorecards for score dispersion, thin evidence, and bias signals. Execute calculations via [rubric_calibration_checker.py](scripts/rubric_calibration_checker.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `hris_and_ats_records` | `workday_raas_api` (oauth2_service_account), `greenhouse_harvest_api` (api_key_secret_manager) | Google Sheets, Google Docs, Google Drive — Read Workforce Roster Sheets (UNFORMATTED_VALUE) and Interview Debrief Docs in People Ops Shared Drives. | `.json`, `.csv` via `view_file` |
-| `onboarding_it_provisioning` | `servicenow_hrsd_api` (oauth2_service_account) | Google Sheets, Gmail, Google Drive — Inspect Onboarding Tracker Sheets and IT ticket updates in People Ops Drives. | `.json`, `.csv` via `view_file` |
+| `hris_and_ats_records` | `workday_raas_api` (oauth2_service_account), `greenhouse_harvest_api` (api_key_secret_manager) | Google Sheets, Google Docs, Google Drive — Read Workforce Roster Sheets (UNFORMATTED_VALUE) and Interview Debrief Docs in People Ops Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
+| `onboarding_it_provisioning` | `servicenow_hrsd_api` (oauth2_service_account) | Google Sheets, Gmail, Google Drive — Inspect Onboarding Tracker Sheets and IT ticket updates in People Ops Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Splits order delays into merchant prep vs courier transit faults, waives verified weather delays, and assigns refund liability. Resolves SuperApp zone delivery SLA disputes, attribution (merchant vs courier), and refund liability. Execute calculations via [zone_sla_dispute_analyzer.py](scripts/zone_sla_dispute_analyzer.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `marketplace_catalog_dispatch_psp` | `bigquery_sql_api` (workload_identity), `rest_webhook_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read Merchant Listing Queues, Zone Delivery SLA Logs, and Weekly PSP Payout Sheets in SuperApp Ops Drives. | `.json`, `.csv` via `view_file` |
+| `marketplace_catalog_dispatch_psp` | `bigquery_sql_api` (workload_identity), `rest_webhook_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read Merchant Listing Queues, Zone Delivery SLA Logs, and Weekly PSP Payout Sheets in SuperApp Ops Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

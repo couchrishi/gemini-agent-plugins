@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Reconciles SAP WE goods receipts and RE invoice postings with TCURX currency scaling, SHKZG sign flips, and >60d aging classification. Reconciles SAP GR/IR clearing accounts across goods receipts and invoice receipts with TCURX and aging guards. Execute calculations via [gr_ir_reconciler.py](scripts/gr_ir_reconciler.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `erp_p2p_and_bom_data` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive — Read Procurement GR/IR Aging Sheets, RFx Bid Matrix Sheets, and BOM Cost Rollup tabs in Supply Chain Shared Drives. | `.json`, `.csv` via `view_file` |
+| `erp_p2p_and_bom_data` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive — Read Procurement GR/IR Aging Sheets, RFx Bid Matrix Sheets, and BOM Cost Rollup tabs in Supply Chain Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Matches CPT prior-auth packets against covered ICD-10 prefixes, step-therapy trial durations, and required diagnostic labs. Matches prior authorization requests against clinical ICD-10, step therapy, and lab criteria. Execute calculations via [medical_criteria_matcher.py](scripts/medical_criteria_matcher.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `clinical_ctms_and_safety_db` | `ctms_fhir_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read De-Identified SoA Feasibility Sheets, PV Intake Logs, and Medical Policy Playbooks in Clinical Ops Drives. | `.json`, `.csv` via `view_file` |
+| `clinical_ctms_and_safety_db` | `ctms_fhir_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read De-Identified SoA Feasibility Sheets, PV Intake Logs, and Medical Policy Playbooks in Clinical Ops Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

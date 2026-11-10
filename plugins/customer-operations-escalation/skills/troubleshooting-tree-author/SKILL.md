@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Validates customer support diagnostic trees via BFS/DFS for cycles, dead-end questions, orphan nodes, broken refs, and depth. Validates support troubleshooting decision trees for orphan nodes, cycles, dead ends, and broken targets. Execute calculations via [decision_tree_validator.py](scripts/decision_tree_validator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `crm_and_support_case_data` | `salesforce_soql_api` (oauth2_user), `servicenow_csm_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read VIP Escalation Tracker Sheets, Quarterly Survey Exports, and Support Playbook Docs in CX Shared Drives. | `.json`, `.csv` via `view_file` |
+| `crm_and_support_case_data` | `salesforce_soql_api` (oauth2_user), `servicenow_csm_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read VIP Escalation Tracker Sheets, Quarterly Survey Exports, and Support Playbook Docs in CX Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

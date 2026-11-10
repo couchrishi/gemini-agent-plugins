@@ -180,6 +180,49 @@ def _collect_truncation_warnings(
     return warnings
 
 
+def _load_enterprise_io() -> Any | None:
+    try:
+        from scripts import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    try:
+        import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    eio_path = Path(__file__).resolve().parent / "enterprise_io.py"
+    if eio_path.is_file():
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("enterprise_io", eio_path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+_ENTERPRISE_IO = _load_enterprise_io()
+
+
+def _to_bool(val: Any, default: bool = False) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in {"true", "yes", "y", "1", "on"}:
+        return True
+    if s in {"false", "no", "n", "0", "off", ""}:
+        return False if s else default
+    return bool(s)
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -190,25 +233,29 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
             _loaded = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(_loaded, dict):
                 cfg.update(_loaded)
-    org_cfg = bool(cfg.get("org_configured", False))
+    org_cfg = _to_bool(cfg.get("org_configured"), False)
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
 
-def load_payload(input_arg: str | Path | dict[str, Any] | list[dict[str, Any]]) -> dict[str, Any]:
+def load_payload(
+    input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
+    *,
+    sheet: str | None = None,
+) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
     if isinstance(input_arg, list):
         return {"clauses": input_arg}
+    if _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="policy-sop-answering", sheet=sheet)
     p = Path(input_arg)
     if p.suffix.lower() == ".csv":
         with p.open("r", encoding="utf-8", newline="") as fh:
             return {"clauses": list(csv.DictReader(fh))}
-    data = json.loads(p.read_text(encoding="utf-8"))
-    if not isinstance(data, (dict, list)):
-        return {}
-    if isinstance(data, list):
-        return {"clauses": data}
-    return data
+    loaded = json.loads(p.read_text(encoding="utf-8"))
+    if isinstance(loaded, list):
+        return {"clauses": loaded}
+    return loaded if isinstance(loaded, dict) else {}
 
 
 def _parse_date(val: Any) -> dt.date | None:
@@ -232,19 +279,21 @@ def analyze(
     jurisdiction: str | None = None,
     entity: str | None = None,
     as_of_date: str | None = None,
+
+    sheet: str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload))
+    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
     clauses = data.get("clauses") or data.get("records") or []
     q_text = query or data.get("query") or ""
     target_jur = (jurisdiction or data.get("jurisdiction") or "GLOBAL").upper()
     target_ent = (entity or data.get("entity") or "ALL").lower()
     as_of = _parse_date(as_of_date or data.get("as_of_date")) or dt.date(2026, 11, 10)
-    allow_drafts = bool(cfg.get("allow_draft_versions_in_answers", False))
+    allow_drafts = _to_bool(cfg.get("allow_draft_versions_in_answers"), False)
 
     metadata = _as_dict(data.get("metadata"))
     total_available = _to_int(metadata.get("total_available"), len(clauses))
-    truncated = bool(metadata.get("truncated", total_available > len(clauses)))
+    truncated = _to_bool(metadata.get("truncated"), total_available > len(clauses))
     warnings: list[str] = []
     if truncated:
         warnings.append(
@@ -376,6 +425,7 @@ def render_markdown(result: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Match policy/SOP clauses by jurisdiction, entity, and date.")
     parser.add_argument("--input", required=True, type=Path, help="Path to policy clauses JSON or CSV")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
     parser.add_argument("--config", type=Path, help="Optional config.json path")
     parser.add_argument("--query", help="Policy question text")
     parser.add_argument("--jurisdiction", help="Target jurisdiction code (e.g. SG, US-CA, DE)")
@@ -392,6 +442,7 @@ def main(argv: list[str] | None = None) -> int:
         jurisdiction=args.jurisdiction,
         entity=args.entity,
         as_of_date=args.as_of_date,
+        sheet=args.sheet,
     )
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:

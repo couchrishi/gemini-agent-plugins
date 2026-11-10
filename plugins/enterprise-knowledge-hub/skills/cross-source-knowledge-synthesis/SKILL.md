@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Scores source authority and recency across multi-repo hits, flags conflicting numerical/date claims, and verifies 100% claim citation coverage. Cross-source authority scorer, numerical/date conflict auditor, and citation coverage verifier. Execute calculations via [citation_conflict_auditor.py](scripts/citation_conflict_auditor.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `enterprise_document_search` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user), `atlassian_confluence_cloud` (oauth2_user) | Google Drive, Google Docs, Google Sheets — Search Shared Drives with includeItemsFromAllDrives=true and inspect all child tabs in Google Docs. | `.json`, `.csv`, `.md`, `.txt` via `view_file` |
-| `support_ticket_gap_signal` | `servicenow_table_api` (oauth2_service_account) | Google Sheets, Google Drive — Locate exported ticket topic summary Sheets in the Knowledge Ops Shared Drive folder. | `.csv`, `.json` via `view_file` |
+| `enterprise_document_search` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user), `atlassian_confluence_cloud` (oauth2_user) | Google Drive, Google Docs, Google Sheets — Search Shared Drives with includeItemsFromAllDrives=true and inspect all child tabs in Google Docs. | `.json`, `.csv`, `.md`, `.txt`, `.xlsx`, `.docx` via `view_file` |
+| `support_ticket_gap_signal` | `servicenow_table_api` (oauth2_service_account) | Google Sheets, Google Drive — Locate exported ticket topic summary Sheets in the Knowledge Ops Shared Drive folder. | `.csv`, `.json`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

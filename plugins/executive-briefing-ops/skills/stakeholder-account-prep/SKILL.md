@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Aggregates account ARR milestones, open escalations, executive touchpoints, and renewal countdowns into scored stakeholder dossiers. Aggregates account commercial milestones, escalations, touchpoints, and renewal countdowns. Execute calculations via [dossier_synthesizer.py](scripts/dossier_synthesizer.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `calendar_and_mail_context` | `google_calendar_api` (oauth2_user), `gmail_api` (oauth2_user), `microsoft_graph_calendar_mail` (oauth2_user) | Google Calendar, Gmail, Google Meet, Google Docs — Inspect Calendar event descriptions and Google Meet transcript Docs in the Executive Prep folder. | `.json`, `.csv`, `.md`, `.txt` via `view_file` |
-| `account_and_escalation_context` | `salesforce_soql_api` (oauth2_user) | Google Sheets, Google Drive — Locate Account Health Tracker Sheet in Executive Shared Drive. | `.json`, `.csv` via `view_file` |
+| `calendar_and_mail_context` | `google_calendar_api` (oauth2_user), `gmail_api` (oauth2_user), `microsoft_graph_calendar_mail` (oauth2_user) | Google Calendar, Gmail, Google Meet, Google Docs — Inspect Calendar event descriptions and Google Meet transcript Docs in the Executive Prep folder. | `.json`, `.csv`, `.md`, `.txt`, `.xlsx`, `.docx` via `view_file` |
+| `account_and_escalation_context` | `salesforce_soql_api` (oauth2_user) | Google Sheets, Google Drive — Locate Account Health Tracker Sheet in Executive Shared Drive. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

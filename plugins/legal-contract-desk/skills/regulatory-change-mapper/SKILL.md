@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Maps regulatory articles against internal controls to detect uncovered mandates, stale test evidence, and prioritized remediation queues. Maps regulatory mandates against internal compliance controls and identifies uncovered/stale gaps. Execute calculations via [control_gap_mapper.py](scripts/control_gap_mapper.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `clm_and_contract_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Drive — Inspect Legal Playbook Docs (all child tabs) and Executed Contract Registry Sheets in Legal Shared Drives. | `.json`, `.csv`, `.md`, `.txt` via `view_file` |
-| `compliance_control_register` | `servicenow_grc_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Control Register & Audit Evidence Sheets in Compliance Shared Drives. | `.json`, `.csv` via `view_file` |
+| `clm_and_contract_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Drive — Inspect Legal Playbook Docs (all child tabs) and Executed Contract Registry Sheets in Legal Shared Drives. | `.json`, `.csv`, `.md`, `.txt`, `.xlsx` via `view_file` |
+| `compliance_control_register` | `servicenow_grc_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Control Register & Audit Evidence Sheets in Compliance Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

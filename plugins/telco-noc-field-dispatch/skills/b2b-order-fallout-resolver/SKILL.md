@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Classifies stuck B2B DIA/MPLS/SIP orders into deterministic remediation queues and quantifies Monthly Recurring Charge (MRC) at risk. Classifies B2B telco provisioning order fallout, SLA breach aging, and Monthly Recurring Charge (MRC) at risk. Execute calculations via [order_fallout_classifier.py](scripts/order_fallout_classifier.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `noc_nms_fsm_and_oss` | `servicenow_table_api` (oauth2_service_account), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Active NOC Alarm Export Sheets, Tech Certification Rosters, and B2B Order Fallout Sheets in Network Ops Drives. | `.json`, `.csv` via `view_file` |
+| `noc_nms_fsm_and_oss` | `servicenow_table_api` (oauth2_service_account), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Active NOC Alarm Export Sheets, Tech Certification Rosters, and B2B Order Fallout Sheets in Network Ops Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

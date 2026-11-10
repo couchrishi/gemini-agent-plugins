@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Verifies target locale translations for missing markets, untranslated leaks, DNT term preservation, and regional glossary fidelity. Checks market localization packs against do-not-translate lists, regional glossaries, and target locale coverage. Execute calculations via [locale_glossary_checker.py](scripts/locale_glossary_checker.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `marketing_asset_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Slides, Google Drive — Read Brand Playbook Docs, Campaign Matrix Sheets, and Launch Decks in Marketing Shared Drives. | `.json`, `.csv`, `.md` via `view_file` |
-| `localization_cms` | `smartling_tms_api` (oauth2_service_account) | Google Sheets, Google Docs — Inspect Regional Copy & Glossary Tabs in Marketing Launch Sheets. | `.json`, `.csv` via `view_file` |
+| `marketing_asset_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Slides, Google Drive — Read Brand Playbook Docs, Campaign Matrix Sheets, and Launch Decks in Marketing Shared Drives. | `.json`, `.csv`, `.md`, `.xlsx`, `.docx` via `view_file` |
+| `localization_cms` | `smartling_tms_api` (oauth2_service_account) | Google Sheets, Google Docs — Inspect Regional Copy & Glossary Tabs in Marketing Launch Sheets. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Scores VIP account escalations (0-100) from Sev1/Sev2 cases, SLA breaches, ARR, imminent renewals, outages, and competitor risk. Scores VIP customer escalations by ARR at risk, renewal proximity, outage impact, and ticket backlog. Execute calculations via [escalation_exposure_scorer.py](scripts/escalation_exposure_scorer.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `crm_and_support_case_data` | `salesforce_soql_api` (oauth2_user), `servicenow_csm_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read VIP Escalation Tracker Sheets, Quarterly Survey Exports, and Support Playbook Docs in CX Shared Drives. | `.json`, `.csv` via `view_file` |
+| `crm_and_support_case_data` | `salesforce_soql_api` (oauth2_user), `servicenow_csm_api` (oauth2_service_account) | Google Sheets, Google Docs, Google Drive — Read VIP Escalation Tracker Sheets, Quarterly Survey Exports, and Support Playbook Docs in CX Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

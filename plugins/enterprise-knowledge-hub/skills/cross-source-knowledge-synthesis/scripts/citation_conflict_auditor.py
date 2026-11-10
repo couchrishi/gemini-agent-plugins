@@ -201,6 +201,49 @@ def _collect_truncation_warnings(
     return warnings
 
 
+def _load_enterprise_io() -> Any | None:
+    try:
+        from scripts import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    try:
+        import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    eio_path = Path(__file__).resolve().parent / "enterprise_io.py"
+    if eio_path.is_file():
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("enterprise_io", eio_path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+_ENTERPRISE_IO = _load_enterprise_io()
+
+
+def _to_bool(val: Any, default: bool = False) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in {"true", "yes", "y", "1", "on"}:
+        return True
+    if s in {"false", "no", "n", "0", "off", ""}:
+        return False if s else default
+    return bool(s)
+
+
 def load_config(config_path: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     merged = dict(DEFAULT_CONFIG)
     if isinstance(config_path, dict):
@@ -209,26 +252,30 @@ def load_config(config_path: str | Path | dict[str, Any] | None) -> tuple[dict[s
         p = Path(config_path)
         if p.is_file():
             merged.update(json.loads(p.read_text(encoding="utf-8")))
-    org_configured = bool(merged.get("org_configured", False))
+    org_configured = _to_bool(merged.get("org_configured"), False)
     banner = "" if org_configured else BASELINE_BANNER
     return merged, org_configured, banner
 
 
-def load_payload(input_path: str | Path | dict[str, Any] | list[dict[str, Any]]) -> dict[str, Any]:
-    if isinstance(input_path, dict):
-        return input_path
-    if isinstance(input_path, list):
-        return {"sources": input_path}
-    p = Path(input_path)
+def load_payload(
+    input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
+    *,
+    sheet: str | None = None,
+) -> dict[str, Any]:
+    if isinstance(input_arg, dict):
+        return input_arg
+    if isinstance(input_arg, list):
+        return {"sources": input_arg}
+    if _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="cross-source-knowledge-synthesis", sheet=sheet)
+    p = Path(input_arg)
     if p.suffix.lower() == ".csv":
         with p.open("r", encoding="utf-8", newline="") as fh:
             return {"sources": list(csv.DictReader(fh))}
-    data = json.loads(p.read_text(encoding="utf-8"))
-    if not isinstance(data, (dict, list)):
-        return {}
-    if isinstance(data, list):
-        return {"sources": data}
-    return data
+    loaded = json.loads(p.read_text(encoding="utf-8"))
+    if isinstance(loaded, list):
+        return {"sources": loaded}
+    return loaded if isinstance(loaded, dict) else {}
 
 
 def _parse_date(val: str | None, fallback: dt.date) -> dt.date:
@@ -257,14 +304,17 @@ def _is_draft(src: dict[str, Any]) -> bool:
     ver = str(src.get("version", ""))
     if re.match(r"^\d+\.[1-9]\d*$", ver):
         return True
-    return bool(src.get("is_draft", False))
+    return _to_bool(src.get("is_draft"), False)
 
 
 def analyze(
     payload: str | Path | dict[str, Any] | list[dict[str, Any]],
     config: str | Path | dict[str, Any] | None = None,
+
+    *,
+    sheet: str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload))
+    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
     sources = data.get("sources") or data.get("records") or []
     draft_claims = _as_list(data.get("draft_claims"))
@@ -287,7 +337,7 @@ def analyze(
 
     weights = cfg.get("authoritative_source_weights", DEFAULT_AUTHORITY_WEIGHTS)
     half_life = max(1, _to_int(cfg.get("recency_half_life_days"), 365))
-    allow_drafts = bool(cfg.get("allow_draft_versions_in_answers", False))
+    allow_drafts = _to_bool(cfg.get("allow_draft_versions_in_answers"), False)
 
     ranked_sources: list[dict[str, Any]] = []
     topic_claims: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -303,7 +353,7 @@ def analyze(
         doc_type = str(src.get("doc_type") or "knowledge_article").lower()
         topic = str(src.get("topic") or "general").lower()
         excerpt = str(src.get("excerpt") or src.get("content") or "")
-        irm_protected = bool(src.get("irm_protected", False))
+        irm_protected = _to_bool(src.get("irm_protected"), False)
 
         if irm_protected and len(excerpt.strip()) < 15:
             irm_warnings.append(f"{sid} ({title}): IRM/sensitivity-encrypted body omitted by connector.")
@@ -463,12 +513,13 @@ def render_markdown(result: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit multi-source authority, conflicts, and citation coverage.")
     parser.add_argument("--input", required=True, type=Path, help="Path to JSON or CSV source dataset")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
     parser.add_argument("--config", type=Path, help="Optional config.json path")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional file path to write output")
     args = parser.parse_args(argv)
 
-    result = analyze(args.input, config=args.config)
+    result = analyze(args.input, config=args.config, sheet=args.sheet)
     rendered = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(rendered + "\n", encoding="utf-8")

@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Builds 80/20 manufacturing scrap cost Paretos, isolates >=2x anomalous supplier lots, and computes CapEx payback hurdles. Computes manufacturing defect 80/20 Paretos, isolates shift/lot spikes, and checks CapEx payback. Execute calculations via [defect_pareto_correlator.py](scripts/defect_pareto_correlator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `cmms_qms_ehs_systems` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Critical Spares Inventory Sheets, QMS Scrap Logs, and Daily PTW Safety Logs in Plant Ops Shared Drives. | `.json`, `.csv` via `view_file` |
+| `cmms_qms_ehs_systems` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Critical Spares Inventory Sheets, QMS Scrap Logs, and Daily PTW Safety Logs in Plant Ops Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

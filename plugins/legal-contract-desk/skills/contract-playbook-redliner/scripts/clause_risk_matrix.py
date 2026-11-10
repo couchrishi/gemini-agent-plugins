@@ -219,6 +219,49 @@ def _collect_truncation_warnings(
     return warnings
 
 
+def _load_enterprise_io() -> Any | None:
+    try:
+        from scripts import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    try:
+        import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    eio_path = Path(__file__).resolve().parent / "enterprise_io.py"
+    if eio_path.is_file():
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("enterprise_io", eio_path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+_ENTERPRISE_IO = _load_enterprise_io()
+
+
+def _to_bool(val: Any, default: bool = False) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in {"true", "yes", "y", "1", "on"}:
+        return True
+    if s in {"false", "no", "n", "0", "off", ""}:
+        return False if s else default
+    return bool(s)
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -229,15 +272,29 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
             _loaded = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(_loaded, dict):
                 cfg.update(_loaded)
-    org_cfg = bool(cfg.get("org_configured", False))
+    org_cfg = _to_bool(cfg.get("org_configured"), False)
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
 
-def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
+def load_payload(
+    input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
+    *,
+    sheet: str | None = None,
+) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
-    _loaded = json.loads(Path(input_arg).read_text(encoding="utf-8"))
-    return _loaded if isinstance(_loaded, dict) else {}
+    if isinstance(input_arg, list):
+        return {"clauses": input_arg}
+    if _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="contract-playbook-redliner", sheet=sheet)
+    p = Path(input_arg)
+    if p.suffix.lower() == ".csv":
+        with p.open("r", encoding="utf-8", newline="") as fh:
+            return {"clauses": list(csv.DictReader(fh))}
+    loaded = json.loads(p.read_text(encoding="utf-8"))
+    if isinstance(loaded, list):
+        return {"clauses": loaded}
+    return loaded if isinstance(loaded, dict) else {}
 
 
 def _detect_prompt_injection(text: str) -> list[str]:
@@ -264,15 +321,15 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
     max_notice = _to_int(cfg.get("max_renewal_notice_days"), 60)
     max_cpi = _to_float(cfg.get("max_price_escalator_pct"), 5.0)
     max_breach_hrs = _to_int(cfg.get("max_breach_notify_hours"), 72)
-    forbid_ai = bool(cfg.get("forbid_customer_data_training", True))
+    forbid_ai = _to_bool(cfg.get("forbid_customer_data_training"), True)
     approved_jur = {str(j).lower().strip() for j in _as_list(cfg.get("approved_jurisdictions"))}
 
     score = 1
     rationale: list[str] = []
 
     if family == "limitation_of_liability":
-        uncapped = bool(metrics.get("uncapped_liability", False)) or "unlimited liability" in text.lower()
-        asymmetric = bool(metrics.get("unilateral_cap", False))
+        uncapped = _to_bool(metrics.get("uncapped_liability"), False) or "unlimited liability" in text.lower()
+        asymmetric = _to_bool(metrics.get("unilateral_cap"), False)
         cap_months = _to_opt_float(metrics.get("lol_cap_months"))
         super_mult = _to_opt_float(metrics.get("super_cap_multiplier"))
         if uncapped:
@@ -302,10 +359,10 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
             rationale.append(f"Mutual cap aligns within {lol_min}-{lol_max} month policy band.")
 
     elif family == "auto_renewal":
-        evergreen = bool(metrics.get("silent_evergreen", False))
+        evergreen = _to_bool(metrics.get("silent_evergreen"), False)
         notice_days = _to_opt_int(metrics.get("notice_days"))
         cpi_pct = _to_opt_float(metrics.get("price_escalator_pct"))
-        uncapped_cpi = bool(metrics.get("uncapped_price_escalator", False))
+        uncapped_cpi = _to_bool(metrics.get("uncapped_price_escalator"), False)
         if uncapped_cpi or (notice_days is not None and int(notice_days) > 90):
             score = 9
             rationale.append(
@@ -331,10 +388,10 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
             rationale.append("Renewal notice window and escalator cap comply with baseline limits.")
 
     elif family in {"data_rights_ai_training", "ip_and_data", "data_privacy"}:
-        trains_on_data = bool(metrics.get("vendor_ai_training_allowed", False)) or any(
+        trains_on_data = _to_bool(metrics.get("vendor_ai_training_allowed"), False) or any(
             kw in text.lower() for kw in ("train its models", "train foundation models", "train general foundation models", "improve vendor ai")
         )
-        ip_assign = bool(metrics.get("assigns_customer_preexisting_ip", False))
+        ip_assign = _to_bool(metrics.get("assigns_customer_preexisting_ip"), False)
         hours = _to_opt_int(metrics.get("breach_notify_hours"))
         if ip_assign or (forbid_ai and trains_on_data):
             score = 9
@@ -350,7 +407,7 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
                 rationale.append("Customer retains exclusive IP and data ownership without AI training rights.")
 
     elif family == "dpa_breach_notification":
-        vague = bool(metrics.get("vague_timing", False)) or "commercially reasonable" in text.lower()
+        vague = _to_bool(metrics.get("vague_timing"), False) or "commercially reasonable" in text.lower()
         hours = _to_opt_int(metrics.get("breach_notify_hours"))
         if vague or (hours is not None and int(hours) > max_breach_hrs):
             score = 9
@@ -368,7 +425,7 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
 
     elif family == "governing_law":
         jur = str(metrics.get("jurisdiction") or "").strip()
-        jury_waiver = bool(metrics.get("unilateral_venue_or_appeal_waiver", False))
+        jury_waiver = _to_bool(metrics.get("unilateral_venue_or_appeal_waiver"), False)
         if jury_waiver:
             score = 9
             rationale.append("Unilateral venue or statutory appeal waiver violates playbook floor.")
@@ -411,8 +468,11 @@ def _score_clause(clause: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]
 def analyze(
     payload: str | Path | dict[str, Any],
     config: str | Path | dict[str, Any] | None = None,
+
+    *,
+    sheet: str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload))
+    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
 
     contract_id = str(data.get("contract_id") or "CONTRACT-1")
@@ -486,11 +546,12 @@ def render_markdown(result: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Score contract clauses on a 1/3/9 playbook risk matrix.")
     parser.add_argument("--input", required=True, type=Path, help="Path to contract clauses JSON")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
     parser.add_argument("--config", type=Path, help="Optional config.json path")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional output file path")
     args = parser.parse_args(argv)
-    result = analyze(args.input, config=args.config)
+    result = analyze(args.input, config=args.config, sheet=args.sheet)
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(out + "\n", encoding="utf-8")

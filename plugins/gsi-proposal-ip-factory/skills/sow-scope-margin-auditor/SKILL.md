@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Lints SOW drafts for unbounded 'all work required' obligations, missing acceptance criteria, >10d deemed acceptance, and margin floors. Lints SOW deliverables and clauses for open-ended scope creep, missing acceptance criteria, and margin breaches. Execute calculations via [sow_margin_linter.py](scripts/sow_margin_linter.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `psa_and_proposal_assets` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Sheets, Google Docs, Google Slides, Google Drive — Read Pricing Pyramid Sheets (UNFORMATTED_VALUE), Draft SOW Docs, and Bench Roster Sheets in Delivery Shared Drives. | `.json`, `.csv` via `view_file` |
-| `bench_talent_roster` | `workday_raas_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Weekly Bench & Roll-off Tracker Sheets in Resource Management Drives. | `.json`, `.csv` via `view_file` |
+| `psa_and_proposal_assets` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Sheets, Google Docs, Google Slides, Google Drive — Read Pricing Pyramid Sheets (UNFORMATTED_VALUE), Draft SOW Docs, and Bench Roster Sheets in Delivery Shared Drives. | `.json`, `.csv`, `.xlsx`, `.docx` via `view_file` |
+| `bench_talent_roster` | `workday_raas_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Weekly Bench & Roll-off Tracker Sheets in Resource Management Drives. | `.json`, `.csv`, `.xlsx`, `.docx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

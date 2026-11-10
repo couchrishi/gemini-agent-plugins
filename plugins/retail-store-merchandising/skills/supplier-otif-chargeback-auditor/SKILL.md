@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Scores PO On-Time and In-Full compliance, honors weather/buyer exclusions, and computes vendor chargebacks vs detention fees. Computes supplier OTIF (On-Time In-Full), exclusion rules, chargebacks, and detention fees. Execute calculations via [otif_detention_calculator.py](scripts/otif_detention_calculator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `retail_pos_wms_and_erp` | `bigquery_sql_api` (workload_identity), `sap_odata_api` (mtls_oauth2) | Google Sheets, Google Docs, Google Drive — Read Store Shrink Cycle-Count Sheets (`UNFORMATTED_VALUE`), Promo Recap Decks/Sheets, and DC Receiving Logs in Retail Ops Drives. | `.json`, `.csv` via `view_file` |
+| `retail_pos_wms_and_erp` | `bigquery_sql_api` (workload_identity), `sap_odata_api` (mtls_oauth2) | Google Sheets, Google Docs, Google Drive — Read Store Shrink Cycle-Count Sheets (`UNFORMATTED_VALUE`), Promo Recap Decks/Sheets, and DC Receiving Logs in Retail Ops Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

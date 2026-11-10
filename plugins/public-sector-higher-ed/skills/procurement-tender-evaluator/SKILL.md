@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Enforces mandatory debarment/COI/tax pass-fail gates first, then computes lowest-compliant commercial normalization and weighted rank. Scores public procurement vendor tenders with mandatory compliance gates and normalized commercial weighting. Execute calculations via [tender_weighted_scorer.py](scripts/tender_weighted_scorer.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `case_erp_and_grants_repositories` | `servicenow_table_api` (oauth2_service_account), `bigquery_sql_api` (workload_identity) | Google Drive, Google Sheets, Google Docs — Read Benefits Intake Packets, Bid Tabulation Sheets (`UNFORMATTED_VALUE`), Grant Budget Sheets, and Accreditation Folders in Shared Drives. | `.json`, `.csv` via `view_file` |
+| `case_erp_and_grants_repositories` | `servicenow_table_api` (oauth2_service_account), `bigquery_sql_api` (workload_identity) | Google Drive, Google Sheets, Google Docs — Read Benefits Intake Packets, Bid Tabulation Sheets (`UNFORMATTED_VALUE`), Grant Budget Sheets, and Accreditation Folders in Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

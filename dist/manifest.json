@@ -11,14 +11,14 @@
       "name": "Brand Governance, Campaign Matrix & Localization Studio",
       "category": "horizontal",
       "path": "bundles/brand-campaign-studio.zip",
-      "size_bytes": 46107,
-      "sha256": "fdeb4e5c8401cd86b739b16a412b51412312497d603585b9e0bf79bffe8faea4",
+      "size_bytes": 72335,
+      "sha256": "c05b7baf6a7da61dffc51c4a11d46e7dba57afb04b45ac24590e4b81f16ad082",
       "skill_ids": [
         "brand-voice-compliance-gate",
         "multimodal-campaign-brief",
         "market-localization-adapter"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -32,6 +32,7 @@
         "references/workflows/multimodal-campaign-brief.md",
         "scripts/campaign_asset_matrix.py",
         "scripts/copy_compliance_linter.py",
+        "scripts/enterprise_io.py",
         "scripts/locale_glossary_checker.py"
       ]
     },
@@ -40,14 +41,14 @@
       "name": "Conversational BI & Variance Analyst",
       "category": "horizontal",
       "path": "bundles/conversational-bi-analyst.zip",
-      "size_bytes": 47622,
-      "sha256": "46349dc6ee75122daee44c110fad74efecc10aa2054e972e1a0e7e72f85bea0d",
+      "size_bytes": 73594,
+      "sha256": "a752ce1e7c94f35210fa7a2fc73abe744ba3a7029e1206d28d8efae7a0761424",
       "skill_ids": [
         "schema-grounded-sql-analyst",
         "kpi-anomaly-driver-tree",
         "executive-data-story-pack"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -60,6 +61,7 @@
         "references/workflows/kpi-anomaly-driver-tree.md",
         "references/workflows/schema-grounded-sql-analyst.md",
         "scripts/dataset_profiler_guard.py",
+        "scripts/enterprise_io.py",
         "scripts/mix_rate_volume_bridge.py",
         "scripts/sql_safety_and_fanout_checker.py"
       ]
@@ -69,14 +71,14 @@
       "name": "Customer Operations, VIP Escalation & Knowledge Quality",
       "category": "enterprise-ops",
       "path": "bundles/customer-operations-escalation.zip",
-      "size_bytes": 46421,
-      "sha256": "c7f25ffa5678b5675891df1755c8d191fafb409019e18ee101552970de71173f",
+      "size_bytes": 72629,
+      "sha256": "13732036b22fcd7bc9880d42bfd316162d81f4f5995f685138412158dfb1b8c9",
       "skill_ids": [
         "critical-escalation-warroom",
         "csat-churn-signal-miner",
         "troubleshooting-tree-author"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -89,6 +91,7 @@
         "references/workflows/csat-churn-signal-miner.md",
         "references/workflows/troubleshooting-tree-author.md",
         "scripts/decision_tree_validator.py",
+        "scripts/enterprise_io.py",
         "scripts/escalation_exposure_scorer.py",
         "scripts/verbatim_driver_quantifier.py"
       ]
@@ -98,14 +101,14 @@
       "name": "Deal Desk, RFP & Pipeline Hygiene Engine",
       "category": "horizontal",
       "path": "bundles/deal-desk-rfp-engine.zip",
-      "size_bytes": 53141,
-      "sha256": "b91ee93b726384df10b77fe646a64c530a1b494b8d4e6df7f4dd78ee20eea189",
+      "size_bytes": 79228,
+      "sha256": "3585c1d2daaf0c42af6fdaf3da8c01fa415a2b8c36fc5930094b9e43c31ed880",
       "skill_ids": [
         "rfp-questionnaire-responder",
         "deal-desk-quote-guard",
         "pipeline-hygiene-slippage"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -119,6 +122,7 @@
         "references/workflows/pipeline-hygiene-slippage.md",
         "references/workflows/rfp-questionnaire-responder.md",
         "scripts/deal_margin_validator.py",
+        "scripts/enterprise_io.py",
         "scripts/pipeline_slippage_auditor.py",
         "scripts/rfp_matrix_builder.py"
       ]
@@ -128,14 +132,14 @@
       "name": "Enterprise Knowledge Hub",
       "category": "horizontal",
       "path": "bundles/enterprise-knowledge-hub.zip",
-      "size_bytes": 54693,
-      "sha256": "afb0e04a727d6b95703b76005e02fab1edb32c27dd2cd92018831bcdc7c2af5e",
+      "size_bytes": 80582,
+      "sha256": "789d7738523a8c0f9167de2e710bf397b349575dc4512640502fd2769a7fc3f9",
       "skill_ids": [
         "cross-source-knowledge-synthesis",
         "policy-sop-answering",
         "knowledge-gap-freshness-audit"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -150,6 +154,7 @@
         "references/workflows/policy-sop-answering.md",
         "scripts/citation_conflict_auditor.py",
         "scripts/corpus_hygiene_scanner.py",
+        "scripts/enterprise_io.py",
         "scripts/policy_scope_matcher.py"
       ]
     },
@@ -158,14 +163,14 @@
       "name": "ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine",
       "category": "enterprise-ops",
       "path": "bundles/erp-procure-to-pay.zip",
-      "size_bytes": 47391,
-      "sha256": "a271a9d7abf493ed127f41959cd4f45edd0964b8f076c965668e027d1f4711a6",
+      "size_bytes": 73599,
+      "sha256": "9b9bd5fba1f3ad977cc36cabb5dca507e73f02e7fa301e9d6fadb28fe3c8f165",
       "skill_ids": [
         "gr-ir-clearing-orchestrator",
         "supplier-rfx-tariff-modeler",
         "bom-cost-rollup-variance"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -178,6 +183,7 @@
         "references/workflows/gr-ir-clearing-orchestrator.md",
         "references/workflows/supplier-rfx-tariff-modeler.md",
         "scripts/bom_ppv_rollup.py",
+        "scripts/enterprise_io.py",
         "scripts/gr_ir_reconciler.py",
         "scripts/landed_cost_simulator.py"
       ]
@@ -187,14 +193,14 @@
       "name": "Executive Briefing & Chief of Staff Ops",
       "category": "horizontal",
       "path": "bundles/executive-briefing-ops.zip",
-      "size_bytes": 51733,
-      "sha256": "22392428f02a586e47212b8fc938e181aab806727ced2b6987723264bec93c90",
+      "size_bytes": 77848,
+      "sha256": "8eb6c82e5ceb813fed3bbd155066bb9d40eade71c4e310eaf3c06e412d137844",
       "skill_ids": [
         "daily-executive-briefing",
         "meeting-to-execution-pack",
         "stakeholder-account-prep"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/deal-desk-approval-baseline.md",
@@ -209,6 +215,7 @@
         "references/workflows/stakeholder-account-prep.md",
         "scripts/agenda_commitment_tracker.py",
         "scripts/dossier_synthesizer.py",
+        "scripts/enterprise_io.py",
         "scripts/transcript_action_extractor.py"
       ]
     },
@@ -217,14 +224,14 @@
       "name": "Finance Variance, 3-Way Match & AR Reconciliation",
       "category": "horizontal",
       "path": "bundles/finance-variance-recon.zip",
-      "size_bytes": 55682,
-      "sha256": "e0305b8c4ba2e880664acd4c80d2f8a021a86aad3b30be9fec5e4418968f6c6b",
+      "size_bytes": 81709,
+      "sha256": "d8abef0402ad9a9586edbc9dc6f3601a1d1a3dc16e0327fd72a194d67b43e3c9",
       "skill_ids": [
         "ap-three-way-match",
         "pnl-budget-variance-bridge",
         "ar-aging-collections-audit"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -238,6 +245,7 @@
         "references/workflows/ar-aging-collections-audit.md",
         "references/workflows/pnl-budget-variance-bridge.md",
         "scripts/aging_bucket_auditor.py",
+        "scripts/enterprise_io.py",
         "scripts/pnl_variance_engine.py",
         "scripts/reconcile_3way.py"
       ]
@@ -247,14 +255,14 @@
       "name": "Financial Services Credit, KYB/AML & Claims Underwriting",
       "category": "vertical",
       "path": "bundles/fsi-credit-kyc-claims.zip",
-      "size_bytes": 48011,
-      "sha256": "cc1e1dfac42ebd39b5b6584554e9895e90e5110414863ac3a849a50b4f23ac94",
+      "size_bytes": 74247,
+      "sha256": "d6b1e946adcfba1aa3bc40196c07d7f0c0830486543189a019f69152bf00340c",
       "skill_ids": [
         "commercial-credit-memo-analyst",
         "kyc-aml-screening-dossier",
         "insurance-claims-triage-pack"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/fsi-credit-kyc-baseline.md",
@@ -268,6 +276,7 @@
         "references/workflows/kyc-aml-screening-dossier.md",
         "scripts/coverage_limit_evaluator.py",
         "scripts/credit_covenant_stress.py",
+        "scripts/enterprise_io.py",
         "scripts/ubo_velocity_screener.py"
       ]
     },
@@ -276,14 +285,14 @@
       "name": "GSI Proposal Architecture, SOW Margin & Bench Factory",
       "category": "enterprise-ops",
       "path": "bundles/gsi-proposal-ip-factory.zip",
-      "size_bytes": 54002,
-      "sha256": "90fe24a643b03df18a52c81f42d755c1b4dbdb4bb3d03fef8359bb017aac40c3",
+      "size_bytes": 80184,
+      "sha256": "ce31b79e10d17a0fc7ab7479a030ff31a6369f67d28d07537b761a3ab10d0532",
       "skill_ids": [
         "winning-proposal-architect",
         "sow-scope-margin-auditor",
         "bench-skill-demand-matcher"
       ],
-      "file_count": 15,
+      "file_count": 16,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -297,6 +306,7 @@
         "references/workflows/bench-skill-demand-matcher.md",
         "references/workflows/sow-scope-margin-auditor.md",
         "references/workflows/winning-proposal-architect.md",
+        "scripts/enterprise_io.py",
         "scripts/sow_margin_linter.py",
         "scripts/staffing_pyramid_calculator.py",
         "scripts/talent_bench_matcher.py"
@@ -307,14 +317,14 @@
       "name": "Healthcare Clinical Trial, Pharmacovigilance & Prior Auth",
       "category": "vertical",
       "path": "bundles/healthcare-clinical-regulatory.zip",
-      "size_bytes": 42683,
-      "sha256": "99e054e0ee8b0e471d5da2c1606889afe1b115ccdd8eef9d266399ea802ad629",
+      "size_bytes": 68914,
+      "sha256": "14263f07f3b3ac72e06dff1753df2f0f0f4c2505b01e42af3af2bbe1de4cd302",
       "skill_ids": [
         "clinical-protocol-feasibility",
         "pharmacovigilance-safety-intake",
         "prior-auth-medical-necessity"
       ],
-      "file_count": 12,
+      "file_count": 13,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -325,6 +335,7 @@
         "references/workflows/clinical-protocol-feasibility.md",
         "references/workflows/pharmacovigilance-safety-intake.md",
         "references/workflows/prior-auth-medical-necessity.md",
+        "scripts/enterprise_io.py",
         "scripts/icsr_completeness_checker.py",
         "scripts/medical_criteria_matcher.py",
         "scripts/soa_endpoint_validator.py"
@@ -335,14 +346,14 @@
       "name": "Industrial Shopfloor Reliability, Quality & EHS Safety",
       "category": "vertical",
       "path": "bundles/industrial-shopfloor-maintenance.zip",
-      "size_bytes": 50068,
-      "sha256": "4ff48d4ffb751237cc22035d600b0370e4297a872bcc6e43b345d6ac7b7815eb",
+      "size_bytes": 76283,
+      "sha256": "adb49553adaf38b62819701fa3029a90b10fec89663fa335f093ba37078bf240",
       "skill_ids": [
         "asset-reliability-spares-planner",
         "quality-capex-rca-copilot",
         "ehs-safety-permit-auditor"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -356,6 +367,7 @@
         "references/workflows/ehs-safety-permit-auditor.md",
         "references/workflows/quality-capex-rca-copilot.md",
         "scripts/defect_pareto_correlator.py",
+        "scripts/enterprise_io.py",
         "scripts/hse_permit_checker.py",
         "scripts/mtbf_spares_optimizer.py"
       ]
@@ -365,14 +377,14 @@
       "name": "ITSM & Service Desk Command Center",
       "category": "horizontal",
       "path": "bundles/itsm-command-center.zip",
-      "size_bytes": 44553,
-      "sha256": "fb5f73e5426001f4f0fd464cf22f79cc876ec2a53be83610041f6a9486d75a02",
+      "size_bytes": 70439,
+      "sha256": "356ef34a4c646eb8205a06546ea9eeca1109ec5ed0afae78baee25fc827dcf1e",
       "skill_ids": [
         "incident-triage-routing",
         "change-risk-cab-review",
         "problem-rca-kb-generator"
       ],
-      "file_count": 12,
+      "file_count": 13,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -384,6 +396,7 @@
         "references/workflows/incident-triage-routing.md",
         "references/workflows/problem-rca-kb-generator.md",
         "scripts/cab_risk_scorer.py",
+        "scripts/enterprise_io.py",
         "scripts/kcs_deflection_analyzer.py",
         "scripts/sla_cluster_triage.py"
       ]
@@ -393,14 +406,14 @@
       "name": "Legal Contract Desk & Regulatory Compliance",
       "category": "horizontal",
       "path": "bundles/legal-contract-desk.zip",
-      "size_bytes": 51865,
-      "sha256": "b5f13a8eea903bded4da1e15251c56945f8edc65ddfb58994d31c8bac37c74a7",
+      "size_bytes": 78013,
+      "sha256": "4054a82c20ba1dc0b1634659be24c6256b0bc28130700b2ec7db540d67ee28d9",
       "skill_ids": [
         "contract-playbook-redliner",
         "executed-obligation-extractor",
         "regulatory-change-mapper"
       ],
-      "file_count": 13,
+      "file_count": 14,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -414,6 +427,7 @@
         "references/workflows/regulatory-change-mapper.md",
         "scripts/clause_risk_matrix.py",
         "scripts/control_gap_mapper.py",
+        "scripts/enterprise_io.py",
         "scripts/obligation_calendar_builder.py"
       ]
     },
@@ -422,14 +436,14 @@
       "name": "Marketplace, Ride-Hailing & SuperApp Ops",
       "category": "vertical",
       "path": "bundles/marketplace-superapp-ops.zip",
-      "size_bytes": 50798,
-      "sha256": "3c732871e390e4389c50e23a1016300a5932ad793bdffcce49706e73af06e966",
+      "size_bytes": 77019,
+      "sha256": "447fbf3e71da5a409b767efde39f68b44be2c6cb52890a661a2996edde5aa222",
       "skill_ids": [
         "merchant-catalog-trust-gate",
         "logistics-sla-dispute-resolver",
         "commission-payout-reconciler"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -443,6 +457,7 @@
         "references/workflows/logistics-sla-dispute-resolver.md",
         "references/workflows/merchant-catalog-trust-gate.md",
         "scripts/catalog_quality_scorer.py",
+        "scripts/enterprise_io.py",
         "scripts/payout_ledger_reconciler.py",
         "scripts/zone_sla_dispute_analyzer.py"
       ]
@@ -452,14 +467,14 @@
       "name": "People Ops, Talent Calibration & Workforce Analytics",
       "category": "horizontal",
       "path": "bundles/people-ops-talent-hub.zip",
-      "size_bytes": 52958,
-      "sha256": "166d50089a9d2fb8e5d498c5d91a1306ccf56280719135ea793f1fd79837b2d1",
+      "size_bytes": 79107,
+      "sha256": "3fa765be15e6884aefb16e3b079cfd15e5580b74bad6567b98974bbb6effe2f4",
       "skill_ids": [
         "structured-hiring-rubric",
         "employee-onboarding-navigator",
         "workforce-attrition-comp-audit"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/hr-hiring-comp-baseline.md",
@@ -473,6 +488,7 @@
         "references/workflows/structured-hiring-rubric.md",
         "references/workflows/workforce-attrition-comp-audit.md",
         "scripts/comp_band_analyzer.py",
+        "scripts/enterprise_io.py",
         "scripts/onboarding_plan_builder.py",
         "scripts/rubric_calibration_checker.py"
       ]
@@ -482,14 +498,14 @@
       "name": "Public Sector Casework, Grants & Higher-Ed Ops",
       "category": "vertical",
       "path": "bundles/public-sector-higher-ed.zip",
-      "size_bytes": 53214,
-      "sha256": "64b97d9a514843b4f3eed0711bbf3c883d1de0d15a23e7e0a0478b4e5e909f94",
+      "size_bytes": 79443,
+      "sha256": "5e2a99ff3acf852f02b6a413e837d6c5701792fe365dc73d0250f615d4381923",
       "skill_ids": [
         "citizen-case-eligibility-triager",
         "procurement-tender-evaluator",
         "grant-accreditation-evidence-pack"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -502,6 +518,7 @@
         "references/workflows/citizen-case-eligibility-triager.md",
         "references/workflows/grant-accreditation-evidence-pack.md",
         "references/workflows/procurement-tender-evaluator.md",
+        "scripts/enterprise_io.py",
         "scripts/grant_accreditation_validator.py",
         "scripts/statutory_eligibility_engine.py",
         "scripts/tender_weighted_scorer.py"
@@ -512,14 +529,14 @@
       "name": "Retail & CPG Store Ops + Merchandising",
       "category": "vertical",
       "path": "bundles/retail-store-merchandising.zip",
-      "size_bytes": 51277,
-      "sha256": "7f5e51ce5328ff0b8d991c48f49e2206cf2997b0bf527fe8796e1427f4ac9344",
+      "size_bytes": 77485,
+      "sha256": "dba31486fcac84c98ca540d6aa8a527312d5e5f7a09418a4316faad48f2d6349",
       "skill_ids": [
         "store-ops-shrink-copilot",
         "merchandising-assortment-planner",
         "supplier-otif-chargeback-auditor"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -532,6 +549,7 @@
         "references/workflows/merchandising-assortment-planner.md",
         "references/workflows/store-ops-shrink-copilot.md",
         "references/workflows/supplier-otif-chargeback-auditor.md",
+        "scripts/enterprise_io.py",
         "scripts/otif_detention_calculator.py",
         "scripts/promo_lift_analyzer.py",
         "scripts/store_shrink_task_ranker.py"
@@ -542,14 +560,14 @@
       "name": "SDLC Modernization, Security PR & SRE Ops",
       "category": "horizontal",
       "path": "bundles/sdlc-modernization-sre.zip",
-      "size_bytes": 43604,
-      "sha256": "010012777e518f483765077518c1f0b667e5e99d4a2f04c99fd1f4d0687d6b69",
+      "size_bytes": 69811,
+      "sha256": "1efd7a1e4e681eda4c7ca739ada58718a6d914b225a6451812aa6cf36a253521",
       "skill_ids": [
         "legacy-code-to-prd",
         "sre-incident-postmortem",
         "security-pr-readiness-gate"
       ],
-      "file_count": 12,
+      "file_count": 13,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -561,6 +579,7 @@
         "references/workflows/security-pr-readiness-gate.md",
         "references/workflows/sre-incident-postmortem.md",
         "scripts/diff_risk_inspector.py",
+        "scripts/enterprise_io.py",
         "scripts/slo_timeline_calculator.py",
         "scripts/spec_traceability_matrix.py"
       ]
@@ -570,14 +589,14 @@
       "name": "Telecom NOC & Field Network Dispatch",
       "category": "vertical",
       "path": "bundles/telco-noc-field-dispatch.zip",
-      "size_bytes": 51530,
-      "sha256": "91793d50bc2d89b356b67e9d98527bda517946e48bbcf9db6a73a2cf242aeae0",
+      "size_bytes": 77722,
+      "sha256": "f994a437aed43c88d7f29ea387a5b0d8982a8725115daf60f483c1dea4957ce0",
       "skill_ids": [
         "noc-outage-topology-correlator",
         "field-dispatch-spares-prep",
         "b2b-order-fallout-resolver"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -592,6 +611,7 @@
         "references/workflows/noc-outage-topology-correlator.md",
         "scripts/alarm_topology_correlator.py",
         "scripts/dispatch_readiness_matcher.py",
+        "scripts/enterprise_io.py",
         "scripts/order_fallout_classifier.py"
       ]
     }
@@ -601,9 +621,9 @@
       "id": "brand-voice-compliance-gate",
       "plugin_id": "brand-campaign-studio",
       "path": "skills/brand-voice-compliance-gate.zip",
-      "size_bytes": 29534,
-      "sha256": "f59acc261771a0b09b60fecbfd2d173d9041652a39aaf278d02c636499860713",
-      "file_count": 8,
+      "size_bytes": 54200,
+      "sha256": "0722f4a202f7aee2480f18c860e7e7bcf7653c23310c16685c89a6e1366e1378",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -612,16 +632,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/copy_compliance_linter.py"
+        "scripts/copy_compliance_linter.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "multimodal-campaign-brief",
       "plugin_id": "brand-campaign-studio",
       "path": "skills/multimodal-campaign-brief.zip",
-      "size_bytes": 29312,
-      "sha256": "5562b34bbb4e36112e54ba76b945b9746f23ff8d2aceae541475ee6195f10619",
-      "file_count": 8,
+      "size_bytes": 53978,
+      "sha256": "442a38e308002d8509fa9f29f0c82ebd54bd85f7dfd7a628325d4e923cfcf871",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -630,16 +651,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/campaign_asset_matrix.py"
+        "scripts/campaign_asset_matrix.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "market-localization-adapter",
       "plugin_id": "brand-campaign-studio",
       "path": "skills/market-localization-adapter.zip",
-      "size_bytes": 29067,
-      "sha256": "797a7c3af0c9729a3084ac4210bc991bb4d97ce94c2a639383662aa3e28c7c47",
-      "file_count": 8,
+      "size_bytes": 53724,
+      "sha256": "f209014c7a6f875cf17727b66ac7489e6803afa07dad391d76515ff1ad4c4927",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -648,6 +670,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/locale_glossary_checker.py"
       ]
     },
@@ -655,9 +678,9 @@
       "id": "schema-grounded-sql-analyst",
       "plugin_id": "conversational-bi-analyst",
       "path": "skills/schema-grounded-sql-analyst.zip",
-      "size_bytes": 29606,
-      "sha256": "15eab0e57bca74fd75cee4c31d8258f9ae8991ecd29a85537e40e02da9f69e82",
-      "file_count": 8,
+      "size_bytes": 54251,
+      "sha256": "a1377bbee34483e4fb246e17ae28c4e955f6da6feb0a0e88fab524a1bc82fe2c",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -666,6 +689,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/sql_safety_and_fanout_checker.py"
       ]
     },
@@ -673,9 +697,9 @@
       "id": "kpi-anomaly-driver-tree",
       "plugin_id": "conversational-bi-analyst",
       "path": "skills/kpi-anomaly-driver-tree.zip",
-      "size_bytes": 29319,
-      "sha256": "5aff4955659d122ac29b2ab6e46c6bfd4d4ff47e7cd2aaeae5034a3ee6c4dc21",
-      "file_count": 8,
+      "size_bytes": 53871,
+      "sha256": "158484efdbe77a236e7122d69632124d30b98a2ac4963fc91d0072df33c5290e",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -684,6 +708,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/mix_rate_volume_bridge.py"
       ]
     },
@@ -691,9 +716,9 @@
       "id": "executive-data-story-pack",
       "plugin_id": "conversational-bi-analyst",
       "path": "skills/executive-data-story-pack.zip",
-      "size_bytes": 29233,
-      "sha256": "911919a66947e8d7b6abd1e8a8ed22015cb86d1e6a32c829ffbc567390bb9370",
-      "file_count": 8,
+      "size_bytes": 53774,
+      "sha256": "11be0ed10469c70ad74df24cb228d44243a185e5432a90271444ac5beb799e1c",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -702,16 +727,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
-        "scripts/dataset_profiler_guard.py"
+        "scripts/dataset_profiler_guard.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "critical-escalation-warroom",
       "plugin_id": "customer-operations-escalation",
       "path": "skills/critical-escalation-warroom.zip",
-      "size_bytes": 29054,
-      "sha256": "24c9575974825f10de30d4d382f610226ecbcb145ed218a400cf6e5eb90b4d68",
-      "file_count": 8,
+      "size_bytes": 53717,
+      "sha256": "cabdf16a32040a2b73da0cfaf3b5843785766e91a9503ff55b0b8c72ac7b95ee",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -720,6 +746,7 @@
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/escalation_exposure_scorer.py"
       ]
     },
@@ -727,9 +754,9 @@
       "id": "csat-churn-signal-miner",
       "plugin_id": "customer-operations-escalation",
       "path": "skills/csat-churn-signal-miner.zip",
-      "size_bytes": 29610,
-      "sha256": "ef76afcea83f3d17694bfdb51e5d5c2395f852b61ff6d22898c0e1549db57b10",
-      "file_count": 8,
+      "size_bytes": 54266,
+      "sha256": "2752d0df9a0b73b33be53d83bf5c7cb58f4daa4f7aa4c035930531f8ebc047ad",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -738,6 +765,7 @@
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/verbatim_driver_quantifier.py"
       ]
     },
@@ -745,9 +773,9 @@
       "id": "troubleshooting-tree-author",
       "plugin_id": "customer-operations-escalation",
       "path": "skills/troubleshooting-tree-author.zip",
-      "size_bytes": 29220,
-      "sha256": "6f751dd98db16c325eaa4c3a685bb8b1ce06e99324439fab365faff4031ea1da",
-      "file_count": 8,
+      "size_bytes": 53869,
+      "sha256": "071e318b872626018f0ce9f4dd5797d81a6374ddabf6e9e926ab377c7b4f3b45",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -756,16 +784,17 @@
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/decision_tree_validator.py"
+        "scripts/decision_tree_validator.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "rfp-questionnaire-responder",
       "plugin_id": "deal-desk-rfp-engine",
       "path": "skills/rfp-questionnaire-responder.zip",
-      "size_bytes": 33876,
-      "sha256": "9e425aacb477841ea3adcf9dc6e3517b4a434d0ac2c5687f2f4b8558ca45f7f7",
-      "file_count": 9,
+      "size_bytes": 58543,
+      "sha256": "6c740740537529d74866ce5b0b116e6d437a56e064484a27cefa46136bc8b8c1",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -775,6 +804,7 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/rfp_matrix_builder.py"
       ]
     },
@@ -782,9 +812,9 @@
       "id": "deal-desk-quote-guard",
       "plugin_id": "deal-desk-rfp-engine",
       "path": "skills/deal-desk-quote-guard.zip",
-      "size_bytes": 33435,
-      "sha256": "57f7228e7054cc143ff4adcd186c0929523b8bab4725a3b928280951ad16be7e",
-      "file_count": 9,
+      "size_bytes": 58092,
+      "sha256": "e512e3b42f83c04035c2645b43e6ad41708087f7e4241cb1d3d9b5b195427568",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -794,16 +824,17 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/deal_margin_validator.py"
+        "scripts/deal_margin_validator.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "pipeline-hygiene-slippage",
       "plugin_id": "deal-desk-rfp-engine",
       "path": "skills/pipeline-hygiene-slippage.zip",
-      "size_bytes": 33984,
-      "sha256": "f9059e9086347d76749256b56c8d4ba8e88836f9ce0cd9883cbe3c528b7db212",
-      "file_count": 9,
+      "size_bytes": 58518,
+      "sha256": "73bf529166b8c034c4044242602bac78cff33ceddda4707f8b17dd9daf338f09",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -813,6 +844,7 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/pipeline_slippage_auditor.py"
       ]
     },
@@ -820,9 +852,9 @@
       "id": "cross-source-knowledge-synthesis",
       "plugin_id": "enterprise-knowledge-hub",
       "path": "skills/cross-source-knowledge-synthesis.zip",
-      "size_bytes": 35378,
-      "sha256": "e68ddb7a78f1b3027d581a08f9690dbd4e64d76ae9701252fe33e5ae23ab4360",
-      "file_count": 9,
+      "size_bytes": 59931,
+      "sha256": "073767a8316cbabc26ddaeeabdc5068676f7d490b52a92ad6924fb192bedade8",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -832,16 +864,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/citation_conflict_auditor.py"
+        "scripts/citation_conflict_auditor.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "policy-sop-answering",
       "plugin_id": "enterprise-knowledge-hub",
       "path": "skills/policy-sop-answering.zip",
-      "size_bytes": 34632,
-      "sha256": "b066045aa489e42fb9fbfbaa60cfffa0be3045f1d1df9a8ead63e76ccd9352b3",
-      "file_count": 9,
+      "size_bytes": 59188,
+      "sha256": "3186d3435e5638e2f3921edb99f435cc673ed32e1f6573dd25a1dc62d88f13e1",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -851,6 +884,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/policy_scope_matcher.py"
       ]
     },
@@ -858,9 +892,9 @@
       "id": "knowledge-gap-freshness-audit",
       "plugin_id": "enterprise-knowledge-hub",
       "path": "skills/knowledge-gap-freshness-audit.zip",
-      "size_bytes": 34337,
-      "sha256": "d90c13b6a7180e205c59355dc9f8af1d6f755efbd7a4b0449e4de0b7265bb2a0",
-      "file_count": 9,
+      "size_bytes": 58888,
+      "sha256": "5fec2934dc17f1d57f1e13ba69edb56a6c5ea685cd62bd2aec763e72597dfeeb",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -870,16 +904,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/corpus_hygiene_scanner.py"
+        "scripts/corpus_hygiene_scanner.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "gr-ir-clearing-orchestrator",
       "plugin_id": "erp-procure-to-pay",
       "path": "skills/gr-ir-clearing-orchestrator.zip",
-      "size_bytes": 29723,
-      "sha256": "4201a14927ce23879d484f6281e885f8633c6ea7a207f631144d52ad00f9a8aa",
-      "file_count": 8,
+      "size_bytes": 54377,
+      "sha256": "9722264a6c39aeaba5ebb37a6454509fc1fb7fa28520acd1e3b8fc4f24b7421d",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -888,6 +923,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/gr_ir_reconciler.py"
       ]
     },
@@ -895,9 +931,9 @@
       "id": "supplier-rfx-tariff-modeler",
       "plugin_id": "erp-procure-to-pay",
       "path": "skills/supplier-rfx-tariff-modeler.zip",
-      "size_bytes": 29051,
-      "sha256": "e400c5f817e08ed1421603f5552737c9c108a3bbcd5fdb66ba0bd6c1b9d92dff",
-      "file_count": 8,
+      "size_bytes": 53711,
+      "sha256": "003af278bdab8da8a41d051b8efaa3642c5411a0d234b55ea2b50be35ffe2794",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -906,6 +942,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/landed_cost_simulator.py"
       ]
     },
@@ -913,9 +950,9 @@
       "id": "bom-cost-rollup-variance",
       "plugin_id": "erp-procure-to-pay",
       "path": "skills/bom-cost-rollup-variance.zip",
-      "size_bytes": 29082,
-      "sha256": "dcbce66fc749ba15b28aeb6203ab423a8ee9b1ef1c7a1a4258efb40578409106",
-      "file_count": 8,
+      "size_bytes": 53743,
+      "sha256": "e920d1d40266f60ad12f2427e5e247d0347289f7c45799efdc8ea0dfe96df363",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -924,16 +961,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/bom_ppv_rollup.py"
+        "scripts/bom_ppv_rollup.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "daily-executive-briefing",
       "plugin_id": "executive-briefing-ops",
       "path": "skills/daily-executive-briefing.zip",
-      "size_bytes": 33508,
-      "sha256": "32d4fdf07d6c2ef8f7199be21cbf468ad59fca0ec8333fb066de5dd056893e02",
-      "file_count": 9,
+      "size_bytes": 58174,
+      "sha256": "da6866cdf992ae2cb9db9c8cea9b147f8d91c595ee845796acd64b4558ac9b94",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/deal-desk-approval-baseline.md",
@@ -943,16 +981,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/agenda_commitment_tracker.py"
+        "scripts/agenda_commitment_tracker.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "meeting-to-execution-pack",
       "plugin_id": "executive-briefing-ops",
       "path": "skills/meeting-to-execution-pack.zip",
-      "size_bytes": 33149,
-      "sha256": "af3de31a42a26fa3b42beb925d7a00136ae1261f37dfe8017e817466024d3987",
-      "file_count": 9,
+      "size_bytes": 57795,
+      "sha256": "e2d05018990ae9fb21912700303310609ffd21ec56d4cab8913ccd9f8d5fc842",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/deal-desk-approval-baseline.md",
@@ -962,6 +1001,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/transcript_action_extractor.py"
       ]
     },
@@ -969,9 +1009,9 @@
       "id": "stakeholder-account-prep",
       "plugin_id": "executive-briefing-ops",
       "path": "skills/stakeholder-account-prep.zip",
-      "size_bytes": 33035,
-      "sha256": "64d6e05e1915d155c918456e173bda19af578b497dce9492742e39b7cdf67a02",
-      "file_count": 9,
+      "size_bytes": 57599,
+      "sha256": "0ac9352ab509128b6942746186fb64d2773f7a0321e5a7c982c3c7b6fb543296",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/deal-desk-approval-baseline.md",
@@ -981,16 +1021,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/salesforce-crm-soql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/dossier_synthesizer.py"
+        "scripts/dossier_synthesizer.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "ap-three-way-match",
       "plugin_id": "finance-variance-recon",
       "path": "skills/ap-three-way-match.zip",
-      "size_bytes": 36068,
-      "sha256": "87fd5e90537590fad6049ec0b615f5f5810691842436abaf634be0335c7f939b",
-      "file_count": 9,
+      "size_bytes": 60691,
+      "sha256": "9619599a977eb63ac09428ffe19e6ab5f3eb5b9580e6808020fe957f99f0f05e",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1000,6 +1041,7 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/reconcile_3way.py"
       ]
     },
@@ -1007,9 +1049,9 @@
       "id": "pnl-budget-variance-bridge",
       "plugin_id": "finance-variance-recon",
       "path": "skills/pnl-budget-variance-bridge.zip",
-      "size_bytes": 34478,
-      "sha256": "ef4a402016ed78c4dc77710e21dd35dcba39a5c8608f4c8395609e02a5ab3043",
-      "file_count": 9,
+      "size_bytes": 59056,
+      "sha256": "850efb92ea2450527dd06a1b6b2c7db4384febbefccc517861890dc0f9abd983",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1019,6 +1061,7 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/pnl_variance_engine.py"
       ]
     },
@@ -1026,9 +1069,9 @@
       "id": "ar-aging-collections-audit",
       "plugin_id": "finance-variance-recon",
       "path": "skills/ar-aging-collections-audit.zip",
-      "size_bytes": 34382,
-      "sha256": "ec1c2ad5e3f2766b58c6bd1dbb5e22563403b21656706b85c9d4a159574da9a5",
-      "file_count": 9,
+      "size_bytes": 58967,
+      "sha256": "688b9a5a17227542e12c9524166e73479dea8b1fee0e11f2e412e56c0d45e0cf",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1038,16 +1081,17 @@
         "references/traps/chain-denominator-seams.md",
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/aging_bucket_auditor.py"
+        "scripts/aging_bucket_auditor.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "commercial-credit-memo-analyst",
       "plugin_id": "fsi-credit-kyc-claims",
       "path": "skills/commercial-credit-memo-analyst.zip",
-      "size_bytes": 29442,
-      "sha256": "e9ec206323ed38b956ea6df032b2c79828dfceb01b9ebb2773cbcdc38396f717",
-      "file_count": 8,
+      "size_bytes": 54113,
+      "sha256": "e1d126ff7bfedce4646bbb5574f3012b1b9c8c302b1dba2977f27d26eb878277",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/fsi-credit-kyc-baseline.md",
@@ -1056,16 +1100,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/credit_covenant_stress.py"
+        "scripts/credit_covenant_stress.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "kyc-aml-screening-dossier",
       "plugin_id": "fsi-credit-kyc-claims",
       "path": "skills/kyc-aml-screening-dossier.zip",
-      "size_bytes": 29669,
-      "sha256": "007b6b66555ec1969e07915e933276acfe4dbf2f2da79daff76fb05873e1f811",
-      "file_count": 8,
+      "size_bytes": 54323,
+      "sha256": "0f41d2036f1934578e4d28d10034f497a1cc5f07c9c9823c39994004fccd45c9",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/fsi-credit-kyc-baseline.md",
@@ -1074,6 +1119,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/ubo_velocity_screener.py"
       ]
     },
@@ -1081,9 +1127,9 @@
       "id": "insurance-claims-triage-pack",
       "plugin_id": "fsi-credit-kyc-claims",
       "path": "skills/insurance-claims-triage-pack.zip",
-      "size_bytes": 29137,
-      "sha256": "fa5e3bcd7ea131778e6a9c204367ac7e046a3dd1b5a4143618f07c9d8c69e1d8",
-      "file_count": 8,
+      "size_bytes": 53800,
+      "sha256": "bb6f1240e6aab64714a400b410bf246b433e40cb4b1aba88d412abbfb36df991",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/fsi-credit-kyc-baseline.md",
@@ -1092,16 +1138,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/coverage_limit_evaluator.py"
+        "scripts/coverage_limit_evaluator.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "winning-proposal-architect",
       "plugin_id": "gsi-proposal-ip-factory",
       "path": "skills/winning-proposal-architect.zip",
-      "size_bytes": 36591,
-      "sha256": "6d454881d2ebd97671649e1076f04698db7077cdb42ac2324ac4f664665628ca",
-      "file_count": 10,
+      "size_bytes": 61238,
+      "sha256": "1e6749caa5acfe87b6c4b54111c643290c82e02da08439cb7a1f86969533f0f0",
+      "file_count": 11,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1112,6 +1159,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/workday-hris-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/staffing_pyramid_calculator.py"
       ]
     },
@@ -1119,9 +1167,9 @@
       "id": "sow-scope-margin-auditor",
       "plugin_id": "gsi-proposal-ip-factory",
       "path": "skills/sow-scope-margin-auditor.zip",
-      "size_bytes": 36720,
-      "sha256": "312f62330ec7d7c20b4361133dd8b1428c803dd246cc77fa49bf35c6a9ec7ca1",
-      "file_count": 10,
+      "size_bytes": 61379,
+      "sha256": "2d6e0572c32853b94ed52352bcca8237c64684ea188bf5cabe57095eab215467",
+      "file_count": 11,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1132,6 +1180,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/workday-hris-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/sow_margin_linter.py"
       ]
     },
@@ -1139,9 +1188,9 @@
       "id": "bench-skill-demand-matcher",
       "plugin_id": "gsi-proposal-ip-factory",
       "path": "skills/bench-skill-demand-matcher.zip",
-      "size_bytes": 36621,
-      "sha256": "870584cc262d26508820ee8f8c111922ee8865babba9f177f7b1d03614e65aad",
-      "file_count": 10,
+      "size_bytes": 61273,
+      "sha256": "46296aaf433d48fe4563c8ec06bd6d3d029ae360c2353ad30ffc1f146fc3f281",
+      "file_count": 11,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1152,6 +1201,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/workday-hris-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/talent_bench_matcher.py"
       ]
     },
@@ -1159,9 +1209,9 @@
       "id": "clinical-protocol-feasibility",
       "plugin_id": "healthcare-clinical-regulatory",
       "path": "skills/clinical-protocol-feasibility.zip",
-      "size_bytes": 25220,
-      "sha256": "b7f49a865e1ff7dfd548aad55224d0c1fa242e5258fe79a24c45e21bbdfe2024",
-      "file_count": 7,
+      "size_bytes": 49877,
+      "sha256": "d56ae629733badda707ce75c57d17c44f65e8ea9925054d0cc9bd88d6eb847f2",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1169,6 +1219,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/soa_endpoint_validator.py"
       ]
     },
@@ -1176,9 +1227,9 @@
       "id": "pharmacovigilance-safety-intake",
       "plugin_id": "healthcare-clinical-regulatory",
       "path": "skills/pharmacovigilance-safety-intake.zip",
-      "size_bytes": 25492,
-      "sha256": "5b5a4d000a6ca0199b34f55fb4c85f6187246a031bd9d9a7ca3980cd6d938910",
-      "file_count": 7,
+      "size_bytes": 50158,
+      "sha256": "5db02557fe176daec9e552275872f11ab5ec9a4586450b4a5a288ccdefa6271f",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1186,6 +1237,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/icsr_completeness_checker.py"
       ]
     },
@@ -1193,9 +1245,9 @@
       "id": "prior-auth-medical-necessity",
       "plugin_id": "healthcare-clinical-regulatory",
       "path": "skills/prior-auth-medical-necessity.zip",
-      "size_bytes": 25068,
-      "sha256": "9cffda820abe4b9cd0d2585b3c5bbed7508b0234f4061e0398598a18e2015293",
-      "file_count": 7,
+      "size_bytes": 49729,
+      "sha256": "f7ac0f9b224c8d0022872a4bb5215d0b5252e9241377f31be3704f03d0425898",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1203,6 +1255,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/medical_criteria_matcher.py"
       ]
     },
@@ -1210,9 +1263,9 @@
       "id": "asset-reliability-spares-planner",
       "plugin_id": "industrial-shopfloor-maintenance",
       "path": "skills/asset-reliability-spares-planner.zip",
-      "size_bytes": 32724,
-      "sha256": "9e0179b5e4187b1ba646993c9047225b45f08f0d93a86735903dace97a1bfb76",
-      "file_count": 9,
+      "size_bytes": 57381,
+      "sha256": "c95430f651074274ecd519a2bd35298831bd79a9151fdf4b450434dde8640970",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1222,6 +1275,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/servicenow-jira-itsm-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/mtbf_spares_optimizer.py"
       ]
     },
@@ -1229,9 +1283,9 @@
       "id": "quality-capex-rca-copilot",
       "plugin_id": "industrial-shopfloor-maintenance",
       "path": "skills/quality-capex-rca-copilot.zip",
-      "size_bytes": 32773,
-      "sha256": "67c5e342ee58322884b355f85ac6244d9b0b2b143b9a74e9f73b0c99c5da57db",
-      "file_count": 9,
+      "size_bytes": 57435,
+      "sha256": "57b4bfb742dd444c0d1fa1d4595a4054b1eff396a34f378f1dd3b1cdd24d9487",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1241,16 +1295,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/servicenow-jira-itsm-traps.md",
-        "scripts/defect_pareto_correlator.py"
+        "scripts/defect_pareto_correlator.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "ehs-safety-permit-auditor",
       "plugin_id": "industrial-shopfloor-maintenance",
       "path": "skills/ehs-safety-permit-auditor.zip",
-      "size_bytes": 32806,
-      "sha256": "a16f4242c29b9f6bf380df55e6498a8f8b7d16b98a23b78d699d4284e34d2831",
-      "file_count": 9,
+      "size_bytes": 57455,
+      "sha256": "5950c6eb3d12c2724b7ce6c64fb10234fc55f552a58553694a22bca96015e84e",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1260,6 +1315,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/servicenow-jira-itsm-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/hse_permit_checker.py"
       ]
     },
@@ -1267,9 +1323,9 @@
       "id": "incident-triage-routing",
       "plugin_id": "itsm-command-center",
       "path": "skills/incident-triage-routing.zip",
-      "size_bytes": 26319,
-      "sha256": "d12b99cb3d51ab96f76fe6c1daf4910f589ec75e8035ac44743ca30e879e0eae",
-      "file_count": 7,
+      "size_bytes": 50866,
+      "sha256": "7abb2f00089577a4c2fcfe196d51b357430f5b999083cf6ae2184ac24da79d6d",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1277,6 +1333,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/sla_cluster_triage.py"
       ]
     },
@@ -1284,9 +1341,9 @@
       "id": "change-risk-cab-review",
       "plugin_id": "itsm-command-center",
       "path": "skills/change-risk-cab-review.zip",
-      "size_bytes": 25340,
-      "sha256": "5e575611aa359c167607714032785a3b0a8d95bbe778b88040e844d714fda217",
-      "file_count": 7,
+      "size_bytes": 49881,
+      "sha256": "82e528d768ad0007da619281e32921686e6619342b649ef6b0947f57d514b83e",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1294,16 +1351,17 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/cab_risk_scorer.py"
+        "scripts/cab_risk_scorer.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "problem-rca-kb-generator",
       "plugin_id": "itsm-command-center",
       "path": "skills/problem-rca-kb-generator.zip",
-      "size_bytes": 25579,
-      "sha256": "68181837335b43f6bd341dda38d81fd864786436ecf7a4e1285fe9bff792d422",
-      "file_count": 7,
+      "size_bytes": 50136,
+      "sha256": "167fbef1137aabf64a19dc7062bae28d710d0dcafb94ced1c920068726a6589d",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1311,6 +1369,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/kcs_deflection_analyzer.py"
       ]
     },
@@ -1318,9 +1377,9 @@
       "id": "contract-playbook-redliner",
       "plugin_id": "legal-contract-desk",
       "path": "skills/contract-playbook-redliner.zip",
-      "size_bytes": 32374,
-      "sha256": "853bbd3244ced4a5a0d74db0659f2b28750dffc844bc2fa2db917a0f5a699ce8",
-      "file_count": 8,
+      "size_bytes": 57044,
+      "sha256": "3dffae3db327be4cdd1a971f13c18f0eeb1b7fa462831b09ce13f2552c33c4f6",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1329,16 +1388,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/clause_risk_matrix.py"
+        "scripts/clause_risk_matrix.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "executed-obligation-extractor",
       "plugin_id": "legal-contract-desk",
       "path": "skills/executed-obligation-extractor.zip",
-      "size_bytes": 30711,
-      "sha256": "02e75e4c861be5e33db8369280b962eeeb6b0d8b2137f5008e6ac10fb82ac190",
-      "file_count": 8,
+      "size_bytes": 55291,
+      "sha256": "4120680b7c244c726b5504be0cf76df26d1fef2754d0ede7abb4ffbb88254329",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1347,6 +1407,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/obligation_calendar_builder.py"
       ]
     },
@@ -1354,9 +1415,9 @@
       "id": "regulatory-change-mapper",
       "plugin_id": "legal-contract-desk",
       "path": "skills/regulatory-change-mapper.zip",
-      "size_bytes": 30568,
-      "sha256": "bc72db096648c21b32be63185006dbbe7b119cd598a4d6d3345f5a3728a31c29",
-      "file_count": 8,
+      "size_bytes": 55231,
+      "sha256": "9722694825f55d21f9a61575c92fc90c7a5da08a701ccae14850f3dad815632a",
+      "file_count": 9,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1365,16 +1426,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/control_gap_mapper.py"
+        "scripts/control_gap_mapper.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "merchant-catalog-trust-gate",
       "plugin_id": "marketplace-superapp-ops",
       "path": "skills/merchant-catalog-trust-gate.zip",
-      "size_bytes": 33475,
-      "sha256": "f219d2e2e0f98e8988ddce47770ea26ecf20318487e39c5143eb8b24e1062804",
-      "file_count": 9,
+      "size_bytes": 58129,
+      "sha256": "98aa90a8d5308ea938bceeef828d6f20d17cf80583192e59ae3a1990aec2d0dd",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1384,16 +1446,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/catalog_quality_scorer.py"
+        "scripts/catalog_quality_scorer.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "logistics-sla-dispute-resolver",
       "plugin_id": "marketplace-superapp-ops",
       "path": "skills/logistics-sla-dispute-resolver.zip",
-      "size_bytes": 32931,
-      "sha256": "7685ace242cd7ed6ac30b6fe224d093e10bd456780bc8285fac4c0ec2c24b8b1",
-      "file_count": 9,
+      "size_bytes": 57591,
+      "sha256": "7d3f282c5cd7350e69b93c3802de165a97a3ab5a09962958edd9eb2676f82796",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1403,6 +1466,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/zone_sla_dispute_analyzer.py"
       ]
     },
@@ -1410,9 +1474,9 @@
       "id": "commission-payout-reconciler",
       "plugin_id": "marketplace-superapp-ops",
       "path": "skills/commission-payout-reconciler.zip",
-      "size_bytes": 32703,
-      "sha256": "85ff94e6ca63b4845c51be2ed5b074bfe4d048b1c46dccfc30e45bc60a0590d9",
-      "file_count": 9,
+      "size_bytes": 57365,
+      "sha256": "c0b1cfbb5ffb0790bee7ded29411d71508690414e01747b5ade36b4e805c2ad5",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1422,6 +1486,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/payout_ledger_reconciler.py"
       ]
     },
@@ -1429,9 +1494,9 @@
       "id": "structured-hiring-rubric",
       "plugin_id": "people-ops-talent-hub",
       "path": "skills/structured-hiring-rubric.zip",
-      "size_bytes": 33785,
-      "sha256": "36782c6e77e631c88ee1bd562ce9d50730306556214cfe3e36c6932e5fc1634d",
-      "file_count": 9,
+      "size_bytes": 58449,
+      "sha256": "182b1363aed3f7270df0ada4fc07af7682b023dbc7b4a8deb2bffa9cdb567772",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/hr-hiring-comp-baseline.md",
@@ -1441,6 +1506,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
         "references/traps/workday-hris-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/rubric_calibration_checker.py"
       ]
     },
@@ -1448,9 +1514,9 @@
       "id": "employee-onboarding-navigator",
       "plugin_id": "people-ops-talent-hub",
       "path": "skills/employee-onboarding-navigator.zip",
-      "size_bytes": 33674,
-      "sha256": "47ee410df3b475f427f57d54e8f4bba2918b5cec6fafc668abb976fde2bd651e",
-      "file_count": 9,
+      "size_bytes": 58331,
+      "sha256": "c5c842c0e45dd7de0178f281ecf1902a0b33a3d8d08c3b281c20a4b86b107c13",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/hr-hiring-comp-baseline.md",
@@ -1460,6 +1526,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
         "references/traps/workday-hris-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/onboarding_plan_builder.py"
       ]
     },
@@ -1467,9 +1534,9 @@
       "id": "workforce-attrition-comp-audit",
       "plugin_id": "people-ops-talent-hub",
       "path": "skills/workforce-attrition-comp-audit.zip",
-      "size_bytes": 34366,
-      "sha256": "ccb956cc4405fd373c82279af569ba1013525b818b77659b511706cf1bb2c610",
-      "file_count": 9,
+      "size_bytes": 58946,
+      "sha256": "f4e5e1448200945f8c85b59f3d415b7bc758228c3951c2c4211b9f098f53c842",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/hr-hiring-comp-baseline.md",
@@ -1479,16 +1546,17 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/untrusted-content-and-pii.md",
         "references/traps/workday-hris-traps.md",
-        "scripts/comp_band_analyzer.py"
+        "scripts/comp_band_analyzer.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "citizen-case-eligibility-triager",
       "plugin_id": "public-sector-higher-ed",
       "path": "skills/citizen-case-eligibility-triager.zip",
-      "size_bytes": 34309,
-      "sha256": "2ead58e6c12fb399e23d260a945c85d710b730e5c0db07de2f5f11efec2a2e84",
-      "file_count": 9,
+      "size_bytes": 58971,
+      "sha256": "da5cb606ddc26a1f15f217f429f486347006ac89a47ec72f29a853e77415e74c",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1498,6 +1566,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/statutory_eligibility_engine.py"
       ]
     },
@@ -1505,9 +1574,9 @@
       "id": "procurement-tender-evaluator",
       "plugin_id": "public-sector-higher-ed",
       "path": "skills/procurement-tender-evaluator.zip",
-      "size_bytes": 34386,
-      "sha256": "d5eb3c99d5d21255bdc32933d48c4cc80e1c91df604c3436c521e5e47c5c9d50",
-      "file_count": 9,
+      "size_bytes": 59053,
+      "sha256": "65fbbd04fe68aa0e48f27921b875b898885c8a31e04ec863be5141f4cf72523d",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1517,6 +1586,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/tender_weighted_scorer.py"
       ]
     },
@@ -1524,9 +1594,9 @@
       "id": "grant-accreditation-evidence-pack",
       "plugin_id": "public-sector-higher-ed",
       "path": "skills/grant-accreditation-evidence-pack.zip",
-      "size_bytes": 34846,
-      "sha256": "6ae4d545c1dec4777490125d1e047f77d2b6703ea4e99fe0c25004c2422c8331",
-      "file_count": 9,
+      "size_bytes": 59504,
+      "sha256": "325fa01e9ecf115376c7be36f48980a23bb701ec7515af134c87e6c52636e5c7",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/commercial-contract-baseline.md",
@@ -1536,6 +1606,7 @@
         "references/traps/google-workspace-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/grant_accreditation_validator.py"
       ]
     },
@@ -1543,9 +1614,9 @@
       "id": "store-ops-shrink-copilot",
       "plugin_id": "retail-store-merchandising",
       "path": "skills/store-ops-shrink-copilot.zip",
-      "size_bytes": 33182,
-      "sha256": "76e4ae6096f8465d9417fd61e3603f5d681a82dcf00c2218f6e82d29203f2b5d",
-      "file_count": 9,
+      "size_bytes": 57834,
+      "sha256": "a3b3d52382b881150384facf0fda3a3bd5f2c1572b4fcaddf9df77f79db015ab",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1555,6 +1626,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/store_shrink_task_ranker.py"
       ]
     },
@@ -1562,9 +1634,9 @@
       "id": "merchandising-assortment-planner",
       "plugin_id": "retail-store-merchandising",
       "path": "skills/merchandising-assortment-planner.zip",
-      "size_bytes": 32554,
-      "sha256": "9610e08875cacfaeb486f69b6f88865feca1427cfb26a3149a99c1f8e377652b",
-      "file_count": 9,
+      "size_bytes": 57212,
+      "sha256": "34a400629a63c645ddf7261f9d367bde74d09e2ae8346ab6b0149173428a733f",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1574,6 +1646,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/promo_lift_analyzer.py"
       ]
     },
@@ -1581,9 +1654,9 @@
       "id": "supplier-otif-chargeback-auditor",
       "plugin_id": "retail-store-merchandising",
       "path": "skills/supplier-otif-chargeback-auditor.zip",
-      "size_bytes": 33051,
-      "sha256": "d2416b8d6d6f8ccc284d8205995bbef1efc1b15f40fc367911b62746b81bf381",
-      "file_count": 9,
+      "size_bytes": 57718,
+      "sha256": "3f04341be2ab69252adf9d8661a1addf043b882a6a0c764ae9f5947ff8009be2",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1593,6 +1666,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/chain-denominator-seams.md",
         "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/enterprise_io.py",
         "scripts/otif_detention_calculator.py"
       ]
     },
@@ -1600,9 +1674,9 @@
       "id": "legacy-code-to-prd",
       "plugin_id": "sdlc-modernization-sre",
       "path": "skills/legacy-code-to-prd.zip",
-      "size_bytes": 25498,
-      "sha256": "18f2d30de7610c4652b5598c4a2acd301df42b07f2912b09c6cfe6ccc51b979d",
-      "file_count": 7,
+      "size_bytes": 50163,
+      "sha256": "fd97f070f5a9fd1aabadc5a3da8b44272b49af255f77bb7bc3a352ed90000e0d",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1610,6 +1684,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/spec_traceability_matrix.py"
       ]
     },
@@ -1617,9 +1692,9 @@
       "id": "sre-incident-postmortem",
       "plugin_id": "sdlc-modernization-sre",
       "path": "skills/sre-incident-postmortem.zip",
-      "size_bytes": 25244,
-      "sha256": "0ac5f2914d86ca19e5f29d3af15f9abb5d7498eff35bf6d017d84f9ce495955c",
-      "file_count": 7,
+      "size_bytes": 49905,
+      "sha256": "6c33241eaf1d64201fb92edb19dc8a1b97c720cd7bad8c7c2074fecba58f5c36",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1627,6 +1702,7 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/slo_timeline_calculator.py"
       ]
     },
@@ -1634,9 +1710,9 @@
       "id": "security-pr-readiness-gate",
       "plugin_id": "sdlc-modernization-sre",
       "path": "skills/security-pr-readiness-gate.zip",
-      "size_bytes": 25520,
-      "sha256": "d2cbf400f7c14530ebec2c129ce90fe8ff8499ac4917fc8272c13b792beb4b8f",
-      "file_count": 7,
+      "size_bytes": 50168,
+      "sha256": "10199273dde123a3628fa581583a3f1cfb154a6e5f97c30147442320fea5ebb4",
+      "file_count": 8,
       "included_files": [
         "SKILL.md",
         "references/baselines/itsm-sla-severity-baseline.md",
@@ -1644,16 +1720,17 @@
         "references/traps/absent-is-not-zero.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/diff_risk_inspector.py"
+        "scripts/diff_risk_inspector.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "noc-outage-topology-correlator",
       "plugin_id": "telco-noc-field-dispatch",
       "path": "skills/noc-outage-topology-correlator.zip",
-      "size_bytes": 33795,
-      "sha256": "e8aaaade60ac4b2b0900a56d5d9b64e699ac76aff3a31a3a3ebc0c67383b8d18",
-      "file_count": 9,
+      "size_bytes": 58435,
+      "sha256": "652ba8dc71afde6db757532748cb26b89e09c9a9076cedf6b80385b5c08edb24",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1663,16 +1740,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/alarm_topology_correlator.py"
+        "scripts/alarm_topology_correlator.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "field-dispatch-spares-prep",
       "plugin_id": "telco-noc-field-dispatch",
       "path": "skills/field-dispatch-spares-prep.zip",
-      "size_bytes": 33114,
-      "sha256": "78fb07da30f2b35c93e72019b25871a15d098420dd6ba44aea1329a5cfbbdd90",
-      "file_count": 9,
+      "size_bytes": 57777,
+      "sha256": "b310d989d014789899b0a1704964766fa334a79875411aba94f07470d39329c5",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1682,16 +1760,17 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
-        "scripts/dispatch_readiness_matcher.py"
+        "scripts/dispatch_readiness_matcher.py",
+        "scripts/enterprise_io.py"
       ]
     },
     {
       "id": "b2b-order-fallout-resolver",
       "plugin_id": "telco-noc-field-dispatch",
       "path": "skills/b2b-order-fallout-resolver.zip",
-      "size_bytes": 33313,
-      "sha256": "199339a83aace772d75d10f9c93d6638fc2e079cbca556896358f2447901834f",
-      "file_count": 9,
+      "size_bytes": 57965,
+      "sha256": "61b3ffec458c7574bc3659222393e25c1a1da302cf7e1cc9589bc47934b4434d",
+      "file_count": 10,
       "included_files": [
         "SKILL.md",
         "references/baselines/finance-materiality-baseline.md",
@@ -1701,6 +1780,7 @@
         "references/traps/bigquery-sap-erp-traps.md",
         "references/traps/servicenow-jira-itsm-traps.md",
         "references/traps/untrusted-content-and-pii.md",
+        "scripts/enterprise_io.py",
         "scripts/order_fallout_classifier.py"
       ]
     }

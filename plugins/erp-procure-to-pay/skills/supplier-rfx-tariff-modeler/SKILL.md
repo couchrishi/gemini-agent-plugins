@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Simulates multi-supplier RFx bids across FOB, freight, tariffs, shock scenarios, payment financing, and quality defect penalties. Models supplier RFx bids on Total Landed Cost including tariffs, duties, financing, and quality penalties. Execute calculations via [landed_cost_simulator.py](scripts/landed_cost_simulator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `erp_p2p_and_bom_data` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive — Read Procurement GR/IR Aging Sheets, RFx Bid Matrix Sheets, and BOM Cost Rollup tabs in Supply Chain Shared Drives. | `.json`, `.csv` via `view_file` |
+| `erp_p2p_and_bom_data` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive — Read Procurement GR/IR Aging Sheets, RFx Bid Matrix Sheets, and BOM Cost Rollup tabs in Supply Chain Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

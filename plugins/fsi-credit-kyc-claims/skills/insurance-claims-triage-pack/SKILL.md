@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Validates policy effective periods and peril exclusions, computes deductible/coinsurance/sublimit payouts, and flags >$100k reserves. Evaluates insurance claims against policy dates, exclusions, deductibles, sublimits, and coinsurance. Execute calculations via [coverage_limit_evaluator.py](scripts/coverage_limit_evaluator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `core_banking_and_kyb_feeds` | `bigquery_sql_api` (workload_identity), `fin_kyc_registry_api` (mtls_oauth2) | Google Sheets, Google Docs, Google Drive — Read Credit Spreadsheets (UNFORMATTED_VALUE), Corporate Ownership Docs, and Claims Adjuster Sheets in FSI Shared Drives. | `.json`, `.csv` via `view_file` |
+| `core_banking_and_kyb_feeds` | `bigquery_sql_api` (workload_identity), `fin_kyc_registry_api` (mtls_oauth2) | Google Sheets, Google Docs, Google Drive — Read Credit Spreadsheets (UNFORMATTED_VALUE), Corporate Ownership Docs, and Claims Adjuster Sheets in FSI Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

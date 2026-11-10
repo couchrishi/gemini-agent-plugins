@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Computes error-budget burn rates, TTD/TTM/TTR intervals, availability impact, and postmortem action-item SLA compliance. Computes SLO error-budget burn rate, TTD/TTM/TTR postmortem intervals, and action-item SLAs. Execute calculations via [slo_timeline_calculator.py](scripts/slo_timeline_calculator.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `source_code_and_pr_diffs` | `github_rest_api` (oauth2_service_account), `gitlab_api` (oauth2_service_account) | Google Drive, Google Docs, Google Sheets — Read exported Architecture Inventory Sheets, Postmortem Docs, and Diff Attachments in Engineering Shared Drives. | `.json`, `.diff`, `.csv`, `.md`, `.txt` via `view_file` |
-| `monitoring_and_incident_timeline` | `cloud_logging_api` (workload_identity), `jira_api` (oauth2_user) | Google Docs, Google Sheets — Locate Incident Postmortem Docs and Action Tracker Sheets in SRE Shared Drives. | `.json`, `.csv`, `.md` via `view_file` |
+| `source_code_and_pr_diffs` | `github_rest_api` (oauth2_service_account), `gitlab_api` (oauth2_service_account) | Google Drive, Google Docs, Google Sheets — Read exported Architecture Inventory Sheets, Postmortem Docs, and Diff Attachments in Engineering Shared Drives. | `.json`, `.diff`, `.csv`, `.md`, `.txt`, `.xlsx`, `.docx` via `view_file` |
+| `monitoring_and_incident_timeline` | `cloud_logging_api` (workload_identity), `jira_api` (oauth2_user) | Google Docs, Google Sheets — Locate Incident Postmortem Docs and Action Tracker Sheets in SRE Shared Drives. | `.json`, `.csv`, `.md`, `.xlsx`, `.docx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

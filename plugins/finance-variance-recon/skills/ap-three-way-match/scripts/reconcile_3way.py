@@ -195,6 +195,49 @@ def _collect_truncation_warnings(
     return warnings
 
 
+def _load_enterprise_io() -> Any | None:
+    try:
+        from scripts import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    try:
+        import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    eio_path = Path(__file__).resolve().parent / "enterprise_io.py"
+    if eio_path.is_file():
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("enterprise_io", eio_path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+_ENTERPRISE_IO = _load_enterprise_io()
+
+
+def _to_bool(val: Any, default: bool = False) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in {"true", "yes", "y", "1", "on"}:
+        return True
+    if s in {"false", "no", "n", "0", "off", ""}:
+        return False if s else default
+    return bool(s)
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -205,11 +248,17 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
             _loaded = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(_loaded, dict):
                 cfg.update(_loaded)
-    org_cfg = bool(cfg.get("org_configured", False))
+    org_cfg = _to_bool(cfg.get("org_configured"), False)
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
 
-def _read_table(path: Path) -> list[dict[str, Any]]:
+def _read_table(path: Path, sheet: str | None = None) -> list[dict[str, Any]]:
+    if _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.read_enterprise_table(
+            path,
+            sheet=sheet,
+            fallback_keys=("rows", "items", "records", "invoices", "purchase_orders", "goods_receipts"),
+        )
     if path.suffix.lower() == ".csv":
         with path.open(encoding="utf-8", newline="") as fh:
             return list(csv.DictReader(fh))
@@ -229,18 +278,22 @@ def load_payload(
     po_path: str | Path | None = None,
     gr_path: str | Path | None = None,
     invoice_path: str | Path | None = None,
+    sheet: str | None = None,
 ) -> dict[str, Any]:
     if isinstance(input_arg, dict):
-        return input_arg
-    data: dict[str, Any] = {}
-    if input_arg is not None:
+        data: dict[str, Any] = dict(input_arg)
+    elif input_arg is not None and _ENTERPRISE_IO is not None:
+        data = _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="ap-three-way-match", sheet=sheet)
+    elif input_arg is not None:
         data = json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    else:
+        data = {}
     if po_path is not None:
-        data["purchase_orders"] = _read_table(Path(po_path))
+        data["purchase_orders"] = _read_table(Path(po_path), sheet=sheet)
     if gr_path is not None:
-        data["goods_receipts"] = _read_table(Path(gr_path))
+        data["goods_receipts"] = _read_table(Path(gr_path), sheet=sheet)
     if invoice_path is not None:
-        data["invoices"] = _read_table(Path(invoice_path))
+        data["invoices"] = _read_table(Path(invoice_path), sheet=sheet)
     return data
 
 
@@ -270,8 +323,10 @@ def analyze(
     po_path: str | Path | None = None,
     gr_path: str | Path | None = None,
     invoice_path: str | Path | None = None,
+
+    sheet: str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path))
+    data = _strip_null_items(load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
 
     fx_rates = {str(k).upper(): (_to_opt_float(v) if _to_opt_float(v) is not None else 1.0) for k, v in _as_dict(data.get("fx_rates"), {"USD": 1.0}).items()}
@@ -288,7 +343,7 @@ def analyze(
         _, unit_usd = _normalize_amount(
             _to_float(po.get("unit_price"), 0.0),
             curr,
-            sap_raw_encoding=bool(po.get("sap_raw_encoding", False)),
+            sap_raw_encoding=_to_bool(po.get("sap_raw_encoding"), False),
             shkzg=po.get("shkzg"),
             decimals_map=decimals_map,
             fx_rates=fx_rates,
@@ -321,7 +376,7 @@ def analyze(
         vendor_id = str(inv.get("vendor_id") or "UNKNOWN").strip()
         curr = str(inv.get("currency") or "USD").upper()
         shkzg = inv.get("shkzg")
-        raw_encoding = bool(inv.get("sap_raw_encoding", False))
+        raw_encoding = _to_bool(inv.get("sap_raw_encoding"), False)
         qty = _to_float(inv.get("invoiced_qty"), 0.0)
         raw_unit = _to_float(inv.get("unit_price"), 0.0)
         raw_tax = _to_float(inv.get("tax_amount"), 0.0)
@@ -394,7 +449,7 @@ def analyze(
             continue
 
         # Fraud / Bank Change Hold
-        if bool(raw.get("bank_account_changed", False)):
+        if _to_bool(raw.get("bank_account_changed"), False):
             exceptions.append("FRAUD_HOLD_BANK_CHANGE: Unverified vendor remittance/bank modification request.")
 
         # Duplicate detection (exact + fuzzy date window)
@@ -524,13 +579,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--po", type=Path, help="Optional separate PO JSON/CSV file")
     parser.add_argument("--gr", type=Path, help="Optional separate Goods Receipt JSON/CSV file")
     parser.add_argument("--invoice", type=Path, help="Optional separate Invoice JSON/CSV file")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
     parser.add_argument("--config", type=Path, help="Optional config.json path")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional output file path")
     args = parser.parse_args(argv)
     if args.input is None and args.invoice is None:
         parser.error("Provide either --input or --po/--gr/--invoice files.")
-    result = analyze(args.input, config=args.config, po_path=args.po, gr_path=args.gr, invoice_path=args.invoice)
+    result = analyze(args.input, config=args.config, po_path=args.po, gr_path=args.gr, invoice_path=args.invoice, sheet=args.sheet)
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(out + "\n", encoding="utf-8")

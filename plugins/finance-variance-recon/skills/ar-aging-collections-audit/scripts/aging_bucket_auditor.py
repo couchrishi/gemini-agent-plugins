@@ -176,6 +176,49 @@ def _collect_truncation_warnings(
     return warnings
 
 
+def _load_enterprise_io() -> Any | None:
+    try:
+        from scripts import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    try:
+        import enterprise_io as _eio  # type: ignore
+
+        return _eio
+    except ImportError:
+        pass
+    eio_path = Path(__file__).resolve().parent / "enterprise_io.py"
+    if eio_path.is_file():
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("enterprise_io", eio_path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    return None
+
+
+_ENTERPRISE_IO = _load_enterprise_io()
+
+
+def _to_bool(val: Any, default: bool = False) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in {"true", "yes", "y", "1", "on"}:
+        return True
+    if s in {"false", "no", "n", "0", "off", ""}:
+        return False if s else default
+    return bool(s)
+
+
 def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(config_arg, dict):
@@ -186,19 +229,29 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
             _loaded = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(_loaded, dict):
                 cfg.update(_loaded)
-    org_cfg = bool(cfg.get("org_configured", False))
+    org_cfg = _to_bool(cfg.get("org_configured"), False)
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
 
-def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
+def load_payload(
+    input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
+    *,
+    sheet: str | None = None,
+) -> dict[str, Any]:
     if isinstance(input_arg, dict):
         return input_arg
+    if isinstance(input_arg, list):
+        return {"open_items": input_arg}
+    if _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="ar-aging-collections-audit", sheet=sheet)
     p = Path(input_arg)
     if p.suffix.lower() == ".csv":
-        with p.open(encoding="utf-8", newline="") as fh:
+        with p.open("r", encoding="utf-8", newline="") as fh:
             return {"open_items": list(csv.DictReader(fh))}
-    _loaded = json.loads(p.read_text(encoding="utf-8"))
-    return _loaded if isinstance(_loaded, dict) else {}
+    loaded = json.loads(p.read_text(encoding="utf-8"))
+    if isinstance(loaded, list):
+        return {"open_items": loaded}
+    return loaded if isinstance(loaded, dict) else {}
 
 
 def _parse_date(val: Any) -> date | None:
@@ -212,8 +265,11 @@ def analyze(
     payload: str | Path | dict[str, Any],
     config: str | Path | dict[str, Any] | None = None,
     as_of_date: str | None = None,
+
+    *,
+    sheet: str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload))
+    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
     as_of = _parse_date(as_of_date or data.get("as_of_date")) or date(2026, 11, 10)
     esc_threshold = _to_float(cfg.get("ar_escalation_90_plus_threshold"), 10000.0)
@@ -362,12 +418,13 @@ def render_markdown(result: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit AR aging buckets with strict credit memo isolation.")
     parser.add_argument("--input", required=True, type=Path, help="Path to open AR JSON or CSV")
+    parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
     parser.add_argument("--config", type=Path, help="Optional config.json path")
     parser.add_argument("--as-of", type=str, help="Reference ISO date YYYY-MM-DD")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional output file path")
     args = parser.parse_args(argv)
-    result = analyze(args.input, config=args.config, as_of_date=args.as_of)
+    result = analyze(args.input, config=args.config, as_of_date=args.as_of, sheet=args.sheet)
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(out + "\n", encoding="utf-8")

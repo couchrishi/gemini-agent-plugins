@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PLUGINS_DIR = ROOT / "plugins"
 SHARED_TRAPS_DIR = ROOT / "shared" / "traps"
 SHARED_BASELINES_DIR = ROOT / "shared" / "baselines"
+SHARED_EIO_PATH = ROOT / "shared" / "scripts" / "enterprise_io.py"
 DEFAULT_DIST_DIR = ROOT / "dist"
 FIXED_ZIP_TIME = (2026, 1, 1, 0, 0, 0)
 
@@ -267,6 +268,8 @@ def render_bundle_skill_md(
             "",
             "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Because runtime shells start in `/workspace` while bundles and individual skills unpack under `skills/<slug>/` or `skills/user-skills/<slug>/`, always resolve `SKILL_DIR` dynamically before importing scripts or reading references.",
             "",
+            "- **Zero-dependency enterprise ingestion:** Every engine uses [enterprise_io.py](scripts/enterprise_io.py) to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabName>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet.",
+            "",
             "Using persistent `pyrepl`:",
             "",
             "```python",
@@ -313,7 +316,9 @@ def render_bundle_skill_md(
         )
     lines.extend(
         [
-            "# Or inspect CLI flags directly:",
+            "# Or pass .xlsx / .docx / .csv directly (optional --sheet \"TabName\"):",
+            f"# python3 \"$SKILL_DIR/{first_script_rel}\" --input workbook.xlsx --config \"$SKILL_DIR/references/config.json\" --format markdown",
+            "# Inspect CLI flags directly:",
         ]
     )
     for s in skill_entries:
@@ -388,6 +393,9 @@ def sync_and_build(
     drift_errors: list[str] = []
     manifest_bundles: list[dict[str, Any]] = []
     manifest_skills: list[dict[str, Any]] = []
+    if not SHARED_EIO_PATH.is_file():
+        raise FileNotFoundError(f"Missing shared enterprise ingestion helper: {SHARED_EIO_PATH}")
+    eio_bytes = SHARED_EIO_PATH.read_bytes()
 
     bundles_dir = output_dir / "bundles"
     skills_dir = output_dir / "skills"
@@ -415,6 +423,7 @@ def sync_and_build(
 
         bundle_entries: dict[str, tuple[bytes, int]] = {
             "references/config.json": (stamped_cfg_bytes, 0o100644),
+            "scripts/enterprise_io.py": (eio_bytes, 0o100644),
         }
         for name, data in shared_trap_bytes.items():
             bundle_entries[f"references/traps/{name}"] = (data, 0o100644)
@@ -466,12 +475,21 @@ def sync_and_build(
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     dest.write_bytes(content)
 
+            # 1b. Sync or check scripts/enterprise_io.py inside skill scripts/
+            dest_eio = script_path.parent / "enterprise_io.py"
+            if check_only:
+                if not dest_eio.is_file() or dest_eio.read_bytes() != eio_bytes:
+                    drift_errors.append(f"Drifted or missing enterprise_io.py: {dest_eio}")
+            else:
+                dest_eio.write_bytes(eio_bytes)
+
             # 2. Build granular 1-hop skill zip
             skill_md_bytes = skill_md_path.read_bytes()
             script_bytes = script_path.read_bytes()
             skill_zip_entries: dict[str, tuple[bytes, int]] = {
                 "SKILL.md": (skill_md_bytes, 0o100644),
                 script_rel: (script_bytes, 0o100755),
+                "scripts/enterprise_io.py": (eio_bytes, 0o100644),
                 "references/config.json": (stamped_cfg_bytes, 0o100644),
             }
             for name, data in shared_trap_bytes.items():

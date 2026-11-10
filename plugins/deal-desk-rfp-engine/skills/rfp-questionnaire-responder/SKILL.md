@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Matches RFP requirement rows against verified answer libraries using TF-IDF cosine similarity and flags mandatory compliance gaps. Matches RFP questionnaire rows against verified answer libraries using TF-IDF similarity. Execute calculations via [rfp_matrix_builder.py](scripts/rfp_matrix_builder.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `crm_opportunity_and_quotes` | `salesforce_soql_api` (oauth2_user) | Google Sheets, Google Drive, Google Docs — Locate Pipeline Export Sheets, Quote Pricing Calculators, and Deal Desk Guidelines in Revenue Ops Shared Drives. | `.json`, `.csv` via `view_file` |
-| `verified_rfp_answer_library` | `google_drive_api` (oauth2_user) | Google Sheets, Google Docs, Google Drive — Read the Verified RFP Q&A Library Sheet inside the Deal Desk Shared Drive. | `.json`, `.csv` via `view_file` |
+| `crm_opportunity_and_quotes` | `salesforce_soql_api` (oauth2_user) | Google Sheets, Google Drive, Google Docs — Locate Pipeline Export Sheets, Quote Pricing Calculators, and Deal Desk Guidelines in Revenue Ops Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
+| `verified_rfp_answer_library` | `google_drive_api` (oauth2_user) | Google Sheets, Google Docs, Google Drive — Read the Verified RFP Q&A Library Sheet inside the Deal Desk Shared Drive. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

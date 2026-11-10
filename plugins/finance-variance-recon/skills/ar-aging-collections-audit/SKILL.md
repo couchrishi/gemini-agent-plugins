@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Buckets open accounts receivable across Current to 90+ days while isolating unapplied credit memos so negative rows never mask delinquent balances. Audits open Accounts Receivable aging buckets with strict isolation of negative credit memos. Execute calculations via [aging_bucket_auditor.py](scripts/aging_bucket_auditor.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `erp_gl_and_subledger` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive, Google Docs — Read Finance Close Workbooks (UNFORMATTED_VALUE), AP Exception Sheets, and AR Aging exports in Finance Shared Drives. | `.json`, `.csv`, `.tsv` via `view_file` |
-| `treasury_and_vendor_notifications` | `google_drive_api` (oauth2_user) | Gmail, Google Docs, Google Drive — Inspect vendor email notifications for unverified bank-change requests without executing payment updates. | `.json`, `.md`, `.txt` via `view_file` |
+| `erp_gl_and_subledger` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Drive, Google Docs — Read Finance Close Workbooks (UNFORMATTED_VALUE), AP Exception Sheets, and AR Aging exports in Finance Shared Drives. | `.json`, `.csv`, `.tsv`, `.xlsx` via `view_file` |
+| `treasury_and_vendor_notifications` | `google_drive_api` (oauth2_user) | Gmail, Google Docs, Google Drive — Inspect vendor email notifications for unverified bank-change requests without executing payment updates. | `.json`, `.md`, `.txt`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

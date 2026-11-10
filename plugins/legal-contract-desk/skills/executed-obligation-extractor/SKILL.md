@@ -10,14 +10,16 @@ created_by: gemini-agent-plugins
 
 Calculates exact notice deadlines prior to auto-renewal, flags CPI escalator breaches, and builds executed obligation calendars. Computes executed contract renewal opt-out deadlines, CPI escalator breaches, and obligation calendars. Execute calculations via [obligation_calendar_builder.py](scripts/obligation_calendar_builder.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `clm_and_contract_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Drive — Inspect Legal Playbook Docs (all child tabs) and Executed Contract Registry Sheets in Legal Shared Drives. | `.json`, `.csv`, `.md`, `.txt` via `view_file` |
-| `compliance_control_register` | `servicenow_grc_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Control Register & Audit Evidence Sheets in Compliance Shared Drives. | `.json`, `.csv` via `view_file` |
+| `clm_and_contract_repository` | `google_drive_api` (oauth2_user), `microsoft_graph_sharepoint` (oauth2_user) | Google Docs, Google Sheets, Google Drive — Inspect Legal Playbook Docs (all child tabs) and Executed Contract Registry Sheets in Legal Shared Drives. | `.json`, `.csv`, `.md`, `.txt`, `.xlsx`, `.docx` via `view_file` |
+| `compliance_control_register` | `servicenow_grc_api` (oauth2_service_account) | Google Sheets, Google Drive — Read Control Register & Audit Evidence Sheets in Compliance Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 

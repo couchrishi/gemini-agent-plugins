@@ -10,13 +10,15 @@ created_by: gemini-agent-plugins
 
 Enforces zero-compromise LOTO isolation, confined-space O2 (19.5-23.5%), 0% LEL gas freshness, fire watch, and worker certification checks. Audits EHS Permit-to-Work (PTW) packages for LOTO isolation, gas test limits, and worker certification. Execute calculations via [hse_permit_checker.py](scripts/hse_permit_checker.py) inside persistent `pyrepl` RAM rather than estimating metrics in prompt tokens.
 
+Direct local uploads support `.xlsx`, `.csv`, `.tsv`, `.json`, `.jsonl` via [enterprise_io.py](scripts/enterprise_io.py) (zero third-party Excel/Word dependencies; pass `--sheet <TabName>` or `sheet="..."` to target a single worksheet).
+
 ## Three-Mode Connector Graceful Degradation
 
 Probe Mode A connectors first, degrade automatically to Mode B Workspace sources or Mode C local exports when external APIs are unavailable, and never fail on missing optional feeds:
 
 | Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Upload |
 | :--- | :--- | :--- | :--- |
-| `cmms_qms_ehs_systems` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Critical Spares Inventory Sheets, QMS Scrap Logs, and Daily PTW Safety Logs in Plant Ops Shared Drives. | `.json`, `.csv` via `view_file` |
+| `cmms_qms_ehs_systems` | `sap_odata_api` (mtls_oauth2), `bigquery_sql_api` (workload_identity) | Google Sheets, Google Docs, Google Drive — Read Critical Spares Inventory Sheets, QMS Scrap Logs, and Daily PTW Safety Logs in Plant Ops Shared Drives. | `.json`, `.csv`, `.xlsx` via `view_file` |
 
 ## Org Configuration & Badged Baseline Rule
 
