@@ -1,0 +1,50 @@
+version: '1.0'
+plugin_id: people-ops-talent-hub
+capabilities:
+- id: hris_and_ats_records
+  description: Workday HRIS effective-dated worker snapshots, compensation bands,
+    and ATS interview scorecards.
+  required: true
+  mode_a_live_connectors:
+  - connector: workday_raas_api
+    endpoint_template: https://wd2-impl-services1.workday.com/ccx/service/customreport2/{tenant}
+    auth_type: oauth2_service_account
+    scopes:
+    - workday.worker.read
+    - workday.comp.read
+  - connector: greenhouse_harvest_api
+    endpoint_template: https://harvest.greenhouse.io/v1/scorecards
+    auth_type: api_key_secret_manager
+    scopes:
+    - scorecards.read
+    - candidates.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read Workforce Roster Sheets (UNFORMATTED_VALUE) and Interview Debrief
+      Docs in People Ops Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv
+- id: onboarding_it_provisioning
+  description: New-hire start dates, IT SSO/hardware provisioning tasks, and compliance
+    training gates.
+  required: false
+  mode_a_live_connectors:
+  - connector: servicenow_hrsd_api
+    endpoint_template: https://{instance}.service-now.com/api/now/table/sn_hr_core_case
+    auth_type: oauth2_service_account
+    scopes:
+    - hrsd_case.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Gmail
+    - Google Drive
+    lookup_hint: Inspect Onboarding Tracker Sheets and IT ticket updates in People
+      Ops Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

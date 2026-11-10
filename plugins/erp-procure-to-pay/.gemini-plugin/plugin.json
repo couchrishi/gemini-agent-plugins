@@ -1,0 +1,48 @@
+{
+  "id": "erp-procure-to-pay",
+  "name": "ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine",
+  "version": "1.0.0",
+  "category": "enterprise-ops",
+  "segment_tags": [
+    "manufacturing",
+    "supply-chain",
+    "sap",
+    "procurement",
+    "finance",
+    "erp"
+  ],
+  "description": "Reconciles SAP GR/IR clearing imbalances across goods receipts and invoice postings with TCURX scaling, simulates multi-supplier RFx total landed cost under tariff shocks, and rolls up multi-level BOM purchase price variances with cycle detection.",
+  "skills": [
+    {
+      "id": "gr-ir-clearing-orchestrator",
+      "script": "scripts/gr_ir_reconciler.py",
+      "summary": "Reconciles SAP WE goods receipts and RE invoice postings with TCURX currency scaling, SHKZG sign flips, and >60d aging classification."
+    },
+    {
+      "id": "supplier-rfx-tariff-modeler",
+      "script": "scripts/landed_cost_simulator.py",
+      "summary": "Simulates multi-supplier RFx bids across FOB, freight, tariffs, shock scenarios, payment financing, and quality defect penalties."
+    },
+    {
+      "id": "bom-cost-rollup-variance",
+      "script": "scripts/bom_ppv_rollup.py",
+      "summary": "Explodes multi-level BOMs with scrap factors, guards against circular BOM graphs, and rolls up leaf PPV drivers."
+    }
+  ],
+  "shared_traps": [
+    "bigquery-sap-erp-traps.md",
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "finance-materiality-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/erp-procure-to-pay-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-grir-aging-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,95 @@
+{
+  "fx_rates": {
+    "USD": 1.0,
+    "JPY": 0.0066666667,
+    "EUR": 1.08
+  },
+  "decimal_places": {
+    "JPY": 0,
+    "KRW": 0,
+    "USD": 2
+  },
+  "purchase_orders": [
+    {
+      "po_number": "PO-CYM-1001",
+      "line_item": "10",
+      "vendor_id": "V-TOKYO-CNC",
+      "currency": "JPY",
+      "sap_raw_encoding": true,
+      "ordered_qty": 10,
+      "unit_price": 1500.0
+    },
+    {
+      "po_number": "PO-CYM-1002",
+      "line_item": "10",
+      "vendor_id": "V-CLOUD-HOST",
+      "currency": "USD",
+      "ordered_qty": 100,
+      "unit_price": 50.0
+    }
+  ],
+  "goods_receipts": [
+    {
+      "po_number": "PO-CYM-1001",
+      "line_item": "10",
+      "received_qty": 10
+    },
+    {
+      "po_number": "PO-CYM-1002",
+      "line_item": "10",
+      "received_qty": 100
+    }
+  ],
+  "invoices": [
+    {
+      "invoice_id": "INV-JP-01",
+      "invoice_number": "TK-9001",
+      "po_number": "PO-CYM-1001",
+      "line_item": "10",
+      "vendor_id": "V-TOKYO-CNC",
+      "currency": "JPY",
+      "sap_raw_encoding": true,
+      "invoiced_qty": 10,
+      "unit_price": 1500.0,
+      "tax_amount": 0.0,
+      "invoice_date": "2026-10-05"
+    },
+    {
+      "invoice_id": "INV-US-01",
+      "invoice_number": "CH-441",
+      "po_number": "PO-CYM-1002",
+      "line_item": "10",
+      "vendor_id": "V-CLOUD-HOST",
+      "currency": "USD",
+      "invoiced_qty": 100,
+      "unit_price": 62.0,
+      "tax_amount": 0.0,
+      "invoice_date": "2026-10-06"
+    },
+    {
+      "invoice_id": "INV-US-01-DUP",
+      "invoice_number": "CH-441",
+      "po_number": "PO-CYM-1002",
+      "line_item": "10",
+      "vendor_id": "V-CLOUD-HOST",
+      "currency": "USD",
+      "invoiced_qty": 100,
+      "unit_price": 62.0,
+      "tax_amount": 0.0,
+      "invoice_date": "2026-10-07"
+    },
+    {
+      "invoice_id": "INV-US-CREDIT",
+      "invoice_number": "CH-441-CR",
+      "po_number": "PO-CYM-1002",
+      "line_item": "10",
+      "vendor_id": "V-CLOUD-HOST",
+      "currency": "USD",
+      "shkzg": "H",
+      "invoiced_qty": 100,
+      "unit_price": 62.0,
+      "tax_amount": 0.0,
+      "invoice_date": "2026-10-08"
+    }
+  ]
+}

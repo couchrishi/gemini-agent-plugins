@@ -1,0 +1,51 @@
+skill_id: structured-hiring-rubric
+plugin_id: people-ops-talent-hub
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/rubric_calibration_checker.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - candidate_calibrations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - calibration_status
+  must_not_include_patterns:
+  - auto-advanced candidate without debrief
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Flags score dispersion >= 2.0 and Score 1 vetoes.
+  - Detects bias phrasing and sub-40-char evidence notes.
+scenarios:
+- id: mode_a_split_panel
+  mode: mode_a
+  prompt: Calibrate Greenhouse scorecards for Cymbal Financial Staff Engineer candidate
+    with scores [4, 1, 4, 3].
+  expected_assertions:
+  - Flags score_spread=3.0 (>=2.0) and strong_no_hire_veto=true.
+  - Assigns calibration_status=DEBRIEF_REQUIRED_SPLIT_PANEL.
+- id: mode_b_bias_detection
+  mode: mode_b
+  prompt: Audit the Debrief Doc in Drive containing 'good culture fit, high energy
+    for recent grad' in 25 chars.
+  expected_assertions:
+  - Flags both bias_flags and thin_evidence_flags -> CALIBRATION_BLOCKED_BIAS_OR_THIN_EVIDENCE.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_consensus_hire
+  mode: mode_c
+  prompt: Evaluate scorecards.json for consensus candidates and verify HITL offer
+    gate.
+  expected_assertions:
+  - Computes exact mean_score and sets HIRE_RECOMMENDED_FOR_HITL without auto-extending
+    offers.
+  - Preserves strict evidence completeness.
+rubric:
+- criterion: dispersion_and_veto_detection
+  weight: 0.4
+  description: Flags >=2.0 spread and Score 1 vetoes accurately.
+- criterion: evidence_and_bias_audit
+  weight: 0.35
+  description: Catches <40 char notes and protected-class bias markers.
+- criterion: hitl_hiring_governance
+  weight: 0.25
+  description: Keeps offer/rejection decisions strictly human-approved.

@@ -1,0 +1,31 @@
+version: "1.0"
+plugin_id: itsm-command-center
+capabilities:
+  - id: itsm_ticketing_and_cmdb
+    description: Incident, Problem, Change Request, Task SLA, and CMDB CI records across ServiceNow and Jira Service Management.
+    required: true
+    mode_a_live_connectors:
+      - connector: servicenow_table_api
+        endpoint_template: https://{instance}.service-now.com/api/now/table/incident
+        auth_type: oauth2_service_account
+        scopes: ["itil_read", "cmdb_read"]
+      - connector: jira_service_management_api
+        endpoint_template: https://{domain}.atlassian.net/rest/api/3/search/jql
+        auth_type: oauth2_user
+        scopes: ["read:jira-work", "read:servicedesk-request"]
+    mode_b_workspace_fallback:
+      google_workspace_sources: ["Google Sheets", "Google Drive", "Google Docs"]
+      lookup_hint: Locate exported ServiceNow/Jira Incident, Change, and CMDB Sheets in IT Ops Shared Drives.
+    mode_c_local_file_formats: ["json", "csv"]
+  - id: runbook_and_kcs_kb
+    description: Standard operating runbooks and Knowledge-Centered Service articles for incident routing and deflection validation.
+    required: false
+    mode_a_live_connectors:
+      - connector: atlassian_confluence_cloud
+        endpoint_template: https://{domain}.atlassian.net/wiki/rest/api/content/search
+        auth_type: oauth2_user
+        scopes: ["read:confluence-content.all"]
+    mode_b_workspace_fallback:
+      google_workspace_sources: ["Google Docs", "Google Drive"]
+      lookup_hint: Read Runbook Docs inside the SRE & Service Desk Shared Drive.
+    mode_c_local_file_formats: ["json", "md", "csv"]

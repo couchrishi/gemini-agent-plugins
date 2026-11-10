@@ -1,0 +1,50 @@
+skill_id: troubleshooting-tree-author
+plugin_id: customer-operations-escalation
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/decision_tree_validator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - broken_references
+  - cycles_detected
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - graph_valid
+  must_not_include_patterns:
+  - published cyclic decision tree
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Detects cycles, orphan nodes, broken targets, and dead-end questions via BFS/DFS.
+  - Measures max_resolution_depth against max_resolution_hops.
+scenarios:
+- id: mode_a_cycle_deadend_catch
+  mode: mode_a
+  prompt: Validate our payment-timeout diagnostic tree JSON containing an infinite
+    retry loop and a dangling branch target.
+  expected_assertions:
+  - Captures exact cycle path and broken reference, setting graph_valid=false.
+  - Lists unreachable orphan nodes separately.
+- id: mode_b_docs_depth_check
+  mode: mode_b
+  prompt: Audit Support Playbook tree from Drive with 8 nested diagnostic hops.
+  expected_assertions:
+  - Flags exceeds_max_hops=true when depth > 6.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_clean_tree
+  mode: mode_c
+  prompt: Run decision_tree_validator.py on clean_tree.json before Knowledge Lead
+    publish.
+  expected_assertions:
+  - Reports graph_valid=true with 0 defects.
+  - Requires HITL sign-off to publish.
+rubric:
+- criterion: graph_defect_detection
+  weight: 0.45
+  description: Finds cycles, dead ends, orphans, and broken pointers reliably.
+- criterion: hop_depth_measurement
+  weight: 0.3
+  description: Computes BFS shortest resolution depth accurately.
+- criterion: baseline_and_hitl_governance
+  weight: 0.25
+  description: Blocks flawed graphs and requires HITL approval for release.

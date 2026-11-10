@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDLC Modernization & SRE Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once service SLO targets, complexity thresholds, and security gate policies are bound."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant organization name."
+    },
+    "default_slo_availability_pct": {
+      "type": "number",
+      "minimum": 95.0,
+      "maximum": 99.999,
+      "default": 99.9,
+      "description": "Default 30-day availability SLO target percentage."
+    },
+    "complexity_hotspot_threshold": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 100,
+      "default": 15,
+      "description": "Cyclomatic complexity score flagging legacy modernization hotspots."
+    },
+    "min_requirement_traceability_pct": {
+      "type": "number",
+      "minimum": 50.0,
+      "maximum": 100.0,
+      "default": 85.0,
+      "description": "Minimum percentage of extracted requirements covered by verified test cases."
+    },
+    "postmortem_action_sla_days": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 90,
+      "default": 14,
+      "description": "Target days for completing P0/P1 postmortem corrective action items."
+    }
+  }
+}

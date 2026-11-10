@@ -1,0 +1,28 @@
+version: '1.0'
+plugin_id: customer-operations-escalation
+read_only_tools:
+- salesforce_query_arr
+- servicenow_read_csm_cases
+- sheets_read_unformatted
+- view_file
+- pyrepl
+draft_only_tools:
+- docs_create_warroom_brief
+- docs_draft_kb_decision_tree
+- write_to_file
+hitl_gated_mutations:
+- tool: servicenow_trigger_exec_escalation
+  scope: explicit_per_call
+  condition: request.war_room_count >= 1 || request.arr_at_risk_usd > 0
+  reason: Spinning up executive customer war-rooms or paging VP sponsors requires
+    Support Director confirmation.
+- tool: kb_publish_troubleshooting_tree
+  scope: explicit_per_call
+  condition: request.graph_valid == true
+  reason: Publishing agent troubleshooting flows to production portals requires Knowledge
+    Lead review.
+cel_guardrails:
+- id: block_invalid_troubleshooting_tree
+  description: Halt publication of any troubleshooting graph containing cycles, dead
+    ends, or broken refs.
+  expr: tree.graph_valid == true

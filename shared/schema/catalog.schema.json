@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/couchrishi/gemini-agent-plugins/shared/schema/catalog.schema.json",
+  "title": "Gemini Agent Plugins Master Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "total_plugins", "total_skills", "plugins"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "total_plugins": {
+      "type": "integer",
+      "const": 20
+    },
+    "total_skills": {
+      "type": "integer",
+      "const": 60
+    },
+    "plugins": {
+      "type": "array",
+      "minItems": 20,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "version",
+          "category",
+          "segment_tags",
+          "description",
+          "path",
+          "bundle_zip",
+          "shared_traps",
+          "shared_baselines",
+          "skills"
+        ],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "name": {"type": "string", "minLength": 3},
+          "version": {"type": "string"},
+          "category": {"type": "string", "enum": ["horizontal", "enterprise-ops", "vertical"]},
+          "segment_tags": {"type": "array", "items": {"type": "string"}},
+          "description": {"type": "string"},
+          "path": {"type": "string", "pattern": "^plugins/[a-z0-9-]+$"},
+          "bundle_zip": {"type": "string", "pattern": "^dist/bundles/[a-z0-9-]+\\.zip$"},
+          "shared_traps": {"type": "array", "items": {"type": "string"}},
+          "shared_baselines": {"type": "array", "items": {"type": "string"}},
+          "skills": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "path", "skill_zip", "script", "summary"],
+              "properties": {
+                "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+                "path": {"type": "string"},
+                "skill_zip": {"type": "string", "pattern": "^dist/skills/[a-z0-9-]+\\.zip$"},
+                "script": {"type": "string", "pattern": "^scripts/[a-z0-9_]+\\.py$"},
+                "summary": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

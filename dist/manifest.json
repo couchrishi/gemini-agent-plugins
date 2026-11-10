@@ -1,0 +1,1708 @@
+{
+  "version": "1.0.0",
+  "generated_by": "tools/package.py",
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "bundle_count": 20,
+  "skill_count": 60,
+  "bundles": [
+    {
+      "id": "brand-campaign-studio",
+      "name": "Brand Governance, Campaign Matrix & Localization Studio",
+      "category": "horizontal",
+      "path": "bundles/brand-campaign-studio.zip",
+      "size_bytes": 22817,
+      "sha256": "4d082553addc16d9bdfe5e8369287f055e8f04c50ca106ac0aa27731edf4a003",
+      "skill_ids": [
+        "brand-voice-compliance-gate",
+        "multimodal-campaign-brief",
+        "market-localization-adapter"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/brand-voice-compliance-gate.md",
+        "references/workflows/market-localization-adapter.md",
+        "references/workflows/multimodal-campaign-brief.md",
+        "scripts/campaign_asset_matrix.py",
+        "scripts/copy_compliance_linter.py",
+        "scripts/locale_glossary_checker.py"
+      ]
+    },
+    {
+      "id": "conversational-bi-analyst",
+      "name": "Conversational BI & Variance Analyst",
+      "category": "horizontal",
+      "path": "bundles/conversational-bi-analyst.zip",
+      "size_bytes": 24805,
+      "sha256": "4f0e1a23d643a238fefa3450cc7b54d933024b0422911775c1a12d7eb0008701",
+      "skill_ids": [
+        "schema-grounded-sql-analyst",
+        "kpi-anomaly-driver-tree",
+        "executive-data-story-pack"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/workflows/executive-data-story-pack.md",
+        "references/workflows/kpi-anomaly-driver-tree.md",
+        "references/workflows/schema-grounded-sql-analyst.md",
+        "scripts/dataset_profiler_guard.py",
+        "scripts/mix_rate_volume_bridge.py",
+        "scripts/sql_safety_and_fanout_checker.py"
+      ]
+    },
+    {
+      "id": "customer-operations-escalation",
+      "name": "Customer Operations, VIP Escalation & Knowledge Quality",
+      "category": "enterprise-ops",
+      "path": "bundles/customer-operations-escalation.zip",
+      "size_bytes": 22817,
+      "sha256": "17f0a9897319dff6090fa8d9585df6d30164c6dc3550a9b64cdf54cc7557d0d4",
+      "skill_ids": [
+        "critical-escalation-warroom",
+        "csat-churn-signal-miner",
+        "troubleshooting-tree-author"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/critical-escalation-warroom.md",
+        "references/workflows/csat-churn-signal-miner.md",
+        "references/workflows/troubleshooting-tree-author.md",
+        "scripts/decision_tree_validator.py",
+        "scripts/escalation_exposure_scorer.py",
+        "scripts/verbatim_driver_quantifier.py"
+      ]
+    },
+    {
+      "id": "deal-desk-rfp-engine",
+      "name": "Deal Desk, RFP & Pipeline Hygiene Engine",
+      "category": "horizontal",
+      "path": "bundles/deal-desk-rfp-engine.zip",
+      "size_bytes": 26713,
+      "sha256": "75c839644679a8e02a1d2db4d233ae216175ff658b65ddcc3dc13cecf38d8183",
+      "skill_ids": [
+        "rfp-questionnaire-responder",
+        "deal-desk-quote-guard",
+        "pipeline-hygiene-slippage"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/deal-desk-quote-guard.md",
+        "references/workflows/pipeline-hygiene-slippage.md",
+        "references/workflows/rfp-questionnaire-responder.md",
+        "scripts/deal_margin_validator.py",
+        "scripts/pipeline_slippage_auditor.py",
+        "scripts/rfp_matrix_builder.py"
+      ]
+    },
+    {
+      "id": "enterprise-knowledge-hub",
+      "name": "Enterprise Knowledge Hub",
+      "category": "horizontal",
+      "path": "bundles/enterprise-knowledge-hub.zip",
+      "size_bytes": 28228,
+      "sha256": "200b0e3a70f130799f0c680debe71be2c92b4931cb90c3fe6e57459a81905ec3",
+      "skill_ids": [
+        "cross-source-knowledge-synthesis",
+        "policy-sop-answering",
+        "knowledge-gap-freshness-audit"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/cross-source-knowledge-synthesis.md",
+        "references/workflows/knowledge-gap-freshness-audit.md",
+        "references/workflows/policy-sop-answering.md",
+        "scripts/citation_conflict_auditor.py",
+        "scripts/corpus_hygiene_scanner.py",
+        "scripts/policy_scope_matcher.py"
+      ]
+    },
+    {
+      "id": "erp-procure-to-pay",
+      "name": "ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine",
+      "category": "enterprise-ops",
+      "path": "bundles/erp-procure-to-pay.zip",
+      "size_bytes": 24203,
+      "sha256": "130fe0ac7a734d4fa3b4ac26423201aec82694a93a307b89384a13cd617f1158",
+      "skill_ids": [
+        "gr-ir-clearing-orchestrator",
+        "supplier-rfx-tariff-modeler",
+        "bom-cost-rollup-variance"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/bom-cost-rollup-variance.md",
+        "references/workflows/gr-ir-clearing-orchestrator.md",
+        "references/workflows/supplier-rfx-tariff-modeler.md",
+        "scripts/bom_ppv_rollup.py",
+        "scripts/gr_ir_reconciler.py",
+        "scripts/landed_cost_simulator.py"
+      ]
+    },
+    {
+      "id": "executive-briefing-ops",
+      "name": "Executive Briefing & Chief of Staff Ops",
+      "category": "horizontal",
+      "path": "bundles/executive-briefing-ops.zip",
+      "size_bytes": 26258,
+      "sha256": "6bf38fd8ade134ef449cfc11e945c09f44393f7613066871fbac88f7a99620ef",
+      "skill_ids": [
+        "daily-executive-briefing",
+        "meeting-to-execution-pack",
+        "stakeholder-account-prep"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/daily-executive-briefing.md",
+        "references/workflows/meeting-to-execution-pack.md",
+        "references/workflows/stakeholder-account-prep.md",
+        "scripts/agenda_commitment_tracker.py",
+        "scripts/dossier_synthesizer.py",
+        "scripts/transcript_action_extractor.py"
+      ]
+    },
+    {
+      "id": "finance-variance-recon",
+      "name": "Finance Variance, 3-Way Match & AR Reconciliation",
+      "category": "horizontal",
+      "path": "bundles/finance-variance-recon.zip",
+      "size_bytes": 28243,
+      "sha256": "b0da4c722e0b0333cb93229df1531d6fe7500b44e4d5dab48025ca5a2ad1a73b",
+      "skill_ids": [
+        "ap-three-way-match",
+        "pnl-budget-variance-bridge",
+        "ar-aging-collections-audit"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/ap-three-way-match.md",
+        "references/workflows/ar-aging-collections-audit.md",
+        "references/workflows/pnl-budget-variance-bridge.md",
+        "scripts/aging_bucket_auditor.py",
+        "scripts/pnl_variance_engine.py",
+        "scripts/reconcile_3way.py"
+      ]
+    },
+    {
+      "id": "fsi-credit-kyc-claims",
+      "name": "Financial Services Credit, KYB/AML & Claims Underwriting",
+      "category": "vertical",
+      "path": "bundles/fsi-credit-kyc-claims.zip",
+      "size_bytes": 24138,
+      "sha256": "21229cb1aeae0a8bf82732c928b42abdc7e878022d558a5ef239b2aadad16762",
+      "skill_ids": [
+        "commercial-credit-memo-analyst",
+        "kyc-aml-screening-dossier",
+        "insurance-claims-triage-pack"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/fsi-credit-kyc-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/commercial-credit-memo-analyst.md",
+        "references/workflows/insurance-claims-triage-pack.md",
+        "references/workflows/kyc-aml-screening-dossier.md",
+        "scripts/coverage_limit_evaluator.py",
+        "scripts/credit_covenant_stress.py",
+        "scripts/ubo_velocity_screener.py"
+      ]
+    },
+    {
+      "id": "gsi-proposal-ip-factory",
+      "name": "GSI Proposal Architecture, SOW Margin & Bench Factory",
+      "category": "enterprise-ops",
+      "path": "bundles/gsi-proposal-ip-factory.zip",
+      "size_bytes": 25446,
+      "sha256": "646833b985b6bd2c2dd9159803afb66fd24cc9ce1a6b5ca0a595791898a5cc99",
+      "skill_ids": [
+        "winning-proposal-architect",
+        "sow-scope-margin-auditor",
+        "bench-skill-demand-matcher"
+      ],
+      "file_count": 15,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/workday-hris-traps.md",
+        "references/workflows/bench-skill-demand-matcher.md",
+        "references/workflows/sow-scope-margin-auditor.md",
+        "references/workflows/winning-proposal-architect.md",
+        "scripts/sow_margin_linter.py",
+        "scripts/staffing_pyramid_calculator.py",
+        "scripts/talent_bench_matcher.py"
+      ]
+    },
+    {
+      "id": "healthcare-clinical-regulatory",
+      "name": "Healthcare Clinical Trial, Pharmacovigilance & Prior Auth",
+      "category": "vertical",
+      "path": "bundles/healthcare-clinical-regulatory.zip",
+      "size_bytes": 22326,
+      "sha256": "a255e72da857b64f8b2163136f11be76177458d104f97e3bb7f934177089aa46",
+      "skill_ids": [
+        "clinical-protocol-feasibility",
+        "pharmacovigilance-safety-intake",
+        "prior-auth-medical-necessity"
+      ],
+      "file_count": 12,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/clinical-protocol-feasibility.md",
+        "references/workflows/pharmacovigilance-safety-intake.md",
+        "references/workflows/prior-auth-medical-necessity.md",
+        "scripts/icsr_completeness_checker.py",
+        "scripts/medical_criteria_matcher.py",
+        "scripts/soa_endpoint_validator.py"
+      ]
+    },
+    {
+      "id": "industrial-shopfloor-maintenance",
+      "name": "Industrial Shopfloor Reliability, Quality & EHS Safety",
+      "category": "vertical",
+      "path": "bundles/industrial-shopfloor-maintenance.zip",
+      "size_bytes": 24393,
+      "sha256": "baa4097904ed8ef82accd13e5b852abe29b1bf49caff21223dbd9dcb731d6afa",
+      "skill_ids": [
+        "asset-reliability-spares-planner",
+        "quality-capex-rca-copilot",
+        "ehs-safety-permit-auditor"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/workflows/asset-reliability-spares-planner.md",
+        "references/workflows/ehs-safety-permit-auditor.md",
+        "references/workflows/quality-capex-rca-copilot.md",
+        "scripts/defect_pareto_correlator.py",
+        "scripts/hse_permit_checker.py",
+        "scripts/mtbf_spares_optimizer.py"
+      ]
+    },
+    {
+      "id": "itsm-command-center",
+      "name": "ITSM & Service Desk Command Center",
+      "category": "horizontal",
+      "path": "bundles/itsm-command-center.zip",
+      "size_bytes": 23508,
+      "sha256": "fcf07963c77eb250fbbf7a87b4e21c8f3323c5651342021464716b3360ee4251",
+      "skill_ids": [
+        "incident-triage-routing",
+        "change-risk-cab-review",
+        "problem-rca-kb-generator"
+      ],
+      "file_count": 12,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/change-risk-cab-review.md",
+        "references/workflows/incident-triage-routing.md",
+        "references/workflows/problem-rca-kb-generator.md",
+        "scripts/cab_risk_scorer.py",
+        "scripts/kcs_deflection_analyzer.py",
+        "scripts/sla_cluster_triage.py"
+      ]
+    },
+    {
+      "id": "legal-contract-desk",
+      "name": "Legal Contract Desk & Regulatory Compliance",
+      "category": "horizontal",
+      "path": "bundles/legal-contract-desk.zip",
+      "size_bytes": 27185,
+      "sha256": "3f19252e45c2046704cf3be01068d314ced566198c9bbab4f8ba51decbc707c6",
+      "skill_ids": [
+        "contract-playbook-redliner",
+        "executed-obligation-extractor",
+        "regulatory-change-mapper"
+      ],
+      "file_count": 13,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/contract-playbook-redliner.md",
+        "references/workflows/executed-obligation-extractor.md",
+        "references/workflows/regulatory-change-mapper.md",
+        "scripts/clause_risk_matrix.py",
+        "scripts/control_gap_mapper.py",
+        "scripts/obligation_calendar_builder.py"
+      ]
+    },
+    {
+      "id": "marketplace-superapp-ops",
+      "name": "Marketplace, Ride-Hailing & SuperApp Ops",
+      "category": "vertical",
+      "path": "bundles/marketplace-superapp-ops.zip",
+      "size_bytes": 25389,
+      "sha256": "55607a3220f5de86125905281f1ff669be65d906949e6f32cf2a42e9c207a6f8",
+      "skill_ids": [
+        "merchant-catalog-trust-gate",
+        "logistics-sla-dispute-resolver",
+        "commission-payout-reconciler"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/commission-payout-reconciler.md",
+        "references/workflows/logistics-sla-dispute-resolver.md",
+        "references/workflows/merchant-catalog-trust-gate.md",
+        "scripts/catalog_quality_scorer.py",
+        "scripts/payout_ledger_reconciler.py",
+        "scripts/zone_sla_dispute_analyzer.py"
+      ]
+    },
+    {
+      "id": "people-ops-talent-hub",
+      "name": "People Ops, Talent Calibration & Workforce Analytics",
+      "category": "horizontal",
+      "path": "bundles/people-ops-talent-hub.zip",
+      "size_bytes": 26252,
+      "sha256": "3d925fcaeff45ca7cb4b3cafe263d27fe8423a94b5c0f9dd0cf29ff0b485f93c",
+      "skill_ids": [
+        "structured-hiring-rubric",
+        "employee-onboarding-navigator",
+        "workforce-attrition-comp-audit"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/hr-hiring-comp-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/traps/workday-hris-traps.md",
+        "references/workflows/employee-onboarding-navigator.md",
+        "references/workflows/structured-hiring-rubric.md",
+        "references/workflows/workforce-attrition-comp-audit.md",
+        "scripts/comp_band_analyzer.py",
+        "scripts/onboarding_plan_builder.py",
+        "scripts/rubric_calibration_checker.py"
+      ]
+    },
+    {
+      "id": "public-sector-higher-ed",
+      "name": "Public Sector Casework, Grants & Higher-Ed Ops",
+      "category": "vertical",
+      "path": "bundles/public-sector-higher-ed.zip",
+      "size_bytes": 26198,
+      "sha256": "63a8aa6b02eae55666e1a9208a36befb4965033ae0dea196fe30e0551a08966a",
+      "skill_ids": [
+        "citizen-case-eligibility-triager",
+        "procurement-tender-evaluator",
+        "grant-accreditation-evidence-pack"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/citizen-case-eligibility-triager.md",
+        "references/workflows/grant-accreditation-evidence-pack.md",
+        "references/workflows/procurement-tender-evaluator.md",
+        "scripts/grant_accreditation_validator.py",
+        "scripts/statutory_eligibility_engine.py",
+        "scripts/tender_weighted_scorer.py"
+      ]
+    },
+    {
+      "id": "retail-store-merchandising",
+      "name": "Retail & CPG Store Ops + Merchandising",
+      "category": "vertical",
+      "path": "bundles/retail-store-merchandising.zip",
+      "size_bytes": 25727,
+      "sha256": "efa4e4ebb796ce46c2f8408d5d1feec91101dbde7a60dcb37ad487ba3afc6d4f",
+      "skill_ids": [
+        "store-ops-shrink-copilot",
+        "merchandising-assortment-planner",
+        "supplier-otif-chargeback-auditor"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/workflows/merchandising-assortment-planner.md",
+        "references/workflows/store-ops-shrink-copilot.md",
+        "references/workflows/supplier-otif-chargeback-auditor.md",
+        "scripts/otif_detention_calculator.py",
+        "scripts/promo_lift_analyzer.py",
+        "scripts/store_shrink_task_ranker.py"
+      ]
+    },
+    {
+      "id": "sdlc-modernization-sre",
+      "name": "SDLC Modernization, Security PR & SRE Ops",
+      "category": "horizontal",
+      "path": "bundles/sdlc-modernization-sre.zip",
+      "size_bytes": 22488,
+      "sha256": "0701ed940ee09840fe2659d79a6d8047c7a4be08d12f470bfe95f8546eff1c4e",
+      "skill_ids": [
+        "legacy-code-to-prd",
+        "sre-incident-postmortem",
+        "security-pr-readiness-gate"
+      ],
+      "file_count": 12,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/legacy-code-to-prd.md",
+        "references/workflows/security-pr-readiness-gate.md",
+        "references/workflows/sre-incident-postmortem.md",
+        "scripts/diff_risk_inspector.py",
+        "scripts/slo_timeline_calculator.py",
+        "scripts/spec_traceability_matrix.py"
+      ]
+    },
+    {
+      "id": "telco-noc-field-dispatch",
+      "name": "Telecom NOC & Field Network Dispatch",
+      "category": "vertical",
+      "path": "bundles/telco-noc-field-dispatch.zip",
+      "size_bytes": 25665,
+      "sha256": "d9fe763eae468e58325b41ec7227e7986ff90ac501263db129432f793287105c",
+      "skill_ids": [
+        "noc-outage-topology-correlator",
+        "field-dispatch-spares-prep",
+        "b2b-order-fallout-resolver"
+      ],
+      "file_count": 14,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/workflows/b2b-order-fallout-resolver.md",
+        "references/workflows/field-dispatch-spares-prep.md",
+        "references/workflows/noc-outage-topology-correlator.md",
+        "scripts/alarm_topology_correlator.py",
+        "scripts/dispatch_readiness_matcher.py",
+        "scripts/order_fallout_classifier.py"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "brand-voice-compliance-gate",
+      "plugin_id": "brand-campaign-studio",
+      "path": "skills/brand-voice-compliance-gate.zip",
+      "size_bytes": 13084,
+      "sha256": "b0c28aaddfaf6b980ff8e7982721b48443f4e9554cb8b3ffd273a53e427c9560",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/copy_compliance_linter.py"
+      ]
+    },
+    {
+      "id": "multimodal-campaign-brief",
+      "plugin_id": "brand-campaign-studio",
+      "path": "skills/multimodal-campaign-brief.zip",
+      "size_bytes": 12944,
+      "sha256": "dbad14768ad2c6d6966856dee4d747afcf856e1c1efd587a7e5a183c26c07592",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/campaign_asset_matrix.py"
+      ]
+    },
+    {
+      "id": "market-localization-adapter",
+      "plugin_id": "brand-campaign-studio",
+      "path": "skills/market-localization-adapter.zip",
+      "size_bytes": 12538,
+      "sha256": "5b40b802207d5ec704d9668c7a114d2f853d77338224ea1cc1e0380286557574",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/locale_glossary_checker.py"
+      ]
+    },
+    {
+      "id": "schema-grounded-sql-analyst",
+      "plugin_id": "conversational-bi-analyst",
+      "path": "skills/schema-grounded-sql-analyst.zip",
+      "size_bytes": 13545,
+      "sha256": "762198c3da43cb10b9a8221b0d81f62ba580281a02588acdd1d3d9a42571adab",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "scripts/sql_safety_and_fanout_checker.py"
+      ]
+    },
+    {
+      "id": "kpi-anomaly-driver-tree",
+      "plugin_id": "conversational-bi-analyst",
+      "path": "skills/kpi-anomaly-driver-tree.zip",
+      "size_bytes": 13336,
+      "sha256": "e4af25d6d2f198e054858876c97f5bf0e366b178671ae513ced0aae17f60082e",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "scripts/mix_rate_volume_bridge.py"
+      ]
+    },
+    {
+      "id": "executive-data-story-pack",
+      "plugin_id": "conversational-bi-analyst",
+      "path": "skills/executive-data-story-pack.zip",
+      "size_bytes": 13642,
+      "sha256": "7ad41962236c3ec94a3155310d3b4a705490cfec6773a709c5c3ad5440d1e470",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "scripts/dataset_profiler_guard.py"
+      ]
+    },
+    {
+      "id": "critical-escalation-warroom",
+      "plugin_id": "customer-operations-escalation",
+      "path": "skills/critical-escalation-warroom.zip",
+      "size_bytes": 12618,
+      "sha256": "81817f7c76925b23c300ec19dd43dd7df7d4b44dc451a3e05a0a81e34343ecdc",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/escalation_exposure_scorer.py"
+      ]
+    },
+    {
+      "id": "csat-churn-signal-miner",
+      "plugin_id": "customer-operations-escalation",
+      "path": "skills/csat-churn-signal-miner.zip",
+      "size_bytes": 13023,
+      "sha256": "511412ae8d8430c510b1a16812e9bea394f737b358d0707259a162b5161defe1",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/verbatim_driver_quantifier.py"
+      ]
+    },
+    {
+      "id": "troubleshooting-tree-author",
+      "plugin_id": "customer-operations-escalation",
+      "path": "skills/troubleshooting-tree-author.zip",
+      "size_bytes": 12655,
+      "sha256": "1a961ef456f6206882981fc6990af43afd387eb14027c79d9b856a725a630b38",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/decision_tree_validator.py"
+      ]
+    },
+    {
+      "id": "rfp-questionnaire-responder",
+      "plugin_id": "deal-desk-rfp-engine",
+      "path": "skills/rfp-questionnaire-responder.zip",
+      "size_bytes": 15282,
+      "sha256": "429ed9539ab4685858f53200cd577b469ab08a2c97c80ce24a00f742af5f97cb",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/rfp_matrix_builder.py"
+      ]
+    },
+    {
+      "id": "deal-desk-quote-guard",
+      "plugin_id": "deal-desk-rfp-engine",
+      "path": "skills/deal-desk-quote-guard.zip",
+      "size_bytes": 14836,
+      "sha256": "3fcdaa237f539dc14bb545718d3e11da5016ed9777aa7c1111d0f6fe8e7e467e",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/deal_margin_validator.py"
+      ]
+    },
+    {
+      "id": "pipeline-hygiene-slippage",
+      "plugin_id": "deal-desk-rfp-engine",
+      "path": "skills/pipeline-hygiene-slippage.zip",
+      "size_bytes": 15456,
+      "sha256": "cc852926051044085fa1b227ea529091f055c1e8193bfe49de9aa2a48f6f4b00",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/pipeline_slippage_auditor.py"
+      ]
+    },
+    {
+      "id": "cross-source-knowledge-synthesis",
+      "plugin_id": "enterprise-knowledge-hub",
+      "path": "skills/cross-source-knowledge-synthesis.zip",
+      "size_bytes": 16433,
+      "sha256": "a01de40af03b306652c52bed1307f42392e523576c729509f7b41ed9d0046951",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/citation_conflict_auditor.py"
+      ]
+    },
+    {
+      "id": "policy-sop-answering",
+      "plugin_id": "enterprise-knowledge-hub",
+      "path": "skills/policy-sop-answering.zip",
+      "size_bytes": 15226,
+      "sha256": "d00d077e207acfcb630c9f0e8ae108961ae4ad8d4c5b0bb9d8c82f275e2e8877",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/policy_scope_matcher.py"
+      ]
+    },
+    {
+      "id": "knowledge-gap-freshness-audit",
+      "plugin_id": "enterprise-knowledge-hub",
+      "path": "skills/knowledge-gap-freshness-audit.zip",
+      "size_bytes": 15034,
+      "sha256": "40a7893e90d2dec9c5d812ee3595d9422819db55bcba695a1bf9980830bb5232",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/corpus_hygiene_scanner.py"
+      ]
+    },
+    {
+      "id": "gr-ir-clearing-orchestrator",
+      "plugin_id": "erp-procure-to-pay",
+      "path": "skills/gr-ir-clearing-orchestrator.zip",
+      "size_bytes": 14021,
+      "sha256": "ad80b4896a3d455bcfaf87da471421789c36591aedf9a96b60954a4e4f387f45",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/gr_ir_reconciler.py"
+      ]
+    },
+    {
+      "id": "supplier-rfx-tariff-modeler",
+      "plugin_id": "erp-procure-to-pay",
+      "path": "skills/supplier-rfx-tariff-modeler.zip",
+      "size_bytes": 13261,
+      "sha256": "d7c1a0aa6e6eb0363fb97cffd1c116e92288ee2f454058912dd9bf0607b1bdda",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/landed_cost_simulator.py"
+      ]
+    },
+    {
+      "id": "bom-cost-rollup-variance",
+      "plugin_id": "erp-procure-to-pay",
+      "path": "skills/bom-cost-rollup-variance.zip",
+      "size_bytes": 13322,
+      "sha256": "c501357983d2a971e44764c498e6f39abe95b1709edd5b6ffb8df4cb3347f58a",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/bom_ppv_rollup.py"
+      ]
+    },
+    {
+      "id": "daily-executive-briefing",
+      "plugin_id": "executive-briefing-ops",
+      "path": "skills/daily-executive-briefing.zip",
+      "size_bytes": 14871,
+      "sha256": "ba694c41bdbf847e4e97ef66f4b174f18737935940751a83cc8b8831c9749f29",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/agenda_commitment_tracker.py"
+      ]
+    },
+    {
+      "id": "meeting-to-execution-pack",
+      "plugin_id": "executive-briefing-ops",
+      "path": "skills/meeting-to-execution-pack.zip",
+      "size_bytes": 14633,
+      "sha256": "c815689fd310ecaffef3748f1f5be1f4b1d6ca77b38915ebae1657eb003494f1",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/transcript_action_extractor.py"
+      ]
+    },
+    {
+      "id": "stakeholder-account-prep",
+      "plugin_id": "executive-briefing-ops",
+      "path": "skills/stakeholder-account-prep.zip",
+      "size_bytes": 14324,
+      "sha256": "691820c4629d4675cce4c9e2cebed5681dffc3f2fad5af5bcda8b222eea61383",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/salesforce-crm-soql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/dossier_synthesizer.py"
+      ]
+    },
+    {
+      "id": "ap-three-way-match",
+      "plugin_id": "finance-variance-recon",
+      "path": "skills/ap-three-way-match.zip",
+      "size_bytes": 16975,
+      "sha256": "f61e3308dc6f7e1fe0882fe69dafec4e81e3c32783ebb1942b645e0be9f99813",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/reconcile_3way.py"
+      ]
+    },
+    {
+      "id": "pnl-budget-variance-bridge",
+      "plugin_id": "finance-variance-recon",
+      "path": "skills/pnl-budget-variance-bridge.zip",
+      "size_bytes": 15304,
+      "sha256": "fda27f43703ca9289efcee74f505260616061b4bd281a743ce6b233fcd0a4de7",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/pnl_variance_engine.py"
+      ]
+    },
+    {
+      "id": "ar-aging-collections-audit",
+      "plugin_id": "finance-variance-recon",
+      "path": "skills/ar-aging-collections-audit.zip",
+      "size_bytes": 15252,
+      "sha256": "17b83a4fcfd08960bf85ca1223a6ca4cbe993791805ac7168754525f115ec722",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/aging_bucket_auditor.py"
+      ]
+    },
+    {
+      "id": "commercial-credit-memo-analyst",
+      "plugin_id": "fsi-credit-kyc-claims",
+      "path": "skills/commercial-credit-memo-analyst.zip",
+      "size_bytes": 13433,
+      "sha256": "9930e6c2f99aca9457ddce3707aee8094cd646daf32f4d7249eb171638aa5175",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/fsi-credit-kyc-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/credit_covenant_stress.py"
+      ]
+    },
+    {
+      "id": "kyc-aml-screening-dossier",
+      "plugin_id": "fsi-credit-kyc-claims",
+      "path": "skills/kyc-aml-screening-dossier.zip",
+      "size_bytes": 13601,
+      "sha256": "b562b4fd381ec9f303c96e2facc6715c0aa782980a57a694ed67861a2ec7fc2e",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/fsi-credit-kyc-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/ubo_velocity_screener.py"
+      ]
+    },
+    {
+      "id": "insurance-claims-triage-pack",
+      "plugin_id": "fsi-credit-kyc-claims",
+      "path": "skills/insurance-claims-triage-pack.zip",
+      "size_bytes": 13150,
+      "sha256": "9174b65b8b84d4d53e4dcaa5ba76ffdcf63cde5231970feb9c7bf1cad41d1f07",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/fsi-credit-kyc-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/coverage_limit_evaluator.py"
+      ]
+    },
+    {
+      "id": "winning-proposal-architect",
+      "plugin_id": "gsi-proposal-ip-factory",
+      "path": "skills/winning-proposal-architect.zip",
+      "size_bytes": 15293,
+      "sha256": "2c0953f437285e37a25e7a86ad470c34f5d1b8254bb78f14f6e6b15d00f3e78a",
+      "file_count": 10,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/staffing_pyramid_calculator.py"
+      ]
+    },
+    {
+      "id": "sow-scope-margin-auditor",
+      "plugin_id": "gsi-proposal-ip-factory",
+      "path": "skills/sow-scope-margin-auditor.zip",
+      "size_bytes": 15434,
+      "sha256": "5e9a7c71234e4e0daeebbe7f22d50744cb0941a3ac95b1731a83ac30574ca59f",
+      "file_count": 10,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/sow_margin_linter.py"
+      ]
+    },
+    {
+      "id": "bench-skill-demand-matcher",
+      "plugin_id": "gsi-proposal-ip-factory",
+      "path": "skills/bench-skill-demand-matcher.zip",
+      "size_bytes": 15436,
+      "sha256": "70c7e9005c59d115d8a4883a25aa0ae663877afb15af2ca0fdee1c497e886b0b",
+      "file_count": 10,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/deal-desk-approval-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/talent_bench_matcher.py"
+      ]
+    },
+    {
+      "id": "clinical-protocol-feasibility",
+      "plugin_id": "healthcare-clinical-regulatory",
+      "path": "skills/clinical-protocol-feasibility.zip",
+      "size_bytes": 11822,
+      "sha256": "724735ae757df38d876fe6473d3d2e7edde3d38a89a7c0d84da8dea24d6d4972",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/soa_endpoint_validator.py"
+      ]
+    },
+    {
+      "id": "pharmacovigilance-safety-intake",
+      "plugin_id": "healthcare-clinical-regulatory",
+      "path": "skills/pharmacovigilance-safety-intake.zip",
+      "size_bytes": 12108,
+      "sha256": "16c22f7d6d4bbde7af9f0f62e67d91633daecdf927b0cf77b897c6e8cf495a03",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/icsr_completeness_checker.py"
+      ]
+    },
+    {
+      "id": "prior-auth-medical-necessity",
+      "plugin_id": "healthcare-clinical-regulatory",
+      "path": "skills/prior-auth-medical-necessity.zip",
+      "size_bytes": 11736,
+      "sha256": "116081684e2d182a8782ac7b0780789a1ae61301718a0167b020a80a934297df",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/medical_criteria_matcher.py"
+      ]
+    },
+    {
+      "id": "asset-reliability-spares-planner",
+      "plugin_id": "industrial-shopfloor-maintenance",
+      "path": "skills/asset-reliability-spares-planner.zip",
+      "size_bytes": 14288,
+      "sha256": "e491364b75708e17688baf1c66801ad30f0dd2bb06138804d61d739ebb139be3",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "scripts/mtbf_spares_optimizer.py"
+      ]
+    },
+    {
+      "id": "quality-capex-rca-copilot",
+      "plugin_id": "industrial-shopfloor-maintenance",
+      "path": "skills/quality-capex-rca-copilot.zip",
+      "size_bytes": 14266,
+      "sha256": "557d2c8e5d2718e8bc230fdcf2ea4ee2cc1681b841ebec8f86658e72fe25717b",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "scripts/defect_pareto_correlator.py"
+      ]
+    },
+    {
+      "id": "ehs-safety-permit-auditor",
+      "plugin_id": "industrial-shopfloor-maintenance",
+      "path": "skills/ehs-safety-permit-auditor.zip",
+      "size_bytes": 14411,
+      "sha256": "c5c1f7b326132b00dab3b5106a939b1fdeb1b90fe68e55b694f9879d730d0d12",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "scripts/hse_permit_checker.py"
+      ]
+    },
+    {
+      "id": "incident-triage-routing",
+      "plugin_id": "itsm-command-center",
+      "path": "skills/incident-triage-routing.zip",
+      "size_bytes": 12417,
+      "sha256": "01e19d4b115c996dc06603a1a800da5916a53d6f70b87bd8fae57f0060ff2c53",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/sla_cluster_triage.py"
+      ]
+    },
+    {
+      "id": "change-risk-cab-review",
+      "plugin_id": "itsm-command-center",
+      "path": "skills/change-risk-cab-review.zip",
+      "size_bytes": 11647,
+      "sha256": "dd98ac391542cd9e5aaaa68276eca67cfe0ad8ae06bd895ab2590d844a3eb696",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/cab_risk_scorer.py"
+      ]
+    },
+    {
+      "id": "problem-rca-kb-generator",
+      "plugin_id": "itsm-command-center",
+      "path": "skills/problem-rca-kb-generator.zip",
+      "size_bytes": 11659,
+      "sha256": "706e0cf97a56cb757889efc3bd2be1384d8333c5114db5c02a249baf0a9f66d8",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/kcs_deflection_analyzer.py"
+      ]
+    },
+    {
+      "id": "contract-playbook-redliner",
+      "plugin_id": "legal-contract-desk",
+      "path": "skills/contract-playbook-redliner.zip",
+      "size_bytes": 15502,
+      "sha256": "d233f831dde5ee758a31fe677eb847aa88d4b7334fcf834cf3a779e6d5fdee12",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/clause_risk_matrix.py"
+      ]
+    },
+    {
+      "id": "executed-obligation-extractor",
+      "plugin_id": "legal-contract-desk",
+      "path": "skills/executed-obligation-extractor.zip",
+      "size_bytes": 13883,
+      "sha256": "3596d4af239c23c21e5b756438b307a58e2bd690c7ba6da17e08428f3e716b99",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/obligation_calendar_builder.py"
+      ]
+    },
+    {
+      "id": "regulatory-change-mapper",
+      "plugin_id": "legal-contract-desk",
+      "path": "skills/regulatory-change-mapper.zip",
+      "size_bytes": 13559,
+      "sha256": "25763f04644dfd946b4d61b33e67b08b852d86bd25d1b46fef9c6023498ecbad",
+      "file_count": 8,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/control_gap_mapper.py"
+      ]
+    },
+    {
+      "id": "merchant-catalog-trust-gate",
+      "plugin_id": "marketplace-superapp-ops",
+      "path": "skills/merchant-catalog-trust-gate.zip",
+      "size_bytes": 15266,
+      "sha256": "2a2dc801dee6f063edd26f6697c7335b003a028b93133c7415b29926944a7dd0",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/catalog_quality_scorer.py"
+      ]
+    },
+    {
+      "id": "logistics-sla-dispute-resolver",
+      "plugin_id": "marketplace-superapp-ops",
+      "path": "skills/logistics-sla-dispute-resolver.zip",
+      "size_bytes": 14755,
+      "sha256": "1a7376b3e339c608d9b1353bd9f28d7f9ad909a3ae7d4cfe7bf5b7574bcfb5d7",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/zone_sla_dispute_analyzer.py"
+      ]
+    },
+    {
+      "id": "commission-payout-reconciler",
+      "plugin_id": "marketplace-superapp-ops",
+      "path": "skills/commission-payout-reconciler.zip",
+      "size_bytes": 14424,
+      "sha256": "a167c3b9ce2c4d86c08325d41bbf21e4a839696147a01bc4a036da2463e50667",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/payout_ledger_reconciler.py"
+      ]
+    },
+    {
+      "id": "structured-hiring-rubric",
+      "plugin_id": "people-ops-talent-hub",
+      "path": "skills/structured-hiring-rubric.zip",
+      "size_bytes": 14592,
+      "sha256": "70c4d425d98d039859cb8e0539a063172638104f87c21e8c1d58c96f419d4428",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/hr-hiring-comp-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/rubric_calibration_checker.py"
+      ]
+    },
+    {
+      "id": "employee-onboarding-navigator",
+      "plugin_id": "people-ops-talent-hub",
+      "path": "skills/employee-onboarding-navigator.zip",
+      "size_bytes": 14557,
+      "sha256": "e711df5438de1c97e190eddffe37973b290e147aac75d18a2dee6cf12de31b0a",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/hr-hiring-comp-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/onboarding_plan_builder.py"
+      ]
+    },
+    {
+      "id": "workforce-attrition-comp-audit",
+      "plugin_id": "people-ops-talent-hub",
+      "path": "skills/workforce-attrition-comp-audit.zip",
+      "size_bytes": 15208,
+      "sha256": "0dc16ae335bc4ec2e5f14cbd6daa136d3aabbd2264725115f0f95104342921e8",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/hr-hiring-comp-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "references/traps/workday-hris-traps.md",
+        "scripts/comp_band_analyzer.py"
+      ]
+    },
+    {
+      "id": "citizen-case-eligibility-triager",
+      "plugin_id": "public-sector-higher-ed",
+      "path": "skills/citizen-case-eligibility-triager.zip",
+      "size_bytes": 14865,
+      "sha256": "162de113a38b4c811c1c6408c19a63644dac5caacd8f206cabd916cd4ee76080",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/statutory_eligibility_engine.py"
+      ]
+    },
+    {
+      "id": "procurement-tender-evaluator",
+      "plugin_id": "public-sector-higher-ed",
+      "path": "skills/procurement-tender-evaluator.zip",
+      "size_bytes": 14820,
+      "sha256": "d997746b8a2999cac287ff0812008e2976fc0ac3907ea36d235e66cdff5f96c1",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/tender_weighted_scorer.py"
+      ]
+    },
+    {
+      "id": "grant-accreditation-evidence-pack",
+      "plugin_id": "public-sector-higher-ed",
+      "path": "skills/grant-accreditation-evidence-pack.zip",
+      "size_bytes": 15279,
+      "sha256": "01928ec397c60c27670de301994d2d9147e98dfb0d40e712e6947743d82fce31",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/commercial-contract-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/google-workspace-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/grant_accreditation_validator.py"
+      ]
+    },
+    {
+      "id": "store-ops-shrink-copilot",
+      "plugin_id": "retail-store-merchandising",
+      "path": "skills/store-ops-shrink-copilot.zip",
+      "size_bytes": 14888,
+      "sha256": "55c271cb5e08f52edf3c41cee4f8a31de03e54372c912705ccf0f750e36944c0",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/store_shrink_task_ranker.py"
+      ]
+    },
+    {
+      "id": "merchandising-assortment-planner",
+      "plugin_id": "retail-store-merchandising",
+      "path": "skills/merchandising-assortment-planner.zip",
+      "size_bytes": 14252,
+      "sha256": "5c6e42b9d839ff77419331af807213d562a9925ffc16bdb40fac8b9af20ccd59",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/promo_lift_analyzer.py"
+      ]
+    },
+    {
+      "id": "supplier-otif-chargeback-auditor",
+      "plugin_id": "retail-store-merchandising",
+      "path": "skills/supplier-otif-chargeback-auditor.zip",
+      "size_bytes": 14800,
+      "sha256": "919127173a65ed023926ddcafb25cdd2a3b77dbc30fd54f43cd26a65e82ed261",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/chain-denominator-seams.md",
+        "references/traps/sharepoint-onedrive-kql-traps.md",
+        "scripts/otif_detention_calculator.py"
+      ]
+    },
+    {
+      "id": "legacy-code-to-prd",
+      "plugin_id": "sdlc-modernization-sre",
+      "path": "skills/legacy-code-to-prd.zip",
+      "size_bytes": 11629,
+      "sha256": "e86a24de32c0fba72a01ec755ed611793fc0d2f4544f055381c9ba4afcf31e77",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/spec_traceability_matrix.py"
+      ]
+    },
+    {
+      "id": "sre-incident-postmortem",
+      "plugin_id": "sdlc-modernization-sre",
+      "path": "skills/sre-incident-postmortem.zip",
+      "size_bytes": 11421,
+      "sha256": "748e73a1c497e3ca5fc89493080dfbccfcbd1b5e05482be275e73eecd6e61c8e",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/slo_timeline_calculator.py"
+      ]
+    },
+    {
+      "id": "security-pr-readiness-gate",
+      "plugin_id": "sdlc-modernization-sre",
+      "path": "skills/security-pr-readiness-gate.zip",
+      "size_bytes": 11600,
+      "sha256": "40766f03cec46cd5f90bf1d3791d5440f51a1a1dc463d534639b5974e3db4e12",
+      "file_count": 7,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/diff_risk_inspector.py"
+      ]
+    },
+    {
+      "id": "noc-outage-topology-correlator",
+      "plugin_id": "telco-noc-field-dispatch",
+      "path": "skills/noc-outage-topology-correlator.zip",
+      "size_bytes": 15205,
+      "sha256": "d7bf2075870b85e9baea5cd9795f3c0e08d54ae7d7c40891a560260ea7ce2c7c",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/alarm_topology_correlator.py"
+      ]
+    },
+    {
+      "id": "field-dispatch-spares-prep",
+      "plugin_id": "telco-noc-field-dispatch",
+      "path": "skills/field-dispatch-spares-prep.zip",
+      "size_bytes": 14552,
+      "sha256": "b51a4b99794fdbdbe9b86af9944442a179074e3995e1a732712d480fd34cee47",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/dispatch_readiness_matcher.py"
+      ]
+    },
+    {
+      "id": "b2b-order-fallout-resolver",
+      "plugin_id": "telco-noc-field-dispatch",
+      "path": "skills/b2b-order-fallout-resolver.zip",
+      "size_bytes": 14668,
+      "sha256": "9e2ba0e21c8f9493217399a9bb9ca4a196487494a2c8716900d3ec619da323d4",
+      "file_count": 9,
+      "included_files": [
+        "SKILL.md",
+        "references/baselines/finance-materiality-baseline.md",
+        "references/baselines/itsm-sla-severity-baseline.md",
+        "references/config.json",
+        "references/traps/absent-is-not-zero.md",
+        "references/traps/bigquery-sap-erp-traps.md",
+        "references/traps/servicenow-jira-itsm-traps.md",
+        "references/traps/untrusted-content-and-pii.md",
+        "scripts/order_fallout_classifier.py"
+      ]
+    }
+  ]
+}

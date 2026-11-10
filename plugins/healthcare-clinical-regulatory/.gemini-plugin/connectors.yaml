@@ -1,0 +1,29 @@
+version: '1.0'
+plugin_id: healthcare-clinical-regulatory
+capabilities:
+- id: clinical_ctms_and_safety_db
+  description: CTMS trial Schedules of Assessments, site feasibility metrics, safety
+    ICSR intake forms, and payer medical policies.
+  required: true
+  mode_a_live_connectors:
+  - connector: ctms_fhir_api
+    endpoint_template: https://api.ctms.example.com/fhir/r4/ResearchStudy/{study_id}
+    auth_type: mtls_oauth2
+    scopes:
+    - study.read
+    - patient.read.deidentified
+  - connector: bigquery_sql_api
+    endpoint_template: https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/queries
+    auth_type: workload_identity
+    scopes:
+    - https://www.googleapis.com/auth/bigquery.readonly
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read De-Identified SoA Feasibility Sheets, PV Intake Logs, and Medical
+      Policy Playbooks in Clinical Ops Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

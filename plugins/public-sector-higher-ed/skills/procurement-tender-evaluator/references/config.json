@@ -1,0 +1,12 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "base_fpl_single_usd": 15060.0,
+  "eligibility_fpl_multiplier": 2.0,
+  "statutory_cure_window_days": 15,
+  "technical_weight_pct": 50.0,
+  "sustainability_weight_pct": 15.0,
+  "commercial_weight_pct": 35.0,
+  "max_indirect_fa_rate_pct": 52.0,
+  "max_evidence_age_days": 365
+}

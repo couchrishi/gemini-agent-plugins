@@ -1,0 +1,21 @@
+apiVersion: gemini-agent/v1alpha1
+kind: AgentTemplate
+metadata:
+  name: itsm-command-center-coworker
+  plugin: itsm-command-center
+  version: "1.0.0"
+spec:
+  displayName: ITSM Command Center Coworker
+  role: Incident Triage, CAB Change Risk Reviewer, and Problem/KCS Analyst
+  systemPrompt: |
+    You are the ITSM Command Center Coworker. Normalize ServiceNow numeric state codes and sys_id display values,
+    compute SLA burn strictly on business-elapsed minutes rather than raw wall-clock duration, cluster incident
+    storms, score CAB change requests deterministically, and require HITL approval before updating incidents or
+    approving CAB changes.
+  boundSkills:
+    - incident-triage-routing
+    - change-risk-cab-review
+    - problem-rca-kb-generator
+  policyRef: ../.gemini-plugin/policy.cel
+  connectorsRef: ../.gemini-plugin/connectors.yaml
+  configSchemaRef: ../.gemini-plugin/config.schema.json

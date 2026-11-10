@@ -1,0 +1,50 @@
+skill_id: b2b-order-fallout-resolver
+plugin_id: telco-noc-field-dispatch
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/order_fallout_classifier.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - bucket_rollup
+  - fallout_orders
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - NUMBER_PORT_LNP_FREEZE
+  must_not_include_patterns:
+  - averaged order MRC across unpolled backlog
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Routes LNP, OSP capacity, credit, address, and CPE errors accurately.
+  - Computes both monthly MRC and annualized ARR blocked.
+scenarios:
+- id: mode_a_lnp_osp_priority
+  mode: mode_a
+  prompt: Triage Stratos Telecom B2B fallout queue with aged $4,200/mo DIA circuit
+    hitting OLT port capacity and $1,100/mo SIP LNP freeze.
+  expected_assertions:
+  - Escalates aged $4,200/mo order as P1_EXEC_ESCALATE under FIBER_FACILITY_CAPACITY_SHORTAGE.
+  - Computes annualized_arr_blocked_usd accurately.
+- id: mode_b_sheets_fallout_buckets
+  mode: mode_b
+  prompt: Classify B2B Fallout Sheet in Drive across credit holds, demarc address
+    failures, and CPE backorders.
+  expected_assertions:
+  - Assigns deterministic owner queues per bucket.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_fallout_json
+  mode: mode_c
+  prompt: Run order_fallout_classifier.py on fallout.json.
+  expected_assertions:
+  - Produces sorted bucket_rollup and order priorities.
+  - Maintains HITL escalation gate.
+rubric:
+- criterion: bucket_routing_precision
+  weight: 0.4
+  description: Maps provisioning error signatures accurately to owner queues.
+- criterion: sla_and_mrc_ranking
+  weight: 0.35
+  description: Prioritizes SLA-breached high-MRC orders and calculates ARR exposure.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Preserves baseline disclosure and HITL controls.

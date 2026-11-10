@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conversational BI Analyst Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once warehouse cost ceilings, z-score thresholds, and materiality tolerances are bound."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant organization name."
+    },
+    "default_currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Default analytical reporting currency."
+    },
+    "zscore_anomaly_threshold": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 5.0,
+      "default": 2.0,
+      "description": "Absolute z-score threshold flagging KPI segment anomalies."
+    },
+    "materiality_amount_threshold": {
+      "type": "number",
+      "minimum": 100.0,
+      "maximum": 10000000.0,
+      "default": 25000.0,
+      "description": "Absolute variance materiality threshold in reporting currency."
+    },
+    "max_query_scan_gb": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 100000.0,
+      "default": 500.0,
+      "description": "Maximum dry-run BigQuery scan GB allowed before explicit confirmation."
+    },
+    "min_sample_size_guard": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 500,
+      "default": 30,
+      "description": "Minimum denominator sample size before emitting LOW_SAMPLE_SIZE caution."
+    },
+    "max_null_rate_warn_pct": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 80.0,
+      "default": 15.0,
+      "description": "Column null percentage triggering data-quality warning in dataset profiler."
+    }
+  }
+}

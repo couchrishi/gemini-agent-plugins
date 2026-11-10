@@ -1,0 +1,51 @@
+skill_id: sow-scope-margin-auditor
+plugin_id: gsi-proposal-ip-factory
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/sow_margin_linter.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - blockers
+  - warnings
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - sow_gate_status
+  must_not_include_patterns:
+  - cleared SOW with unbounded scope clause
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Flags missing deliverable acceptance_criteria rather than assuming covered.
+  - Catches unbounded scope creep phrasing deterministically.
+scenarios:
+- id: mode_a_scope_creep_blocker
+  mode: mode_a
+  prompt: Audit CivicFirst Agency SOW draft containing 'all work required at no additional
+    cost regardless' and 18% margin.
+  expected_assertions:
+  - Blocks SOW as BLOCKED_SCORE_9 with itemized clause/margin blockers.
+  - Flags missing client dependencies if omitted.
+- id: mode_b_docs_missing_acceptance
+  mode: mode_b
+  prompt: Check SOW Doc in Drive with a 20-day acceptance window and 2 deliverables
+    lacking criteria.
+  expected_assertions:
+  - Flags extended acceptance window and missing_acceptance_criteria_count=2.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_sow_clean
+  mode: mode_c
+  prompt: Run sow_margin_linter.py on sow.json.
+  expected_assertions:
+  - Separates Score-9 blockers vs Score-3 warnings clearly.
+  - Maintains HITL sign-off requirement.
+rubric:
+- criterion: scope_creep_detection
+  weight: 0.4
+  description: Catches unbounded obligations and subjective acceptance vetoes accurately.
+- criterion: deliverable_and_margin_checks
+  weight: 0.35
+  description: Validates criteria presence, acceptance SLA days, and gross margin
+    floor.
+- criterion: hitl_bid_governance
+  weight: 0.25
+  description: Enforces baseline disclosure and bid-desk approval gate.

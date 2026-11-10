@@ -1,0 +1,19 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: weekly-bench-utilization-digest
+  plugin: gsi-proposal-ip-factory
+spec:
+  cron_expression: 0 8 * * 1
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: bench-skill-demand-matcher
+  prompt: Run the weekly bench-to-demand skill matching check via scripts/talent_bench_matcher.py
+    and surface unfilled roles needing subcontractor sourcing.
+  goal_verifier:
+    command_check: python3 skills/bench-skill-demand-matcher/scripts/talent_bench_matcher.py
+      --help
+    nl_criteria:
+    - Matches respect min_skill_overlap_pct and max_start_delay_days.
+    - Unfillable demand seats report EXTERNAL_SUBCONTRACT_REQUIRED.
+    - Standard baseline stamp appears when org_configured is false.

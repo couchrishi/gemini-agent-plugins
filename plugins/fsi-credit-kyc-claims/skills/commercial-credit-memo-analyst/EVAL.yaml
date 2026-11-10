@@ -1,0 +1,49 @@
+skill_id: commercial-credit-memo-analyst
+plugin_id: fsi-credit-kyc-claims
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/credit_covenant_stress.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - credit_evaluations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - underwriting_recommendation
+  must_not_include_patterns:
+  - auto-approved loan breaching base DSCR covenant
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Applies both operating-leverage EBITDA contraction and floating-rate +200bps shocks.
+  - Distinguishes Watch vs Breach covenants deterministically.
+scenarios:
+- id: mode_a_rate_shock_breach
+  mode: mode_a
+  prompt: Stress-test Cymbal Financial's borrower spread with $12M EBITDA, $42M floating
+    debt, under -20% revenue and +200bps.
+  expected_assertions:
+  - Calculates exact Base vs Stress DSCR and Net Leverage.
+  - Flags CREDIT_COMMITTEE_CONDITIONS when stress case breaches DSCR < 1.10x.
+- id: mode_b_sheets_spread_baseline
+  mode: mode_b
+  prompt: Check Borrower Credit Spread Sheet in Drive with 4.5x Net Leverage and 1.05x
+    Base DSCR.
+  expected_assertions:
+  - Flags base_breach_count=1 and DECLINE_OR_RESTRUCTURE.
+  - Includes standard baseline stamp when org_configured is false.
+- id: mode_c_local_credit_memo
+  mode: mode_c
+  prompt: Run credit_covenant_stress.py on borrowers.json and verify HITL gate.
+  expected_assertions:
+  - Outputs Base, Mild, and Severe stress tables accurately.
+  - Keeps credit commit HITL-gated.
+rubric:
+- criterion: ratio_and_shock_precision
+  weight: 0.45
+  description: Computes DSCR, Leverage, Int Cov, and floating-rate shocks precisely.
+- criterion: covenant_tiering
+  weight: 0.3
+  description: Separates Compliant, Watch, and Breach across scenarios.
+- criterion: baseline_and_credit_hitl
+  weight: 0.25
+  description: Applies baseline banner and Credit Committee HITL gate.

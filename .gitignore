@@ -1,0 +1,27 @@
+# Python caches & environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.uv-cache/
+
+# OS & editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Temporary / scratch outputs (IMPORTANT: keep dist/ tracked so users can download ready-to-upload .zips directly from Git!)
+tmp/
+*.tmp

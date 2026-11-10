@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Marketplace, Ride-Hailing & SuperApp Ops Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Marketplace, Ride-Hailing & SuperApp Ops organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "min_images": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "default": 2,
+      "description": "Minimum product image count for catalog publish eligibility."
+    },
+    "low_price_ratio_threshold": {
+      "type": "number",
+      "minimum": 0.05,
+      "maximum": 0.9,
+      "default": 0.35,
+      "description": "Fraction of category median below which price triggers counterfeit review."
+    },
+    "high_price_multiplier_threshold": {
+      "type": "number",
+      "minimum": 1.5,
+      "maximum": 20.0,
+      "default": 4.0,
+      "description": "Multiplier above category median triggering gouging alert."
+    },
+    "sla_grace_minutes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 30,
+      "default": 5,
+      "description": "On-demand delivery promise grace window in minutes."
+    },
+    "high_value_payout_hitl_usd": {
+      "type": "number",
+      "minimum": 10.0,
+      "default": 50.0,
+      "description": "Customer SLA refund threshold requiring Trust/Ops HITL sign-off."
+    },
+    "default_commission_rate_pct": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 50.0,
+      "default": 15.0,
+      "description": "Standard marketplace take-rate percentage."
+    },
+    "settlement_variance_tolerance_usd": {
+      "type": "number",
+      "minimum": 0.01,
+      "default": 5.0,
+      "description": "Materiality tolerance between expected net payout and PSP wire."
+    }
+  }
+}

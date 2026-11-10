@@ -1,0 +1,49 @@
+skill_id: gr-ir-clearing-orchestrator
+plugin_id: erp-procure-to-pay
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/gr_ir_reconciler.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - clearing_lines
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - clearing_state
+  must_not_include_patterns:
+  - auto-cleared IR_WITHOUT_GR line
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Applies TCURX decimal scaling and SHKZG='H' credit reversal.
+  - Flags open imbalances older than 60 days as aging_breach=true.
+scenarios:
+- id: mode_a_sap_ekbe_grir
+  mode: mode_a
+  prompt: Reconcile Apex Manufacturing SAP EKBE GR/IR lines including JPY raw postings
+    and SHKZG='H' reversals.
+  expected_assertions:
+  - Normalizes JPY scaling and cancels SHKZG reversals accurately.
+  - Separates GR_WITHOUT_IR vs IR_WITHOUT_GR.
+- id: mode_b_sheets_aging_60d
+  mode: mode_b
+  prompt: Check our Drive GR/IR Aging Sheet as of 2026-11-10 for accruals open > 60
+    days.
+  expected_assertions:
+  - Flags aging_breach=true on lines > 60 days old.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_clearing_pack
+  mode: mode_c
+  prompt: Run gr_ir_reconciler.py on grir_postings.json and verify MR11 safety.
+  expected_assertions:
+  - Marks balanced lines BALANCED_CLEARED and keeps SAP postings HITL-gated.
+  - Computes total_abs_imbalance_usd cleanly.
+rubric:
+- criterion: sap_sign_and_decimal_rigor
+  weight: 0.4
+  description: Handles TCURX decimal shifts and SHKZG reversals accurately.
+- criterion: imbalance_state_classification
+  weight: 0.35
+  description: Distinguishes GR_WITHOUT_IR, IR_WITHOUT_GR, and aging breaches.
+- criterion: hitl_erp_clearing_safety
+  weight: 0.25
+  description: Preserves baseline disclosure and human MR11 sign-off.

@@ -1,0 +1,40 @@
+{
+  "id": "sdlc-modernization-sre",
+  "name": "SDLC Modernization, Security PR & SRE Ops",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "engineering", "sre", "github", "gitlab", "security"],
+  "description": "Reverse-engineers legacy codebases into PRD traceability matrices, computes exact SLO error-budget burn and TTD/TTM/TTR postmortem timelines, and gates PR diffs for secrets, removed authz checks, and unsafe DB migrations.",
+  "skills": [
+    {
+      "id": "legacy-code-to-prd",
+      "script": "scripts/spec_traceability_matrix.py",
+      "summary": "Parses legacy code inventories for entrypoints, DB read/write couplings, complexity hotspots, and requirement-to-test traceability coverage."
+    },
+    {
+      "id": "sre-incident-postmortem",
+      "script": "scripts/slo_timeline_calculator.py",
+      "summary": "Computes error-budget burn rates, TTD/TTM/TTR intervals, availability impact, and postmortem action-item SLA compliance."
+    },
+    {
+      "id": "security-pr-readiness-gate",
+      "script": "scripts/diff_risk_inspector.py",
+      "summary": "Scans unified PR diffs and dependency manifests for hardcoded secrets, removed authz checks, unsafe migrations, and breaking API changes."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "servicenow-jira-itsm-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/sdlc-modernization-sre-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-slo-burn-review.yaml"
+  ],
+  "license": "Apache-2.0"
+}

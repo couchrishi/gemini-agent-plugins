@@ -1,0 +1,49 @@
+skill_id: noc-outage-topology-correlator
+plugin_id: telco-noc-field-dispatch
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/alarm_topology_correlator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - root_incidents
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - symptom_alarms_suppressed
+  must_not_include_patterns:
+  - triggered truck rolls for downstream symptom alarms
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Suppresses downstream OLT/cell alarms when upstream metro aggregation node is
+    alarming.
+  - Computes full downstream subscriber and VIP circuit cone accurately.
+scenarios:
+- id: mode_a_metro_ring_cut
+  mode: mode_a
+  prompt: Correlate Stratos Telecom alarm flood with 1 metro agg router alarm feeding
+    18 alarming 5G gNodeBs serving 12,400 subscribers.
+  expected_assertions:
+  - Collapses 19 raw alarms into 1 P1_CRITICAL root incident with ~94.7% noise reduction.
+  - Rolls up impacted_subscribers and enterprise_vip_circuits cleanly.
+- id: mode_b_sheets_cycle_safe
+  mode: mode_b
+  prompt: Analyze Drive Topology & Alarm Export Sheet containing redundant ring links.
+  expected_assertions:
+  - Terminates cleanly without cycle recursion.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_noc_json
+  mode: mode_c
+  prompt: Run alarm_topology_correlator.py on noc_alarms.json.
+  expected_assertions:
+  - Groups suppressed_child_nodes under each root_node_id.
+  - Maintains NOC IC HITL incident gate.
+rubric:
+- criterion: graph_suppression_accuracy
+  weight: 0.45
+  description: Identifies root ancestors cleanly and breaks cycles deterministically.
+- criterion: subscriber_impact_rollup
+  weight: 0.3
+  description: Aggregates downstream subscribers and VIP circuits into P1/P2 severity.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Preserves baseline disclosure and NOC IC HITL sign-off.

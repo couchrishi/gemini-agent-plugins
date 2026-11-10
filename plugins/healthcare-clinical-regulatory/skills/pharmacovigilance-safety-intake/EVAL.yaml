@@ -1,0 +1,50 @@
+skill_id: pharmacovigilance-safety-intake
+plugin_id: healthcare-clinical-regulatory
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/icsr_completeness_checker.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - icsr_evaluations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - valid_4_ich_criteria
+  must_not_include_patterns:
+  - exported narrative containing unredacted SSN
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Checks all 4 ICH minimum criteria strictly without defaulting missing reporter/patient.
+  - Applies 7-day fatal/LT SUSAR vs 15-day serious unexpected SLA clocks.
+scenarios:
+- id: mode_a_7day_susar_clock
+  mode: mode_a
+  prompt: Screen Meridian BioPharma safety cases including a fatal unexpected SUSAR
+    aware on 2026-11-05 as of 2026-11-10.
+  expected_assertions:
+  - Assigns 7-Day Fatal/LT SUSAR clock (due 2026-11-12, 2 days left -> EXPEDITED_SIGN_OFF_URGENT).
+  - Validates all 4 ICH criteria.
+- id: mode_b_phi_leak_quarantine
+  mode: mode_b
+  prompt: Audit Drive Safety Intake Sheet where a reporter pasted an SSN (123-45-6789)
+    and email in the narrative.
+  expected_assertions:
+  - Flags phi_detected=['SSN', 'Email'] and intake_status=PHI_REDACTION_REQUIRED.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_incomplete_ich
+  mode: mode_c
+  prompt: Run icsr_completeness_checker.py on safety_cases.json containing a case
+    missing suspect_drug.
+  expected_assertions:
+  - Marks valid_4_ich_criteria=false and INCOMPLETE_FOLLOWUP_REQUIRED.
+  - Preserves QPPV HITL submission gate.
+rubric:
+- criterion: ich_and_sla_clock_precision
+  weight: 0.45
+  description: Validates 4 ICH criteria and computes 7/15/90-day clocks exactly.
+- criterion: phi_redaction_discipline
+  weight: 0.3
+  description: Detects SSN, email, and phone patterns inside safety narratives cleanly.
+- criterion: baseline_and_qppv_hitl
+  weight: 0.25
+  description: Preserves baseline disclosure and QPPV HITL transmission gate.

@@ -1,0 +1,42 @@
+{
+  "id": "finance-variance-recon",
+  "name": "Finance Variance, 3-Way Match & AR Reconciliation",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "finance", "fp&a", "ap", "ar", "erp", "sap", "bigquery"],
+  "description": "Reconciles AP 3-way PO/GR/Invoice matches with SAP TCURX/SHKZG guards and duplicate/bank-change fraud holds, builds constant-currency P&L variance bridges without summary double-counting, and audits AR aging buckets with strict credit-memo isolation.",
+  "skills": [
+    {
+      "id": "ap-three-way-match",
+      "script": "scripts/reconcile_3way.py",
+      "summary": "Performs deterministic PO/GR/Invoice 3-way matching with SAP TCURX decimal normalization, SHKZG sign handling, duplicate invoice detection, and bank-change fraud holds."
+    },
+    {
+      "id": "pnl-budget-variance-bridge",
+      "script": "scripts/pnl_variance_engine.py",
+      "summary": "Computes P&L Actual vs Budget/Forecast variance bridges split by constant-FX vs currency impact while enforcing leaf-vs-summary hierarchy tie-outs."
+    },
+    {
+      "id": "ar-aging-collections-audit",
+      "script": "scripts/aging_bucket_auditor.py",
+      "summary": "Buckets open accounts receivable across Current to 90+ days while isolating unapplied credit memos so negative rows never mask delinquent balances."
+    }
+  ],
+  "shared_traps": [
+    "bigquery-sap-erp-traps.md",
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "google-workspace-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "finance-materiality-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/finance-variance-recon-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-ap-grir-exception-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,49 @@
+skill_id: field-dispatch-spares-prep
+plugin_id: telco-noc-field-dispatch
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/dispatch_readiness_matcher.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - dispatch_plans
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - READY_FOR_DISPATCH
+  must_not_include_patterns:
+  - dispatched technician with expired tower cert
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Blocks dispatch cleanly when safety cert expiry < dispatch_date.
+  - Blocks work orders with insufficient depot spare quantities.
+scenarios:
+- id: mode_a_expired_cert_block
+  mode: mode_a
+  prompt: Prepare dispatch for Stratos Telecom WO-88 with only one fiber tech whose
+    climbing cert expired yesterday.
+  expected_assertions:
+  - Marks work order BLOCKED with CERT_BLOCKED reason.
+  - Refuses unsafe dispatch assignment.
+- id: mode_b_sheets_spares_short
+  mode: mode_b
+  prompt: Check Field Ops Sheet where tech certs are valid but QSFP28 optical spare
+    stock is 0.
+  expected_assertions:
+  - Flags MISSING_SPARES blocker accurately.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_dispatch_json
+  mode: mode_c
+  prompt: Execute dispatch_readiness_matcher.py on dispatch.json.
+  expected_assertions:
+  - Selects lowest-travel-hours valid tech for READY_FOR_DISPATCH orders.
+  - Keeps truck-roll HITL approval required.
+rubric:
+- criterion: cert_and_skill_validation
+  weight: 0.4
+  description: Rejects missing skills and expired safety certifications strictly.
+- criterion: spares_matching
+  weight: 0.35
+  description: Verifies required depot spares quantities accurately.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Applies standard baseline stamp and dispatch HITL gate.

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GSI Proposal Architecture, SOW Margin & Bench Factory Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once GSI Proposal Architecture, SOW Margin & Bench Factory organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "min_sow_gross_margin_pct": {
+      "type": "number",
+      "minimum": 10.0,
+      "maximum": 80.0,
+      "default": 30.0,
+      "description": "Target consulting SOW gross margin percentage floor."
+    },
+    "critical_margin_floor_pct": {
+      "type": "number",
+      "minimum": 5.0,
+      "maximum": 50.0,
+      "default": 20.0,
+      "description": "Walk-away Score-9 SOW gross margin floor."
+    },
+    "target_offshore_leverage_pct": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 95.0,
+      "default": 55.0,
+      "description": "Target offshore/nearshore delivery hours share."
+    },
+    "max_acceptance_business_days": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 30,
+      "default": 10,
+      "description": "Maximum milestone acceptance SLA before deemed accepted."
+    },
+    "min_skill_overlap_pct": {
+      "type": "number",
+      "minimum": 20.0,
+      "maximum": 100.0,
+      "default": 60.0,
+      "description": "Minimum skill match % for bench candidate shortlisting."
+    },
+    "max_start_delay_days": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 60,
+      "default": 14,
+      "description": "Maximum acceptable bench availability delay in days."
+    }
+  }
+}

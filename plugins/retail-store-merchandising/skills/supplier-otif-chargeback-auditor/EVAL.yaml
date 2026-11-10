@@ -1,0 +1,53 @@
+skill_id: supplier-otif-chargeback-auditor
+plugin_id: retail-store-merchandising
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/otif_detention_calculator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - vendor_scorecards
+  - po_details
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - net_recovery_usd
+  must_not_include_patterns:
+  - charged detention on late carrier or waived weather penalty
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Applies late carrier detention forfeiture and weather exclusion accurately.
+  - Separates On-Time %, In-Full %, and combined OTIF %.
+scenarios:
+- id: mode_a_late_forfeit_detention
+  mode: mode_a
+  prompt: Audit Northstar Retail PO arriving 95 minutes late with 180 minutes dock
+    dwell and 90% fill rate.
+  expected_assertions:
+  - Flags on_time=false, in_full=false, computes late + short-ship chargebacks, and
+    keeps detention_fee_usd=0.0.
+  - Computes net_vendor_recovery_usd cleanly.
+- id: mode_b_sheets_weather_waiver
+  mode: mode_b
+  prompt: Evaluate DC Receiving Sheet with WEATHER_FORCE_MAJEURE exclusion and on-time
+    carrier detained 4 hours.
+  expected_assertions:
+  - Waives late chargeback on weather PO and calculates detention_fee_usd for on-time
+    delayed carrier.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_otif_json
+  mode: mode_c
+  prompt: Run otif_detention_calculator.py on otif.json.
+  expected_assertions:
+  - Outputs vendor_scorecards and meets_sla flags deterministically.
+  - Preserves debit-memo HITL confirmation gate.
+rubric:
+- criterion: otif_and_exclusion_logic
+  weight: 0.4
+  description: Applies grace window, fill tolerance, weather, and buyer-cancel exclusions
+    accurately.
+- criterion: chargeback_detention_math
+  weight: 0.35
+  description: Computes chargebacks and enforces late-arrival detention forfeiture.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Applies standard baseline stamp and AP debit HITL gate.

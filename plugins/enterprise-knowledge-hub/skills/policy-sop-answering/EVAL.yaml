@@ -1,0 +1,50 @@
+skill_id: policy-sop-answering
+plugin_id: enterprise-knowledge-hub
+version: "1.0"
+deterministic_checks:
+  expected_script: scripts/policy_scope_matcher.py
+  required_output_keys:
+    - baseline_mode
+    - query_context
+    - summary
+    - matched_clauses
+    - rejected_clauses
+  must_include_patterns:
+    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+    - "ABSTENTION_NO_EFFECTIVE_COVERAGE"
+  must_not_include_patterns:
+    - "extrapolated policy from an uncovered jurisdiction"
+    - "cited unpublished draft as final"
+  hitl_required_for_mutations: true
+  trap_checks:
+    - "Rejects superseded, archived, expired, future-dated, and unpublished draft clauses."
+    - "Abstains explicitly when no active clause matches jurisdiction and entity."
+scenarios:
+  - id: mode_a_sg_parental_leave
+    mode: mode_a
+    prompt: "Lookup active parental leave policy for Apex Manufacturing in Singapore."
+    expected_assertions:
+      - "Filters out US and superseded clauses."
+      - "Returns exact active Singapore clause version and effective date."
+  - id: mode_b_uncovered_jurisdiction_abstain
+    mode: mode_b
+    prompt: "Find Brazil contractor meal reimbursement limit in Workspace Policy Sheet."
+    expected_assertions:
+      - "Sets abstained=true with ABSTENTION_NO_EFFECTIVE_COVERAGE."
+      - "Does not extrapolate US FTE policy limits to Brazil."
+  - id: mode_c_future_effective_date
+    mode: mode_c
+    prompt: "Evaluate policy_clauses.json as of 2026-11-10 for Germany entity."
+    expected_assertions:
+      - "Rejects 2027-effective clause under not_yet_effective."
+      - "Includes baseline banner when org_configured is false."
+rubric:
+  - criterion: scope_filtering_precision
+    weight: 0.4
+    description: Strictly enforces jurisdiction, legal entity, status, and effective_date bounds.
+  - criterion: abstention_discipline
+    weight: 0.35
+    description: Abstains cleanly rather than synthesizing answers from out-of-scope regions.
+  - criterion: version_and_baseline_hygiene
+    weight: 0.25
+    description: Rejects drafts/superseded SOPs and stamps starter baseline disclaimer when unconfigured.

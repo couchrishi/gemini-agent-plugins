@@ -1,0 +1,42 @@
+{
+  "id": "executive-briefing-ops",
+  "name": "Executive Briefing & Chief of Staff Ops",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "leadership", "chief-of-staff", "account-ops"],
+  "description": "Prepares daily executive briefings with calendar conflict and commitment tracking, extracts structured action/decision packs from meeting transcripts, and synthesizes multi-signal stakeholder account dossiers.",
+  "skills": [
+    {
+      "id": "daily-executive-briefing",
+      "script": "scripts/agenda_commitment_tracker.py",
+      "summary": "Reconciles calendar events, priority threads, and open action items into time-boxed prep blocks with conflict and overdue alerts."
+    },
+    {
+      "id": "meeting-to-execution-pack",
+      "script": "scripts/transcript_action_extractor.py",
+      "summary": "Extracts owner-assigned commitments, decision logs, unresolved blockers, and repeat carryovers from meeting transcripts."
+    },
+    {
+      "id": "stakeholder-account-prep",
+      "script": "scripts/dossier_synthesizer.py",
+      "summary": "Aggregates account ARR milestones, open escalations, executive touchpoints, and renewal countdowns into scored stakeholder dossiers."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "google-workspace-traps.md",
+    "salesforce-crm-soql-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "deal-desk-approval-baseline.md",
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/executive-briefing-ops-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekday-exec-briefing.yaml"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,50 @@
+skill_id: supplier-rfx-tariff-modeler
+plugin_id: erp-procure-to-pay
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/landed_cost_simulator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - landed_cost_models
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - annual_landed_cost_usd
+  must_not_include_patterns:
+  - awarded supplier without tariff duty calculation
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Applies shock tariffs selectively to shocked origin countries when configured.
+  - Evaluates MOQ feasibility before ranking lowest unit FOB.
+scenarios:
+- id: mode_a_tariff_shock_sim
+  mode: mode_a
+  prompt: Model a +25% tariff shock on CN origin quotes vs VN and MX bids for Apex
+    Manufacturing.
+  expected_assertions:
+  - Shifts rank order accurately once landed duty is added.
+  - Computes annual_savings_vs_worst_usd cleanly.
+- id: mode_b_sheets_moq_financing
+  mode: mode_b
+  prompt: Compare supplier quotes in our Drive RFx Sheet including Net 90 vs Net 30
+    financing value.
+  expected_assertions:
+  - Adjusts landed cost for working-capital cost of capital and defect PPM.
+  - Emits baseline banner when org_configured is false.
+- id: mode_c_local_rfx_rank
+  mode: mode_c
+  prompt: Simulate landed_cost_simulator.py on rfx_bids.json with +15% tariff shock.
+  expected_assertions:
+  - Produces deterministic cost_rank and preserves HITL award gate.
+  - Flags infeasible MOQ quotes.
+rubric:
+- criterion: landed_cost_formula_accuracy
+  weight: 0.45
+  description: Includes FOB, freight, insurance, duties, working capital, and defect
+    risk.
+- criterion: shock_and_moq_logic
+  weight: 0.3
+  description: Models incremental tariffs and MOQ feasibility properly.
+- criterion: sourcing_governance_hitl
+  weight: 0.25
+  description: Applies baseline banner and HITL PO award controls.

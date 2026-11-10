@@ -1,0 +1,14 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "min_dscr": 1.25,
+  "max_net_leverage": 3.5,
+  "min_interest_coverage": 2.5,
+  "min_current_ratio": 1.15,
+  "stress_rate_shock_bps": 200,
+  "ubo_standard_pct": 25.0,
+  "ubo_edd_pct": 10.0,
+  "velocity_spike_multiplier": 3.0,
+  "structuring_count_threshold": 5,
+  "high_value_claim_threshold": 100000.0
+}

@@ -1,0 +1,49 @@
+skill_id: citizen-case-eligibility-triager
+plugin_id: public-sector-higher-ed
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/statutory_eligibility_engine.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - case_determinations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - PENDING_VERIFICATION_CURE_NOTICE
+  must_not_include_patterns:
+  - denied application solely for missing proof_of_income
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Routes missing document packets strictly to PENDING_VERIFICATION_CURE_NOTICE.
+  - Detects and counts SSN patterns in applicant notes without echoing them.
+scenarios:
+- id: mode_a_missing_doc_cure
+  mode: mode_a
+  prompt: Triage CivicFirst Agency household-of-4 packet missing proof_of_income with
+    an SSN in free-text notes.
+  expected_assertions:
+  - Outputs PENDING_VERIFICATION_CURE_NOTICE (not denial) and detects pii_tokens_redacted=1.
+  - Calculates 200% FPL household threshold accurately.
+- id: mode_b_sheets_fpl_check
+  mode: mode_b
+  prompt: Audit Intake Case Sheet in Drive with eligible household under 200% FPL
+    and over-income case.
+  expected_assertions:
+  - Separates ELIGIBLE_RECOMMEND_AWARD from RECOMMEND_DENIAL_OVER_INCOME cleanly.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_cases_json
+  mode: mode_c
+  prompt: Run statutory_eligibility_engine.py on cases.json.
+  expected_assertions:
+  - All determinations enforce hitl_caseworker_signoff_required=true.
+  - Preserves caseworker HITL confirmation gate.
+rubric:
+- criterion: due_process_cure_safeguard
+  weight: 0.45
+  description: Never recommends denial on missing documents; emits cure timeline.
+- criterion: fpl_and_pii_handling
+  weight: 0.3
+  description: Computes household FPL ceilings accurately and flags SSN patterns cleanly.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Preserves baseline banner and caseworker HITL approval.

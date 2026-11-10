@@ -1,0 +1,49 @@
+skill_id: asset-reliability-spares-planner
+plugin_id: industrial-shopfloor-maintenance
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/mtbf_spares_optimizer.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - spares_plans
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - reorder_point_units
+  must_not_include_patterns:
+  - divided by zero on zero-failure part
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Applies right-censored MTBF handling cleanly when observed_failures == 0.
+  - Escalates CRITICAL stockouts at zero on-hand explicitly.
+scenarios:
+- id: mode_a_critical_stockout
+  mode: mode_a
+  prompt: Check Apex Manufacturing compressor mechanical seals with 0 on-hand and
+    21-day lead time.
+  expected_assertions:
+  - Flags CRITICAL_STOCKOUT_EXPEDITE and computes exact ROP and order qty.
+  - Computes lead_time_demand_units cleanly.
+- id: mode_b_sheets_zero_failure
+  mode: mode_b
+  prompt: Evaluate Drive Spares Sheet including an ultra-critical turbine bearing
+    with 0 failures in 12,000h.
+  expected_assertions:
+  - Sets zero_failure_censored=true with finite conservative MTBF.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_spares_rop
+  mode: mode_c
+  prompt: Run mtbf_spares_optimizer.py on spares.json.
+  expected_assertions:
+  - Computes total_recommended_spend_usd accurately.
+  - Maintains HITL requisition gate.
+rubric:
+- criterion: mtbf_and_rop_math
+  weight: 0.45
+  description: Computes censored MTBF, lead-time demand, safety stock, and ROP accurately.
+- criterion: stockout_prioritization
+  weight: 0.3
+  description: Highlights critical zero-stock hazards ahead of normal reorders.
+- criterion: baseline_and_hitl_compliance
+  weight: 0.25
+  description: Preserves baseline banner and human PR sign-off.

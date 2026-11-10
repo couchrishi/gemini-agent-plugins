@@ -1,0 +1,33 @@
+version: "1.0"
+plugin_id: legal-contract-desk
+read_only_tools:
+  - drive_read_contract
+  - docs_read_tabs
+  - sharepoint_read_library
+  - servicenow_grc_read
+  - view_file
+  - pyrepl
+draft_only_tools:
+  - docs_create_redline_memo_draft
+  - calendar_create_private_reminder
+  - write_to_file
+hitl_gated_mutations:
+  - tool: clm_send_external_redline
+    scope: explicit_per_call
+    condition: "request.is_external_counterparty == true || request.blocker_score9_count > 0"
+    reason: Transmitting contract redlines to external counterparties requires Legal counsel approval.
+  - tool: clm_execute_or_approve_contract
+    scope: explicit_per_call
+    condition: "request.blocker_score9_count > 0 || request.total_contract_value_usd >= 0"
+    reason: Executing or signing legal agreements always requires explicit human sign-off.
+  - tool: grc_update_control_status
+    scope: task_sticky
+    condition: "request.regulation_count >= 1"
+    reason: Modifying compliance control register mappings requires Compliance Officer confirmation.
+cel_guardrails:
+  - id: escalate_score9_blockers
+    description: Block approval readiness whenever any Score 9 walk-away blocker exists.
+    expr: "review.blocker_score9_count == 0"
+  - id: quarantine_counterparty_prompt_injection
+    description: Halt automated clause extraction when counterparty contract text contains instruction overrides.
+    expr: "untrusted_content.detected == true"

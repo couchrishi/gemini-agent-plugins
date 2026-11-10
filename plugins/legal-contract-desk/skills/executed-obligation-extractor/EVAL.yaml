@@ -1,0 +1,48 @@
+skill_id: executed-obligation-extractor
+plugin_id: legal-contract-desk
+version: "1.0"
+deterministic_checks:
+  expected_script: scripts/obligation_calendar_builder.py
+  required_output_keys:
+    - baseline_mode
+    - summary
+    - contracts
+    - obligation_calendar
+  must_include_patterns:
+    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+    - "UNVERIFIED_MISSING_FIELDS"
+  must_not_include_patterns:
+    - "dispatched unapproved non-renewal notice"
+  hitl_required_for_mutations: true
+  trap_checks:
+    - "Flags missing renewal_date or notice_days as UNVERIFIED rather than zero."
+    - "Computes renewal_date minus notice_days deterministically using timedelta."
+scenarios:
+  - id: mode_a_urgent_renewal_watch
+    mode: mode_a
+    prompt: "Check SharePoint executed contracts for 30-day opt-out cutoffs and CPI caps."
+    expected_assertions:
+      - "Computes exact opt_out_deadline dates and classifies <= 30d windows CRITICAL_URGENT."
+      - "Flags CPI escalators above baseline cap."
+  - id: mode_b_sheets_missing_notice
+    mode: mode_b
+    prompt: "Check Executed Registry Sheet in Drive where two rows omit notice_days."
+    expected_assertions:
+      - "Flags missing notice_days as UNVERIFIED_MISSING_FIELDS without assuming zero."
+      - "Applies standard baseline banner when org_configured is false."
+  - id: mode_c_local_csv_calendar
+    mode: mode_c
+    prompt: "Parse executed_contracts.csv as of 2026-11-10 into an obligation calendar."
+    expected_assertions:
+      - "Sorts obligation_calendar chronologically with urgent exposure totals."
+      - "Requires HITL before sending any external notice."
+rubric:
+  - criterion: date_arithmetic_precision
+    weight: 0.45
+    description: Computes opt_out_deadline = renewal_date - notice_days and days_until_opt_out cleanly.
+  - criterion: missing_field_discipline
+    weight: 0.3
+    description: Flags missing renewal_date/notice_days as UNVERIFIED_MISSING_FIELDS.
+  - criterion: baseline_and_hitl_compliance
+    weight: 0.25
+    description: Enforces baseline stamp and draft-only posture until explicit confirmation.

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Executive Briefing Ops Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once executive briefing cadence and renewal/escalation weights are bound."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant organization name."
+    },
+    "min_prep_buffer_minutes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 60,
+      "default": 15,
+      "description": "Minimum gap in minutes expected between external/executive meetings."
+    },
+    "overdue_action_escalation_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90,
+      "default": 3,
+      "description": "Days past due before an open commitment is marked escalated."
+    },
+    "renewal_critical_window_days": {
+      "type": "integer",
+      "minimum": 14,
+      "maximum": 365,
+      "default": 90,
+      "description": "Days to contract renewal below which stakeholder briefs trigger high-urgency renewal flags."
+    },
+    "touchpoint_stale_days": {
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 180,
+      "default": 30,
+      "description": "Days since last executive touchpoint before stakeholder cadence is flagged stale."
+    }
+  }
+}

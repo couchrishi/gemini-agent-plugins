@@ -1,0 +1,20 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: hourly-sla-breach-watch
+  plugin: itsm-command-center
+spec:
+  cron_expression: "0 * * * *"
+  timezone: "UTC"
+  max_token_budget: 18000
+  target_skill: incident-triage-routing
+  prompt: |
+    Execute hourly incident triage and SLA breach scan via scripts/sla_cluster_triage.py.
+    Highlight active P1/P2 tickets above 75% business-elapsed SLA budget, flag emerging CI/error spike
+    clusters, and recommend top matching runbooks without mutating ticket assignments automatically.
+  goal_verifier:
+    command_check: "python3 skills/incident-triage-routing/scripts/sla_cluster_triage.py --help"
+    nl_criteria:
+      - "SLA burn percentage subtracts sla_paused_minutes from elapsed minutes."
+      - "Canceled tickets (state=8) are excluded from active triage backlog."
+      - "Pagination truncation (X-Total-Count > fetched) triggers TRUNCATION_WARNING."

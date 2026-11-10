@@ -1,0 +1,51 @@
+skill_id: winning-proposal-architect
+plugin_id: gsi-proposal-ip-factory
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/staffing_pyramid_calculator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - phase_breakdown
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - blended_gross_margin_pct
+  must_not_include_patterns:
+  - approved proposal below 20% gross margin
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Computes weighted blended bill rate and margin across all phase durations.
+  - Flags sub-20% critical floor breaches distinctly from 20-30% Finance Desk exceptions.
+scenarios:
+- id: mode_a_low_offshore_margin
+  mode: mode_a
+  prompt: Model Stratos Telecom CRM migration staffing pyramid in Drive with 25% offshore
+    leverage and 26% gross margin.
+  expected_assertions:
+  - Flags below_offshore_target=true and FINANCE_DESK_EXCEPTION_REQUIRED.
+  - Computes exact blended_bill_rate_hourly.
+- id: mode_b_sheets_critical_floor
+  mode: mode_b
+  prompt: Check our Drive Pricing Pyramid Sheet where discounts dropped gross margin
+    to 18.5%.
+  expected_assertions:
+  - Sets margin_gate=CRITICAL_BELOW_20_BLOCKED.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_pyramid_pass
+  mode: mode_c
+  prompt: Execute staffing_pyramid_calculator.py on pyramid.json and verify phase
+    math.
+  expected_assertions:
+  - Reconciles phase revenue/cost sums cleanly.
+  - Respects HITL submission gate.
+rubric:
+- criterion: pyramid_and_margin_math
+  weight: 0.45
+  description: Calculates effort hours, offshore leverage, blended rate, and margin
+    accurately.
+- criterion: tier_gate_precision
+  weight: 0.3
+  description: Applies 30% target and 20% hard blocker thresholds accurately.
+- criterion: baseline_and_hitl_compliance
+  weight: 0.25
+  description: Emits baseline banner and protects proposal submission with HITL.

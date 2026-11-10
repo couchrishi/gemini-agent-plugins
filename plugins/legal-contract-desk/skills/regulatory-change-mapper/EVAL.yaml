@@ -1,0 +1,48 @@
+skill_id: regulatory-change-mapper
+plugin_id: legal-contract-desk
+version: "1.0"
+deterministic_checks:
+  expected_script: scripts/control_gap_mapper.py
+  required_output_keys:
+    - baseline_mode
+    - summary
+    - article_mappings
+    - remediation_queue
+  must_include_patterns:
+    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+    - "UNCOVERED_GAP"
+  must_not_include_patterns:
+    - "mutated GRC attestation without signoff"
+  hitl_required_for_mutations: true
+  trap_checks:
+    - "Treats null last_tested_date or missing evidence_uri as UNVERIFIED_MISSING_EVIDENCE."
+    - "Flags test evidence older than max_control_evidence_days as STALE_EVIDENCE."
+scenarios:
+  - id: mode_a_grc_dora_mapping
+    mode: mode_a
+    prompt: "Map EU DORA articles against ServiceNow GRC controls for Cymbal Financial."
+    expected_assertions:
+      - "Detects uncovered regulatory domains and computes remediation_priority_score."
+      - "Maintains read-only posture until explicit compliance officer approval."
+  - id: mode_b_sheets_stale_evidence
+    mode: mode_b
+    prompt: "Audit Compliance Register Sheet in Drive with null and 490-day-old evidence."
+    expected_assertions:
+      - "Flags null test dates as UNVERIFIED_MISSING_EVIDENCE and old tests as STALE_EVIDENCE."
+      - "Emits standard baseline stamp when org_configured is false."
+  - id: mode_c_local_matrix_priority
+    mode: mode_c
+    prompt: "Generate prioritized remediation queue from regulatory_controls.json."
+    expected_assertions:
+      - "Ranks remediation_queue descending by priority_score."
+      - "Reports accurate overall_compliance_pct."
+rubric:
+  - criterion: mapping_and_domain_coverage
+    weight: 0.4
+    description: Accurately identifies uncovered articles and missing required control domains.
+  - criterion: evidence_freshness_rigor
+    weight: 0.35
+    description: Flags null and expired audit evidence rather than defaulting to compliant.
+  - criterion: remediation_ranking_and_hitl
+    weight: 0.25
+    description: Ranks remediation actions by severity and guards GRC mutations with HITL.

@@ -1,0 +1,50 @@
+{
+  "id": "public-sector-higher-ed",
+  "name": "Public Sector Casework, Grants & Higher-Ed Ops",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "public-sector",
+    "government",
+    "higher-ed",
+    "grants",
+    "procurement",
+    "eligibility",
+    "compliance"
+  ],
+  "description": "Evaluates citizen benefits/aid eligibility with strict missing-document cure holds (never silent denials) and SSN redaction, scores public procurement tenders after mandatory debarment/COI pass-fail gates, and validates research grant budgets (F&A indirect caps, unallowables, PI effort) plus accreditation evidence freshness.",
+  "skills": [
+    {
+      "id": "citizen-case-eligibility-triager",
+      "script": "scripts/statutory_eligibility_engine.py",
+      "summary": "Computes household FPL income eligibility, enforces missing-document cure holds instead of silent denials, and counts PII redactions."
+    },
+    {
+      "id": "procurement-tender-evaluator",
+      "script": "scripts/tender_weighted_scorer.py",
+      "summary": "Enforces mandatory debarment/COI/tax pass-fail gates first, then computes lowest-compliant commercial normalization and weighted rank."
+    },
+    {
+      "id": "grant-accreditation-evidence-pack",
+      "script": "scripts/grant_accreditation_validator.py",
+      "summary": "Validates MTDC base vs F&A indirect cost caps, flags unallowable expenses, checks PI 100% effort cap, and checks accreditation freshness."
+    }
+  ],
+  "shared_traps": [
+    "untrusted-content-and-pii.md",
+    "absent-is-not-zero.md",
+    "servicenow-jira-itsm-traps.md",
+    "google-workspace-traps.md"
+  ],
+  "shared_baselines": [
+    "commercial-contract-baseline.md",
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/public-sector-higher-ed-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-accreditation-evidence-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

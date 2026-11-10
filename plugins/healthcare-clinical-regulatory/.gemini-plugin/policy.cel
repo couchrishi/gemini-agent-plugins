@@ -1,0 +1,28 @@
+version: '1.0'
+plugin_id: healthcare-clinical-regulatory
+read_only_tools:
+- ctms_read_soa_protocol
+- safety_read_deidentified_icsr
+- payer_read_clinical_policy
+- view_file
+- pyrepl
+draft_only_tools:
+- docs_create_feasibility_brief
+- docs_draft_prior_auth_summary
+- write_to_file
+hitl_gated_mutations:
+- tool: pv_submit_e2b_regulatory_report
+  scope: explicit_per_call
+  condition: request.cases_screened >= 1 || request.phi_redaction_alerts > 0
+  reason: Submitting E2B safety reports to FDA/EMA/PMDA requires Pharmacovigilance
+    QPPV medical sign-off.
+- tool: payer_finalize_auth_determination
+  scope: explicit_per_call
+  condition: request.requests_evaluated >= 1
+  reason: Final clinical approvals or medical necessity denials always require Medical
+    Director / Clinician confirmation.
+cel_guardrails:
+- id: block_pv_export_with_raw_phi
+  description: Halt E2B export generation whenever unredacted SSN, email, or phone
+    PHI is detected in narratives.
+  expr: pv.phi_redaction_alerts == 0

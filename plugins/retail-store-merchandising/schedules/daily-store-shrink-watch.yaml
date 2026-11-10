@@ -1,0 +1,19 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: daily-store-shrink-watch
+  plugin: retail-store-merchandising
+spec:
+  cron_expression: 30 6 * * *
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: store-ops-shrink-copilot
+  prompt: Run the morning store shrink and zero-scan phantom inventory sweep via scripts/store_shrink_task_ranker.py
+    and produce prioritized cycle-count lists per store manager.
+  goal_verifier:
+    command_check: python3 skills/store-ops-shrink-copilot/scripts/store_shrink_task_ranker.py
+      --help
+    nl_criteria:
+    - Unpolled POS stores are skipped rather than treated as phantom zero-scans.
+    - Negative on-hand SKUs isolate into NEGATIVE_LEDGER_CORRUPTION.
+    - Standard baseline stamp appears when org_configured is false.

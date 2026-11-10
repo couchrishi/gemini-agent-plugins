@@ -1,0 +1,48 @@
+version: '1.0'
+plugin_id: gsi-proposal-ip-factory
+capabilities:
+- id: psa_and_proposal_assets
+  description: Consulting rate cards, staffing pyramids, SOW templates, and active
+    project demand forecasts.
+  required: true
+  mode_a_live_connectors:
+  - connector: google_drive_api
+    endpoint_template: https://www.googleapis.com/drive/v3/files
+    auth_type: oauth2_user
+    scopes:
+    - https://www.googleapis.com/auth/drive.readonly
+  - connector: microsoft_graph_sharepoint
+    endpoint_template: https://graph.microsoft.com/v1.0/sites/{site_id}/drive/root/children
+    auth_type: oauth2_user
+    scopes:
+    - Sites.Read.All
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Slides
+    - Google Drive
+    lookup_hint: Read Pricing Pyramid Sheets (UNFORMATTED_VALUE), Draft SOW Docs,
+      and Bench Roster Sheets in Delivery Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv
+- id: bench_talent_roster
+  description: Consultant bench availability, loaded cost rates, skills taxonomy,
+    and roll-off dates.
+  required: false
+  mode_a_live_connectors:
+  - connector: workday_raas_api
+    endpoint_template: https://wd2-impl-services1.workday.com/ccx/service/customreport2/{tenant}
+    auth_type: oauth2_service_account
+    scopes:
+    - workday.staffing.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Drive
+    lookup_hint: Read Weekly Bench & Roll-off Tracker Sheets in Resource Management
+      Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

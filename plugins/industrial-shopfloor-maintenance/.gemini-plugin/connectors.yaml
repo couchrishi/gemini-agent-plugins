@@ -1,0 +1,29 @@
+version: '1.0'
+plugin_id: industrial-shopfloor-maintenance
+capabilities:
+- id: cmms_qms_ehs_systems
+  description: SAP PM / CMMS asset failure logs, spare inventory balances, QMS scrap
+    lots, and EHS Permit-to-Work records.
+  required: true
+  mode_a_live_connectors:
+  - connector: sap_odata_api
+    endpoint_template: https://{erp_host}/sap/opu/odata/sap/API_MAINTENANCEORDER
+    auth_type: mtls_oauth2
+    scopes:
+    - sap.pm.read
+    - sap.qm.read
+  - connector: bigquery_sql_api
+    endpoint_template: https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/queries
+    auth_type: workload_identity
+    scopes:
+    - https://www.googleapis.com/auth/bigquery.readonly
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read Critical Spares Inventory Sheets, QMS Scrap Logs, and Daily
+      PTW Safety Logs in Plant Ops Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

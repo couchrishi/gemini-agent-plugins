@@ -1,0 +1,53 @@
+skill_id: kyc-aml-screening-dossier
+plugin_id: fsi-credit-kyc-claims
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/ubo_velocity_screener.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - beneficial_owners
+  - edd_signals
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - kyc_risk_tier
+  must_not_include_patterns:
+  - filed automated SAR without MLRO confirmation
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Sums multi-hop fractional ownership paths accurately for individuals across holding
+    layers.
+  - Flags structured $8,000-$9,999 deposits >= 5 as structuring_alert=true.
+scenarios:
+- id: mode_a_multihop_edd_ubo
+  mode: mode_a
+  prompt: Trace Cymbal Financial onboarding entity owned via two 60%/50% indirect
+    holding layers registered in KY.
+  expected_assertions:
+  - Computes 30% cumulative effective ownership and drops UBO threshold to 10% due
+    to KY EDD.
+  - Sets kyc_risk_tier=EDD_MLRO_ESCALATION_REQUIRED.
+- id: mode_b_sheets_structuring_spike
+  mode: mode_b
+  prompt: Audit Drive AML Transaction Sheet with 4.2x 30d volume spike and 6 cash
+    deposits between $9,100-$9,800.
+  expected_assertions:
+  - Flags both velocity_spike_alert=true and structuring_alert=true.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_kyb_dossier
+  mode: mode_c
+  prompt: Execute ubo_velocity_screener.py on kyb_graph.json.
+  expected_assertions:
+  - Aggregates split paths to the same individual UBO accurately.
+  - Preserves MLRO HITL confirmation gate.
+rubric:
+- criterion: multihop_graph_math
+  weight: 0.45
+  description: Multiplies and sums multi-path indirect ownership accurately without
+    double/under-counting.
+- criterion: edd_and_aml_detection
+  weight: 0.3
+  description: Triggers 10% EDD drop, velocity >=3x spikes, and structuring alerts.
+- criterion: compliance_hitl_safety
+  weight: 0.25
+  description: Preserves baseline disclosure and MLRO SAR/freeze HITL gate.

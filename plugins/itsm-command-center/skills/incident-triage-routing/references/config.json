@@ -1,0 +1,12 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "p1_resolution_minutes": 240,
+  "p2_resolution_minutes": 480,
+  "p3_resolution_minutes": 1440,
+  "p4_resolution_minutes": 2400,
+  "sla_at_risk_pct": 75.0,
+  "spike_cluster_min": 3,
+  "cost_per_l1_ticket_usd": 28.0,
+  "expected_kcs_deflection_rate": 0.35
+}

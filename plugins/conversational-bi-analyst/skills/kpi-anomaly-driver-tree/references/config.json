@@ -1,0 +1,10 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "default_currency": "USD",
+  "zscore_anomaly_threshold": 2.0,
+  "materiality_amount_threshold": 25000.0,
+  "max_query_scan_gb": 500.0,
+  "min_sample_size_guard": 30,
+  "max_null_rate_warn_pct": 15.0
+}

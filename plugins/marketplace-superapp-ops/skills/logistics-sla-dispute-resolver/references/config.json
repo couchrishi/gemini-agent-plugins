@@ -1,0 +1,11 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "min_images": 2,
+  "low_price_ratio_threshold": 0.35,
+  "high_price_multiplier_threshold": 4.0,
+  "sla_grace_minutes": 5,
+  "high_value_payout_hitl_usd": 50.0,
+  "default_commission_rate_pct": 15.0,
+  "settlement_variance_tolerance_usd": 5.0
+}

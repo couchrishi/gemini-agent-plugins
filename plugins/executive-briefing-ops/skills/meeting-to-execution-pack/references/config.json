@@ -1,0 +1,8 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "min_prep_buffer_minutes": 15,
+  "overdue_action_escalation_days": 3,
+  "renewal_critical_window_days": 90,
+  "touchpoint_stale_days": 30
+}

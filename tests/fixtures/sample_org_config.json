@@ -1,0 +1,19 @@
+{
+  "organization_name": "Cymbal Financial",
+  "global": {
+    "materiality_amount_threshold": 10000.0
+  },
+  "plugins": {
+    "finance-variance-recon": {
+      "price_tolerance_pct": 0.05,
+      "materiality_amount_threshold": 10000.0
+    },
+    "fsi-credit-kyc-claims": {
+      "min_dscr": 1.35,
+      "max_net_leverage": 3.25
+    },
+    "public-sector-higher-ed": {
+      "max_indirect_fa_rate_pct": 48.0
+    }
+  }
+}

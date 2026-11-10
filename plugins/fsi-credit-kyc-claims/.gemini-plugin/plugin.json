@@ -1,0 +1,49 @@
+{
+  "id": "fsi-credit-kyc-claims",
+  "name": "Financial Services Credit, KYB/AML & Claims Underwriting",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "fsi",
+    "banking",
+    "insurance",
+    "credit",
+    "kyc",
+    "aml",
+    "claims"
+  ],
+  "description": "Calculates commercial borrower DSCR, net leverage, and interest coverage under multi-shock stress scenarios, resolves multi-hop UBO beneficial ownership with AML velocity/structuring checks, and evaluates insurance claims deterministically.",
+  "skills": [
+    {
+      "id": "commercial-credit-memo-analyst",
+      "script": "scripts/credit_covenant_stress.py",
+      "summary": "Calculates DSCR, Net Leverage, Interest Coverage, and Current Ratio across Base, -10%/-20% revenue, and +200bps rate shocks."
+    },
+    {
+      "id": "kyc-aml-screening-dossier",
+      "script": "scripts/ubo_velocity_screener.py",
+      "summary": "Traverses multi-hop holding DAGs to compute cumulative UBO ownership %, enforces 10% EDD drop, and detects velocity/structuring spikes."
+    },
+    {
+      "id": "insurance-claims-triage-pack",
+      "script": "scripts/coverage_limit_evaluator.py",
+      "summary": "Validates policy effective periods and peril exclusions, computes deductible/coinsurance/sublimit payouts, and flags >$100k reserves."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "bigquery-sap-erp-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "fsi-credit-kyc-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/fsi-credit-kyc-claims-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-kyb-velocity-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

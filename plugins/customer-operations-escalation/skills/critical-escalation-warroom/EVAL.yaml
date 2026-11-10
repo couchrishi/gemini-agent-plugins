@@ -1,0 +1,49 @@
+skill_id: critical-escalation-warroom
+plugin_id: customer-operations-escalation
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/escalation_exposure_scorer.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - scored_escalations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - escalation_tier
+  must_not_include_patterns:
+  - paged executive sponsor without confirmation
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Weights ARR, renewal proximity <= 90d, Sev1s, and SLA breaches deterministically.
+  - Quantifies total arr_at_war_room_risk_usd accurately.
+scenarios:
+- id: mode_a_vip_war_room
+  mode: mode_a
+  prompt: Score Stratos Telecom escalation ($650k ARR, renewal in 45 days, 2 Sev1
+    cases, competitor threat) across CRM and CSM.
+  expected_assertions:
+  - Assigns exposure_score >= 70 and tier WAR_ROOM_SEV0_EXEC.
+  - Lists itemized score drivers.
+- id: mode_b_sheets_tier_sort
+  mode: mode_b
+  prompt: Rank accounts in our Drive VIP Escalation Sheet separating WAR_ROOM from
+    HIGH_TOUCH_TAM.
+  expected_assertions:
+  - Sorts descending by exposure_score then ARR.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_warroom_pack
+  mode: mode_c
+  prompt: Run escalation_exposure_scorer.py on escalations.json.
+  expected_assertions:
+  - Computes arr_at_war_room_risk_usd accurately.
+  - Maintains HITL confirmation before alerting.
+rubric:
+- criterion: composite_risk_scoring
+  weight: 0.45
+  description: Scores Sev1s, SLA breaches, ARR, renewal window, and outages deterministically.
+- criterion: arr_exposure_quantification
+  weight: 0.3
+  description: Reports accurate war-room vs total escalated ARR.
+- criterion: baseline_and_hitl_discipline
+  weight: 0.25
+  description: Preserves baseline banner and human war-room launch gate.

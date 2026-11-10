@@ -1,0 +1,14 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "default_currency": "USD",
+  "materiality_amount_threshold": 25000.0,
+  "materiality_pct_threshold": 10.0,
+  "hierarchy_tolerance_amount": 1.0,
+  "price_tolerance_pct": 0.02,
+  "price_tolerance_abs": 500.0,
+  "qty_tolerance_pct": 0.0,
+  "gr_ir_aging_threshold_days": 60,
+  "duplicate_date_window_days": 3,
+  "ar_escalation_90_plus_threshold": 10000.0
+}

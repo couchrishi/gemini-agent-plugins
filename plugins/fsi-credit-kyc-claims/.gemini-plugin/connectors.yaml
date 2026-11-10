@@ -1,0 +1,29 @@
+version: '1.0'
+plugin_id: fsi-credit-kyc-claims
+capabilities:
+- id: core_banking_and_kyb_feeds
+  description: Borrower financial statements, corporate registry ownership graphs,
+    AML wire/cash logs, and insurance policy claims.
+  required: true
+  mode_a_live_connectors:
+  - connector: bigquery_sql_api
+    endpoint_template: https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/queries
+    auth_type: workload_identity
+    scopes:
+    - https://www.googleapis.com/auth/bigquery.readonly
+  - connector: fin_kyc_registry_api
+    endpoint_template: https://api.kycregistry.example.com/v2/entities/{entity_id}
+    auth_type: mtls_oauth2
+    scopes:
+    - kyb.read
+    - aml.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read Credit Spreadsheets (UNFORMATTED_VALUE), Corporate Ownership
+      Docs, and Claims Adjuster Sheets in FSI Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

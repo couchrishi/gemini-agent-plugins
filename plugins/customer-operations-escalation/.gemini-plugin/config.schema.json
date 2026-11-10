@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Customer Operations, VIP Escalation & Knowledge Quality Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Customer Operations, VIP Escalation & Knowledge Quality organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "war_room_score_threshold": {
+      "type": "number",
+      "minimum": 30.0,
+      "maximum": 100.0,
+      "default": 70.0,
+      "description": "Composite score threshold for executive war-room activation."
+    },
+    "vip_arr_threshold_usd": {
+      "type": "number",
+      "minimum": 10000.0,
+      "default": 250000.0,
+      "description": "ARR floor classifying a customer as VIP strategic tier."
+    },
+    "imminent_renewal_days": {
+      "type": "integer",
+      "minimum": 15,
+      "maximum": 180,
+      "default": 90,
+      "description": "Days-to-renewal window amplifying churn exposure."
+    },
+    "detractor_csat_max": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4,
+      "default": 2,
+      "description": "Maximum CSAT rating (1-5) treated as detractor."
+    },
+    "detractor_nps_max": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8,
+      "default": 6,
+      "description": "Maximum NPS rating (0-10) treated as detractor."
+    },
+    "max_resolution_hops": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 20,
+      "default": 6,
+      "description": "Maximum decision tree hops before usability warning."
+    }
+  }
+}

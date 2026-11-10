@@ -1,0 +1,17 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "stale_review_days": 180,
+  "recency_half_life_days": 365,
+  "duplicate_title_similarity_threshold": 0.82,
+  "min_citation_coverage_pct": 100.0,
+  "allow_draft_versions_in_answers": false,
+  "authoritative_source_weights": {
+    "official_policy": 1.0,
+    "approved_sop": 0.9,
+    "knowledge_article": 0.8,
+    "architecture_doc": 0.75,
+    "slide_deck": 0.5,
+    "chat_thread": 0.3
+  }
+}

@@ -1,0 +1,51 @@
+skill_id: insurance-claims-triage-pack
+plugin_id: fsi-credit-kyc-claims
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/coverage_limit_evaluator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - claim_evaluations
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - net_payable_usd
+  must_not_include_patterns:
+  - approved excluded peril payout
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Rejects out-of-period and excluded-peril claims with $0 net payable.
+  - Applies deductible before coinsurance and peril sublimit/aggregate caps.
+scenarios:
+- id: mode_a_sublimit_reserve
+  mode: mode_a
+  prompt: Evaluate $350k ransomware claim with $25k deductible, $150k cyber sublimit,
+    and 80% coinsurance.
+  expected_assertions:
+  - Caps payout at $150k sublimit cleanly and sets reserve_escalation=true (>= $100k).
+  - Routes to RESERVE_ESCALATION_SENIOR_ADJUSTER.
+- id: mode_b_sheets_excluded_peril
+  mode: mode_b
+  prompt: Check Drive Claims Sheet where CLM-2 occurred after policy expiration and
+    CLM-3 claims excluded flood damage.
+  expected_assertions:
+  - Denies both with COVERAGE_DENIED_OUT_OF_PERIOD and COVERAGE_DENIED_EXCLUSION ($0
+    payable).
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_claims_batch
+  mode: mode_c
+  prompt: Run coverage_limit_evaluator.py on claims.json.
+  expected_assertions:
+  - Computes exact total_net_payable_usd and flags missing documentation holds.
+  - Maintains Adjuster HITL settlement gate.
+rubric:
+- criterion: policy_eligibility_checks
+  weight: 0.4
+  description: Validates dates, exclusions, and evidence completeness first.
+- criterion: payout_waterfall_precision
+  weight: 0.35
+  description: Applies deductible, coinsurance, peril sublimit, and aggregate cap
+    in order.
+- criterion: reserve_and_hitl_controls
+  weight: 0.25
+  description: Flags >= $100k reserves and requires Adjuster HITL payout sign-off.

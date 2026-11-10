@@ -1,0 +1,27 @@
+version: '1.0'
+plugin_id: marketplace-superapp-ops
+read_only_tools:
+- bigquery_query_marketplace_orders
+- catalog_read_pending_skus
+- view_file
+- pyrepl
+draft_only_tools:
+- docs_draft_trust_hold_notice
+- sheets_draft_settlement_recon
+- write_to_file
+hitl_gated_mutations:
+- tool: catalog_suspend_merchant_sku
+  scope: explicit_per_call
+  condition: request.rejected_trust_hold > 0
+  reason: Suspending merchants or publishing rejected SKUs requires Trust & Safety
+    moderator sign-off.
+- tool: psp_release_merchant_payout_batch
+  scope: explicit_per_call
+  condition: request.exception_count == 0
+  reason: Releasing merchant bank payout batches or SLA refunds requires Marketplace
+    Finance Ops approval.
+cel_guardrails:
+- id: block_auto_payout_with_settlement_exceptions
+  description: Block payout batch release when settlement exceptions or clawback risks
+    exist.
+  expr: payouts.exception_count == 0 && payouts.negative_clawback_count == 0

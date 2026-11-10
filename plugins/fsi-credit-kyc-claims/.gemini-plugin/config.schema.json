@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Financial Services Credit, KYB/AML & Claims Underwriting Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Financial Services Credit, KYB/AML & Claims Underwriting organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "min_dscr": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 3.0,
+      "default": 1.25,
+      "description": "Minimum Debt Service Coverage Ratio covenant floor."
+    },
+    "max_net_leverage": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 10.0,
+      "default": 3.5,
+      "description": "Maximum Net Debt / EBITDA covenant ceiling."
+    },
+    "min_interest_coverage": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 10.0,
+      "default": 2.5,
+      "description": "Minimum EBITDA / Interest Coverage floor."
+    },
+    "min_current_ratio": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 5.0,
+      "default": 1.15,
+      "description": "Minimum liquidity current ratio floor."
+    },
+    "stress_rate_shock_bps": {
+      "type": "integer",
+      "minimum": 25,
+      "maximum": 1000,
+      "default": 200,
+      "description": "Severe floating-rate interest rate shock in basis points."
+    },
+    "ubo_standard_pct": {
+      "type": "number",
+      "minimum": 5.0,
+      "maximum": 50.0,
+      "default": 25.0,
+      "description": "Standard cumulative beneficial ownership disclosure threshold %."
+    },
+    "ubo_edd_pct": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 25.0,
+      "default": 10.0,
+      "description": "Reduced UBO threshold % when high-risk jurisdiction or PEP triggers EDD."
+    },
+    "velocity_spike_multiplier": {
+      "type": "number",
+      "minimum": 1.5,
+      "maximum": 10.0,
+      "default": 3.0,
+      "description": "30d-to-90d transaction velocity ratio triggering AML alert."
+    },
+    "structuring_count_threshold": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 20,
+      "default": 5,
+      "description": "Near-$10k deposit count threshold for structuring flag."
+    },
+    "high_value_claim_threshold": {
+      "type": "number",
+      "minimum": 5000.0,
+      "default": 100000.0,
+      "description": "Net claim reserve escalation authority ceiling in USD."
+    }
+  }
+}

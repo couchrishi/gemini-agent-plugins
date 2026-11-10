@@ -1,0 +1,50 @@
+{
+  "id": "industrial-shopfloor-maintenance",
+  "name": "Industrial Shopfloor Reliability, Quality & EHS Safety",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "manufacturing",
+    "industrial",
+    "reliability",
+    "ehs",
+    "safety",
+    "quality",
+    "sap-pm"
+  ],
+  "description": "Optimizes critical spare-part safety stocks and reorder points via censored MTBF reliability modeling, builds 80/20 scrap defect Paretos with CapEx payback evaluation, and enforces strict EHS Permit-to-Work LOTO and gas-test safety gates.",
+  "skills": [
+    {
+      "id": "asset-reliability-spares-planner",
+      "script": "scripts/mtbf_spares_optimizer.py",
+      "summary": "Calculates right-censored MTBF, lead-time demand, safety stock, Reorder Point (ROP), and critical stockout expedite POs."
+    },
+    {
+      "id": "quality-capex-rca-copilot",
+      "script": "scripts/defect_pareto_correlator.py",
+      "summary": "Builds 80/20 manufacturing scrap cost Paretos, isolates >=2x anomalous supplier lots, and computes CapEx payback hurdles."
+    },
+    {
+      "id": "ehs-safety-permit-auditor",
+      "script": "scripts/hse_permit_checker.py",
+      "summary": "Enforces zero-compromise LOTO isolation, confined-space O2 (19.5-23.5%), 0% LEL gas freshness, fire watch, and worker certification checks."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "bigquery-sap-erp-traps.md",
+    "chain-denominator-seams.md",
+    "servicenow-jira-itsm-traps.md"
+  ],
+  "shared_baselines": [
+    "finance-materiality-baseline.md",
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/industrial-shopfloor-maintenance-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-critical-spares-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

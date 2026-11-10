@@ -1,0 +1,49 @@
+{
+  "id": "marketplace-superapp-ops",
+  "name": "Marketplace, Ride-Hailing & SuperApp Ops",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "marketplace",
+    "superapp",
+    "ecommerce",
+    "trust-safety",
+    "logistics",
+    "payouts"
+  ],
+  "description": "Screens merchant catalog listings for prohibited terms, prompt-injection payloads, and price outliers, attributes on-demand delivery SLA breaches across merchant prep vs courier transit with force-majeure waivers, and reconciles merchant GMV, commission fees, FX, and PSP settlements.",
+  "skills": [
+    {
+      "id": "merchant-catalog-trust-gate",
+      "script": "scripts/catalog_quality_scorer.py",
+      "summary": "Detects indirect prompt injection in merchant copy, screens counterfeit/prohibited goods, flags price outliers, and checks attributes."
+    },
+    {
+      "id": "logistics-sla-dispute-resolver",
+      "script": "scripts/zone_sla_dispute_analyzer.py",
+      "summary": "Splits order delays into merchant prep vs courier transit faults, waives verified weather delays, and assigns refund liability."
+    },
+    {
+      "id": "commission-payout-reconciler",
+      "script": "scripts/payout_ledger_reconciler.py",
+      "summary": "Reconciles gross GMV, commission take-rates, promo splits, FX conversions, and PSP wires while flagging negative clawbacks."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "untrusted-content-and-pii.md",
+    "chain-denominator-seams.md",
+    "bigquery-sap-erp-traps.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md",
+    "finance-materiality-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/marketplace-superapp-ops-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-payout-settlement-recon.yaml"
+  ],
+  "license": "Apache-2.0"
+}

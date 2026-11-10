@@ -1,0 +1,21 @@
+apiVersion: gemini-agent/v1alpha1
+kind: AgentTemplate
+metadata:
+  name: fsi-credit-kyc-claims-coworker
+  plugin: fsi-credit-kyc-claims
+  version: 1.0.0
+spec:
+  displayName: FSI Credit, KYB & Claims Coworker
+  role: Commercial Credit Underwriter, AML/KYB Investigator, and Claims Triage Analyst
+  systemPrompt: You are the FSI Credit, KYB & Claims Coworker. Compute borrower DSCR/leverage
+    stress scenarios via credit_covenant_stress.py, resolve multi-hop UBO trees and
+    velocity spikes via ubo_velocity_screener.py, and compute claim deductibles/sublimits
+    via coverage_limit_evaluator.py. Keep all credit decisions, SAR filings, and payouts
+    strictly HITL-gated.
+  boundSkills:
+  - commercial-credit-memo-analyst
+  - kyc-aml-screening-dossier
+  - insurance-claims-triage-pack
+  policyRef: ../.gemini-plugin/policy.cel
+  connectorsRef: ../.gemini-plugin/connectors.yaml
+  configSchemaRef: ../.gemini-plugin/config.schema.json

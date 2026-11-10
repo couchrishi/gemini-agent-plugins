@@ -1,0 +1,19 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: weekly-campaign-compliance-sweep
+  plugin: brand-campaign-studio
+spec:
+  cron_expression: 0 10 * * 2
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: brand-voice-compliance-gate
+  prompt: Run the weekly marketing compliance sweep via scripts/copy_compliance_linter.py
+    across upcoming campaign drafts and flag missing disclaimers or prohibited claims.
+  goal_verifier:
+    command_check: python3 skills/brand-voice-compliance-gate/scripts/copy_compliance_linter.py
+      --help
+    nl_criteria:
+    - Every asset containing ROI/savings/clinical claims without a disclaimer is blocked.
+    - Channel character-limit violations are itemized clearly.
+    - Standard baseline disclosure stamp appears when org_configured is false.

@@ -1,0 +1,48 @@
+{
+  "id": "brand-campaign-studio",
+  "name": "Brand Governance, Campaign Matrix & Localization Studio",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": [
+    "cross-industry",
+    "marketing",
+    "brand",
+    "localization",
+    "campaigns",
+    "compliance"
+  ],
+  "description": "Lints marketing copy against brand voice rules, prohibited claims, and channel limits, validates audience-by-channel multimodal campaign matrices, and audits global localization packs against do-not-translate glossaries.",
+  "skills": [
+    {
+      "id": "brand-voice-compliance-gate",
+      "script": "scripts/copy_compliance_linter.py",
+      "summary": "Lints marketing copy for banned guarantees, missing substantiation disclaimers, readability density, and channel char caps."
+    },
+    {
+      "id": "multimodal-campaign-brief",
+      "script": "scripts/campaign_asset_matrix.py",
+      "summary": "Audits audience-by-channel and funnel coverage matrices, planned spend vs budget, and critical-path launch buffers."
+    },
+    {
+      "id": "market-localization-adapter",
+      "script": "scripts/locale_glossary_checker.py",
+      "summary": "Verifies target locale translations for missing markets, untranslated leaks, DNT term preservation, and regional glossary fidelity."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "google-workspace-traps.md",
+    "sharepoint-onedrive-kql-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "commercial-contract-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/brand-campaign-studio-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-campaign-compliance-sweep.yaml"
+  ],
+  "license": "Apache-2.0"
+}

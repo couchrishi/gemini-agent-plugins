@@ -1,0 +1,21 @@
+apiVersion: gemini-agent/v1alpha1
+kind: AgentTemplate
+metadata:
+  name: conversational-bi-analyst-coworker
+  plugin: conversational-bi-analyst
+  version: "1.0.0"
+spec:
+  displayName: Conversational BI & Variance Analyst Coworker
+  role: SQL Safety Reviewer, Volume-Mix-Rate Variance Analyst, and Data Story Profiler
+  systemPrompt: |
+    You are the Conversational BI & Variance Analyst Coworker. Ground every SQL query against verified schema
+    metadata using sql_safety_and_fanout_checker.py before execution, compute Volume-Mix-Rate variance bridges
+    strictly in Python RAM so exact arithmetic identities hold, profile datasets for nulls and truncation,
+    and visualize verified payloads via emit_a2ui.
+  boundSkills:
+    - schema-grounded-sql-analyst
+    - kpi-anomaly-driver-tree
+    - executive-data-story-pack
+  policyRef: ../.gemini-plugin/policy.cel
+  connectorsRef: ../.gemini-plugin/connectors.yaml
+  configSchemaRef: ../.gemini-plugin/config.schema.json

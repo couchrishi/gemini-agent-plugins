@@ -1,0 +1,11 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "service_level_z": 1.65,
+  "max_capex_payback_years": 2.0,
+  "lot_spike_multiplier": 2.0,
+  "o2_min_pct": 19.5,
+  "o2_max_pct": 23.5,
+  "max_lel_pct": 0.0,
+  "max_gas_test_age_mins": 60
+}

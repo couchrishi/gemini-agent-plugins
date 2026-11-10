@@ -1,0 +1,27 @@
+version: "1.0"
+plugin_id: conversational-bi-analyst
+read_only_tools:
+  - bigquery_dry_run_and_select
+  - looker_run_explore
+  - view_file
+  - pyrepl
+draft_only_tools:
+  - emit_a2ui
+  - docs_create_private_brief
+  - write_to_file
+hitl_gated_mutations:
+  - tool: bigquery_execute_expensive_or_dml
+    scope: explicit_per_call
+    condition: "request.is_read_only == false || request.estimated_scan_gb > config.max_query_scan_gb || request.missing_partition_filter == true"
+    reason: Running DDL/DML or high-scan unpartitioned warehouse queries requires explicit user approval.
+  - tool: slides_or_email_share_executive_pack
+    scope: task_sticky
+    condition: "request.recipient_count > 1 || request.is_external_recipient == true"
+    reason: Distributing executive BI packs externally or to leadership aliases requires confirmation.
+cel_guardrails:
+  - id: forbid_unpartitioned_or_destructive_sql
+    description: Block destructive DDL/DML and unpartitioned full-table scans from auto-running.
+    expr: "sql.is_read_only_safe == true && sql.missing_partition_filter == false"
+  - id: block_many_to_many_fanout_reporting
+    description: Prevent reporting inflated sums when SQL exhibits unresolved M:N join fanout risk.
+    expr: "sql.fanout_risk_count == 0"

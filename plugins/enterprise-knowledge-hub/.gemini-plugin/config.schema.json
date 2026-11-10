@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Enterprise Knowledge Hub Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once organization-specific authority weights and review SLAs are bound."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Display name of the tenant organization."
+    },
+    "stale_review_days": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 730,
+      "default": 180,
+      "description": "Days after last_reviewed_at before a policy or SOP is flagged stale."
+    },
+    "recency_half_life_days": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 1095,
+      "default": 365,
+      "description": "Exponential decay half-life in days when ranking document freshness."
+    },
+    "duplicate_title_similarity_threshold": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 0.99,
+      "default": 0.82,
+      "description": "SequenceMatcher title similarity ratio triggering near-duplicate review."
+    },
+    "min_citation_coverage_pct": {
+      "type": "number",
+      "minimum": 50.0,
+      "maximum": 100.0,
+      "default": 100.0,
+      "description": "Required percentage of synthesized claims backed by verified source IDs."
+    },
+    "allow_draft_versions_in_answers": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether unpublished draft SOP versions (e.g. SharePoint minor 1.2) may be cited as authoritative."
+    },
+    "authoritative_source_weights": {
+      "type": "object",
+      "default": {
+        "official_policy": 1.0,
+        "approved_sop": 0.9,
+        "knowledge_article": 0.8,
+        "architecture_doc": 0.75,
+        "slide_deck": 0.5,
+        "chat_thread": 0.3
+      },
+      "description": "Authority weighting by document classification."
+    }
+  }
+}

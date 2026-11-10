@@ -1,0 +1,11 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "default_currency": "USD",
+  "gr_ir_aging_threshold_days": 60,
+  "clearing_tolerance_usd": 5.0,
+  "annual_cost_of_capital_pct": 8.0,
+  "defect_cost_per_unit_usd": 45.0,
+  "max_single_source_share_pct": 70.0,
+  "ppv_alert_threshold_pct": 5.0
+}

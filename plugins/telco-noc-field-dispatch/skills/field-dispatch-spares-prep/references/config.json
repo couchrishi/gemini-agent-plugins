@@ -1,0 +1,10 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "p1_subscriber_threshold": 5000,
+  "p2_subscriber_threshold": 500,
+  "enforce_safety_cert_expiry": true,
+  "require_all_spares_reserved": true,
+  "provisioning_sla_days": 15,
+  "high_value_mrc_usd": 2500.0
+}

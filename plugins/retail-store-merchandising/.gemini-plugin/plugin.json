@@ -1,0 +1,50 @@
+{
+  "id": "retail-store-merchandising",
+  "name": "Retail & CPG Store Ops + Merchandising",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "retail",
+    "cpg",
+    "store-ops",
+    "shrink",
+    "merchandising",
+    "otif",
+    "supply-chain"
+  ],
+  "description": "Ranks store shrink loss and phantom inventory (zero-scan anomalies) while skipping unpolled POS stores, attributes promotional unit/margin lift net of cannibalization and basket halo, and audits supplier OTIF scorecards, chargebacks, and carrier detention.",
+  "skills": [
+    {
+      "id": "store-ops-shrink-copilot",
+      "script": "scripts/store_shrink_task_ranker.py",
+      "summary": "Ranks store physical shrink loss $, detects zero-scan phantom inventory cleanly, and prioritizes store floor cycle counts."
+    },
+    {
+      "id": "merchandising-assortment-planner",
+      "script": "scripts/promo_lift_analyzer.py",
+      "summary": "Normalizes baseline vs promo durations, deducts sibling cannibalization, adds basket halo, and computes net promo margin ROI."
+    },
+    {
+      "id": "supplier-otif-chargeback-auditor",
+      "script": "scripts/otif_detention_calculator.py",
+      "summary": "Scores PO On-Time and In-Full compliance, honors weather/buyer exclusions, and computes vendor chargebacks vs detention fees."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "bigquery-sap-erp-traps.md",
+    "sharepoint-onedrive-kql-traps.md"
+  ],
+  "shared_baselines": [
+    "finance-materiality-baseline.md",
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/retail-store-merchandising-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-store-shrink-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

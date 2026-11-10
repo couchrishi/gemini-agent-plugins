@@ -1,0 +1,13 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "max_score_spread": 2.0,
+  "min_evidence_chars": 40,
+  "hire_mean_threshold": 3.0,
+  "compa_ratio_min": 0.85,
+  "compa_ratio_max": 1.15,
+  "compa_ratio_underpaid_alert": 0.8,
+  "compa_ratio_overpaid_alert": 1.25,
+  "min_privacy_cell_size": 5,
+  "annual_working_hours": 2080
+}

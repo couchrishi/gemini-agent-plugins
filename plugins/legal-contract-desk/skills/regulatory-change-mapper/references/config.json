@@ -1,0 +1,18 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "lol_cap_months_min": 12,
+  "lol_cap_months_max": 24,
+  "super_cap_multiplier_max": 3.0,
+  "max_renewal_notice_days": 60,
+  "max_price_escalator_pct": 5.0,
+  "max_breach_notify_hours": 72,
+  "forbid_customer_data_training": true,
+  "approved_jurisdictions": [
+    "Delaware",
+    "New York",
+    "England and Wales",
+    "Singapore"
+  ],
+  "max_control_evidence_days": 365
+}

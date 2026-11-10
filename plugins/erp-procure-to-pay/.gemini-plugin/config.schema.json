@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "default_currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Presentation currency code."
+    },
+    "gr_ir_aging_threshold_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 365,
+      "default": 60,
+      "description": "Aging threshold in days for open GR/IR write-off review."
+    },
+    "clearing_tolerance_usd": {
+      "type": "number",
+      "minimum": 0,
+      "default": 5.0,
+      "description": "Residual value tolerance for automated MR11/F.13 clearing proposals."
+    },
+    "annual_cost_of_capital_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30,
+      "default": 8.0,
+      "description": "Annual working-capital discount rate for payment terms modeling."
+    },
+    "defect_cost_per_unit_usd": {
+      "type": "number",
+      "minimum": 0,
+      "default": 45.0,
+      "description": "Estimated cost of poor quality per defective unit."
+    },
+    "max_single_source_share_pct": {
+      "type": "number",
+      "minimum": 20,
+      "maximum": 100,
+      "default": 70.0,
+      "description": "Concentration cap before dual-source warning."
+    },
+    "ppv_alert_threshold_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 50,
+      "default": 5.0,
+      "description": "BOM component purchase price variance alert threshold %."
+    }
+  }
+}

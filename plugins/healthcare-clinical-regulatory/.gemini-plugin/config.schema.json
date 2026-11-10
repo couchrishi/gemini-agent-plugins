@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Healthcare Clinical Trial, Pharmacovigilance & Prior Auth Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Healthcare Clinical Trial, Pharmacovigilance & Prior Auth organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "min_enrollment_coverage_pct": {
+      "type": "number",
+      "minimum": 50.0,
+      "maximum": 150.0,
+      "default": 100.0,
+      "description": "Minimum projected-vs-target sample enrollment coverage %."
+    },
+    "max_screen_fail_warn_pct": {
+      "type": "number",
+      "minimum": 10.0,
+      "maximum": 80.0,
+      "default": 35.0,
+      "description": "Site screen failure rate warning threshold %."
+    },
+    "fatal_lt_susar_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 15,
+      "default": 7,
+      "description": "Regulatory reporting SLA days for fatal/life-threatening unexpected SUSAR."
+    },
+    "serious_unexpected_days": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 30,
+      "default": 15,
+      "description": "Regulatory reporting SLA days for serious unexpected SUSAR."
+    },
+    "periodic_report_days": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 180,
+      "default": 90,
+      "description": "Standard periodic safety reporting cycle days."
+    },
+    "default_min_step_days": {
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 180,
+      "default": 30,
+      "description": "Fallback minimum prior step-therapy duration in days."
+    }
+  }
+}

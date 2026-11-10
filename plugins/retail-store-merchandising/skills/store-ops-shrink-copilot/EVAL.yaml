@@ -1,0 +1,50 @@
+skill_id: store-ops-shrink-copilot
+plugin_id: retail-store-merchandising
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/store_shrink_task_ranker.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - store_rankings
+  - sku_anomalies
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - PHANTOM_INVENTORY_ZERO_SCAN
+  must_not_include_patterns:
+  - wrote off unpolled store inventory
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Skips non-POLLED POS stores accurately instead of generating phantom flags.
+  - Separates negative book qty ledger corruption from physical theft shrink.
+scenarios:
+- id: mode_a_phantom_vs_unpolled
+  mode: mode_a
+  prompt: Analyze Northstar Retail store SKU snapshot where STR-104 has 18 units on
+    hand with 7 zero-scan days and STR-109 has MISSING POS poll.
+  expected_assertions:
+  - Flags STR-104 SKU as PHANTOM_INVENTORY_ZERO_SCAN and skips STR-109 under unpolled_pos_skipped=1.
+  - Ranks tasks by financial impact_score_usd.
+- id: mode_b_sheets_shrink_rank
+  mode: mode_b
+  prompt: Audit Store Cycle-Count Sheet in Drive for physical shrink > $250 and negative
+    book counts.
+  expected_assertions:
+  - Flags NEGATIVE_LEDGER_CORRUPTION and HIGH_DOLLAR_SHRINK separately.
+  - Stamps baseline banner when org_configured is false.
+- id: mode_c_local_shrink_json
+  mode: mode_c
+  prompt: Run store_shrink_task_ranker.py on store_shrink.json.
+  expected_assertions:
+  - Generates prioritized_store_tasks deterministically.
+  - Preserves COGS write-off HITL confirmation gate.
+rubric:
+- criterion: unpolled_pos_isolation
+  weight: 0.4
+  description: Never treats offline/unpolled POS stores as zero-scan phantom inventory.
+- criterion: anomaly_and_task_ranking
+  weight: 0.35
+  description: Computes shrink $ and ranks floor tasks by dollar impact.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Applies standard baseline stamp and GL write-off HITL gate.

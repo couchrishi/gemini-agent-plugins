@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Retail & CPG Store Ops + Merchandising Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Retail & CPG Store Ops + Merchandising organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "zero_scan_days_threshold": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "default": 5,
+      "description": "Days without POS scans for positive book on-hand before flagging phantom inventory."
+    },
+    "min_book_qty_for_phantom": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 4,
+      "description": "Minimum perpetual book qty required to trigger zero-scan investigation."
+    },
+    "high_shrink_usd_threshold": {
+      "type": "number",
+      "minimum": 10.0,
+      "default": 250.0,
+      "description": "Physical count variance threshold in USD triggering EAS/receiving audit."
+    },
+    "min_acceptable_promo_roi": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 5.0,
+      "default": 0.15,
+      "description": "Minimum incremental net gross margin ROI ratio to classify campaign as scalable."
+    },
+    "target_otif_pct": {
+      "type": "number",
+      "minimum": 50.0,
+      "maximum": 100.0,
+      "default": 95.0,
+      "description": "Contractual vendor On-Time In-Full SLA threshold percentage."
+    },
+    "in_full_tolerance_pct": {
+      "type": "number",
+      "minimum": 80.0,
+      "maximum": 100.0,
+      "default": 98.0,
+      "description": "Minimum received-vs-ordered fill rate required for In-Full pass."
+    },
+    "on_time_grace_minutes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 240,
+      "default": 30,
+      "description": "Dock arrival grace window past appointment time."
+    }
+  }
+}

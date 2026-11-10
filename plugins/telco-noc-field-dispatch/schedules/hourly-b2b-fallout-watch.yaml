@@ -1,0 +1,20 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: hourly-b2b-fallout-watch
+  plugin: telco-noc-field-dispatch
+spec:
+  cron_expression: 0 * * * *
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: b2b-order-fallout-resolver
+  prompt: Run the hourly B2B provisioning fallout sweep via scripts/order_fallout_classifier.py
+    and highlight P1 executive escalations where aged MRC breaches SLA.
+  goal_verifier:
+    command_check: python3 skills/b2b-order-fallout-resolver/scripts/order_fallout_classifier.py
+      --help
+    nl_criteria:
+    - Fallout orders route into deterministic LNP, OSP capacity, credit, address,
+      or CPE buckets.
+    - Aged orders above high_value_mrc_usd escalate to P1_EXEC_ESCALATE.
+    - Standard baseline stamp appears when org_configured is false.

@@ -1,0 +1,10 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "min_enrollment_coverage_pct": 100.0,
+  "max_screen_fail_warn_pct": 35.0,
+  "fatal_lt_susar_days": 7,
+  "serious_unexpected_days": 15,
+  "periodic_report_days": 90,
+  "default_min_step_days": 30
+}

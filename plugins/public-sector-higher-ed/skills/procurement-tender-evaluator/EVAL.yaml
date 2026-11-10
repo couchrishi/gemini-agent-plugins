@@ -1,0 +1,49 @@
+skill_id: procurement-tender-evaluator
+plugin_id: public-sector-higher-ed
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/tender_weighted_scorer.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - bid_rankings
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - DISQUALIFIED_NON_COMPLIANT
+  must_not_include_patterns:
+  - ranked debarred vendor in top compliant award
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Excludes disqualified bids from lowest_compliant_price_usd denominator.
+  - Ranks compliant bids cleanly across weighted Tech + Sust + Comm scores.
+scenarios:
+- id: mode_a_debarred_cheap_bid
+  mode: mode_a
+  prompt: Evaluate CivicFirst Agency RFP bids where a $120k vendor is debarred/sanctioned
+    and compliant bids are $200k and $250k.
+  expected_assertions:
+  - Disqualifies $120k bidder immediately and uses $200k as lowest_compliant_price_usd.
+  - Ranks compliant bidders accurately by weighted_total_score.
+- id: mode_b_sheets_coi_gate
+  mode: mode_b
+  prompt: Audit Procurement Bid Sheet in Drive where one bidder lacks signed COI attestation.
+  expected_assertions:
+  - Assigns MISSING_COI_ATTESTATION and DISQUALIFIED_NON_COMPLIANT.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_tender_json
+  mode: mode_c
+  prompt: Execute tender_weighted_scorer.py on tender.json.
+  expected_assertions:
+  - Outputs deterministic rank and weighted scores cleanly.
+  - Preserves Procurement Board HITL award gate.
+rubric:
+- criterion: compliance_gate_ordering
+  weight: 0.45
+  description: Filters debarred/missing-COI/low-tech bidders before computing lowest
+    compliant price.
+- criterion: weighted_scoring_math
+  weight: 0.3
+  description: Computes commercial ratio and weighted totals accurately.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Applies standard baseline stamp and board HITL award gate.

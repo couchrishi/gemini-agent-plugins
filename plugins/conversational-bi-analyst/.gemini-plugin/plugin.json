@@ -1,0 +1,41 @@
+{
+  "id": "conversational-bi-analyst",
+  "name": "Conversational BI & Variance Analyst",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "analytics", "bigquery", "snowflake", "looker", "bi"],
+  "description": "Guards SQL generation against missing partition filters and join fanout explosions, computes exact Volume-Mix-Rate KPI bridges with z-score anomaly detection, and profiles datasets in RAM to emit verified A2UI chart payloads.",
+  "skills": [
+    {
+      "id": "schema-grounded-sql-analyst",
+      "script": "scripts/sql_safety_and_fanout_checker.py",
+      "summary": "Inspects SQL queries and table metadata for missing partition filters, M:N join fanout risks, destructive DDL/DML, and denominator seams."
+    },
+    {
+      "id": "kpi-anomaly-driver-tree",
+      "script": "scripts/mix_rate_volume_bridge.py",
+      "summary": "Computes exact zero-residual Volume-Mix-Rate variance decomposition and segment z-score anomaly detection."
+    },
+    {
+      "id": "executive-data-story-pack",
+      "script": "scripts/dataset_profiler_guard.py",
+      "summary": "Profiles tabular datasets in RAM for completeness, null rates, quantiles, outliers, truncation ceilings, and A2UI Canvas payloads."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "bigquery-sap-erp-traps.md",
+    "chain-denominator-seams.md",
+    "google-workspace-traps.md"
+  ],
+  "shared_baselines": [
+    "finance-materiality-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/conversational-bi-analyst-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-kpi-anomaly-digest.yaml"
+  ],
+  "license": "Apache-2.0"
+}

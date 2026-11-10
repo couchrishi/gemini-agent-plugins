@@ -1,0 +1,49 @@
+skill_id: multimodal-campaign-brief
+plugin_id: brand-campaign-studio
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/campaign_asset_matrix.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - missing_channel_cells
+  - late_assets
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - campaign_readiness
+  must_not_include_patterns:
+  - assumed empty audience matrix cell is covered
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Explicitly reports uncovered audience-channel and funnel cells.
+  - Checks asset due_date lead time against min_production_buffer_days.
+scenarios:
+- id: mode_a_funnel_matrix_gaps
+  mode: mode_a
+  prompt: Audit Meridian BioPharma Q4 launch plan in Drive for missing Conversion
+    stage assets and budget overrun.
+  expected_assertions:
+  - Lists missing_funnel_cells and over_budget flag accurately.
+  - Assigns LAUNCH_AT_RISK_GAPS_PRESENT.
+- id: mode_b_sheets_buffer_check
+  mode: mode_b
+  prompt: Check Drive Launch Tracker Sheet for assets due only 2 days before launch_date.
+  expected_assertions:
+  - Flags late_assets below 5-day buffer.
+  - Includes standard baseline stamp when org_configured is false.
+- id: mode_c_local_brief_lock
+  mode: mode_c
+  prompt: Evaluate campaign_brief.json and verify spend variance calculation.
+  expected_assertions:
+  - Computes exact planned_spend_usd and budget_variance_usd.
+  - Maintains HITL approval gate for launch.
+rubric:
+- criterion: matrix_gap_completeness
+  weight: 0.4
+  description: "Surfaces every uncovered audience\xD7channel and funnel stage."
+- criterion: budget_and_schedule_math
+  weight: 0.35
+  description: Computes spend variance and buffer lead days accurately.
+- criterion: readiness_and_hitl_discipline
+  weight: 0.25
+  description: Emits actionable readiness status with HITL gate.

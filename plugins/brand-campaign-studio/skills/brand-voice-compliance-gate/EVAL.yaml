@@ -1,0 +1,48 @@
+skill_id: brand-voice-compliance-gate
+plugin_id: brand-campaign-studio
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/copy_compliance_linter.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - asset_audits
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - publish_gate
+  must_not_include_patterns:
+  - published copy with unverified guarantee
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Blocks prohibited superlatives and missing claim disclaimers.
+  - Checks channel-specific headline character caps.
+scenarios:
+- id: mode_a_prohibited_claim
+  mode: mode_a
+  prompt: Lint Northstar Retail's seasonal Google Docs ad copy claiming 'Save up to
+    40% with zero risk'.
+  expected_assertions:
+  - Flags both prohibited claim ('zero risk') and missing disclaimer -> BLOCKED_COMPLIANCE_VIOLATION.
+  - Computes compliance_score accurately.
+- id: mode_b_char_limit_warning
+  mode: mode_b
+  prompt: Check Search Ad headlines in Marketing Drive Sheet exceeding 30 characters.
+  expected_assertions:
+  - Flags character limit warning and lowers compliance_score.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_lint_clean
+  mode: mode_c
+  prompt: Lint copy_assets.json locally and verify HITL gate before CMS publish.
+  expected_assertions:
+  - Distinguishes APPROVED_FOR_LOCALIZATION vs BLOCKED assets clearly.
+  - Preserves human publish sign-off.
+rubric:
+- criterion: claim_and_disclaimer_checks
+  weight: 0.45
+  description: Detects banned phrases and missing substantiation disclaimers reliably.
+- criterion: channel_and_readability_checks
+  weight: 0.3
+  description: Enforces channel char limits and readability word targets.
+- criterion: hitl_publishing_safety
+  weight: 0.25
+  description: Enforces baseline disclosure and human launch sign-off.

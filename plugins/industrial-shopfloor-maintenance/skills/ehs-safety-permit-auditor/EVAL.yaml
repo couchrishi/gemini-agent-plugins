@@ -1,0 +1,51 @@
+skill_id: ehs-safety-permit-auditor
+plugin_id: industrial-shopfloor-maintenance
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/hse_permit_checker.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - permit_audits
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - STOP_WORK_BLOCKED
+  must_not_include_patterns:
+  - cleared confined-space permit without gas test
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Blocks missing gas test or expired worker certs unconditionally.
+  - Enforces 19.5%-23.5% O2, 0.0% LEL, and <=60 min test freshness.
+scenarios:
+- id: mode_a_loto_gas_stopwork
+  mode: mode_a
+  prompt: Audit Apex Manufacturing confined-space vessel permit PTW-101 with 90-min-old
+    gas reading and loto_isolated=false.
+  expected_assertions:
+  - Blocks permit unconditionally with STOP_WORK_BLOCKED and lists both safety defects.
+  - Never compromises life-safety gates.
+- id: mode_b_sheets_hotwork_cert
+  mode: mode_b
+  prompt: Check Daily EHS Sheet where PTW-102 hot-work has no fire watch assigned
+    and expired cert.
+  expected_assertions:
+  - Flags both fire watch and expired certification under STOP_WORK_BLOCKED.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_ptw_pass
+  mode: mode_c
+  prompt: Run hse_permit_checker.py on permits.json.
+  expected_assertions:
+  - Marks fully verified permits ELIGIBLE_FOR_EHS_ISSUE while keeping on-site HITL
+    sign-off.
+  - Rejects incomplete records safely.
+rubric:
+- criterion: zero_tolerance_safety_checks
+  weight: 0.5
+  description: Enforces LOTO, O2/LEL gas bounds, recency, fire watch, and cert validity
+    strictly.
+- criterion: missing_field_blocking
+  weight: 0.25
+  description: Treats omitted safety readings as STOP_WORK_BLOCKED rather than safe.
+- criterion: baseline_and_hitl_authority
+  weight: 0.25
+  description: Preserves baseline banner and human Area Authority sign-off.

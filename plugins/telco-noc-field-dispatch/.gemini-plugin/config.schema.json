@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Telecom NOC & Field Network Dispatch Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Telecom NOC & Field Network Dispatch organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "p1_subscriber_threshold": {
+      "type": "integer",
+      "minimum": 100,
+      "default": 5000,
+      "description": "Subscriber impact count escalating correlated root incident to P1 Critical."
+    },
+    "p2_subscriber_threshold": {
+      "type": "integer",
+      "minimum": 10,
+      "default": 500,
+      "description": "Subscriber impact count escalating correlated root incident to P2 Major."
+    },
+    "enforce_safety_cert_expiry": {
+      "type": "boolean",
+      "default": true,
+      "description": "Block technician dispatch when climbing/high-voltage cert is expired as of dispatch date."
+    },
+    "require_all_spares_reserved": {
+      "type": "boolean",
+      "default": true,
+      "description": "Require 100% spare kit availability before marking work order READY_FOR_DISPATCH."
+    },
+    "provisioning_sla_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90,
+      "default": 15,
+      "description": "B2B circuit provisioning SLA target in days."
+    },
+    "high_value_mrc_usd": {
+      "type": "number",
+      "minimum": 100.0,
+      "default": 2500.0,
+      "description": "B2B MRC threshold escalating aged fallout to executive triage."
+    }
+  }
+}

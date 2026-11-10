@@ -1,0 +1,42 @@
+{
+  "id": "enterprise-knowledge-hub",
+  "name": "Enterprise Knowledge Hub",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "knowledge-management", "intranet", "policy-ops"],
+  "description": "Synthesizes cross-source enterprise knowledge with strict citation conflict detection, jurisdiction-scoped SOP/policy answering with abstention gates, and corpus freshness/duplication auditing across Google Workspace, SharePoint, and Confluence.",
+  "skills": [
+    {
+      "id": "cross-source-knowledge-synthesis",
+      "script": "scripts/citation_conflict_auditor.py",
+      "summary": "Scores source authority and recency across multi-repo hits, flags conflicting numerical/date claims, and verifies 100% claim citation coverage."
+    },
+    {
+      "id": "policy-sop-answering",
+      "script": "scripts/policy_scope_matcher.py",
+      "summary": "Filters policy and SOP clauses by jurisdiction, entity, and effective date, enforcing abstention when active coverage is missing."
+    },
+    {
+      "id": "knowledge-gap-freshness-audit",
+      "script": "scripts/corpus_hygiene_scanner.py",
+      "summary": "Audits Drive, SharePoint, and Confluence inventories for overdue review dates, departed owners, near-duplicate titles, and unindexed ticket gaps."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "google-workspace-traps.md",
+    "sharepoint-onedrive-kql-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md",
+    "commercial-contract-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/enterprise-knowledge-hub-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-corpus-hygiene-audit.yaml"
+  ],
+  "license": "Apache-2.0"
+}

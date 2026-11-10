@@ -1,0 +1,47 @@
+{
+  "id": "healthcare-clinical-regulatory",
+  "name": "Healthcare Clinical Trial, Pharmacovigilance & Prior Auth",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "healthcare",
+    "life-sciences",
+    "clinical-trials",
+    "pharmacovigilance",
+    "payer",
+    "hipaa"
+  ],
+  "description": "Validates clinical Schedule of Assessments schedules vs endpoints and enrollment capacity, checks E2B ICSR 4 minimum criteria and 7/15-day statutory clocks with PHI redaction alerts, and audits prior authorization packets against payer criteria.",
+  "skills": [
+    {
+      "id": "clinical-protocol-feasibility",
+      "script": "scripts/soa_endpoint_validator.py",
+      "summary": "Detects missing endpoint procedures in trial Schedules of Assessments and projects net IRB-approved screen-adjusted enrollment."
+    },
+    {
+      "id": "pharmacovigilance-safety-intake",
+      "script": "scripts/icsr_completeness_checker.py",
+      "summary": "Validates 4 ICH minimum ICSR criteria, calculates 7-day/15-day/90-day statutory clocks from awareness_date, and traps raw PHI leaks."
+    },
+    {
+      "id": "prior-auth-medical-necessity",
+      "script": "scripts/medical_criteria_matcher.py",
+      "summary": "Matches CPT prior-auth packets against covered ICD-10 prefixes, step-therapy trial durations, and required diagnostic labs."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "commercial-contract-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/healthcare-clinical-regulatory-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/daily-icsr-sla-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

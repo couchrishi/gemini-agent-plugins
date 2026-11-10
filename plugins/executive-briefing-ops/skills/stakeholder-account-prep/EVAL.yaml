@@ -1,0 +1,48 @@
+skill_id: stakeholder-account-prep
+plugin_id: executive-briefing-ops
+version: "1.0"
+deterministic_checks:
+  expected_script: scripts/dossier_synthesizer.py
+  required_output_keys:
+    - baseline_mode
+    - summary
+    - dossiers
+  must_include_patterns:
+    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+    - "arr_at_risk_usd"
+  must_not_include_patterns:
+    - "assumed zero open escalations despite missing feed"
+    - "updated CRM fields without confirmation"
+  hitl_required_for_mutations: true
+  trap_checks:
+    - "Emits UNVERIFIED_INSUFFICIENT_SCOPE when CRM or escalation feeds are missing."
+    - "Computes renewal countdown and touchpoint staleness deterministically."
+scenarios:
+  - id: mode_a_crm_qbr_prep
+    mode: mode_a
+    prompt: "Prepare executive QBR dossier for Meridian BioPharma from Salesforce and support logs."
+    expected_assertions:
+      - "Computes health_score, rag_status, and days_to_renewal."
+      - "Highlights open P1/P2 tickets and overdue milestones."
+  - id: mode_b_missing_escalation_feed
+    mode: mode_b
+    prompt: "Build account brief from Workspace Sheets when escalation tracker feed is unavailable."
+    expected_assertions:
+      - "Reports missing_feeds under UNVERIFIED_INSUFFICIENT_SCOPE."
+      - "Includes baseline disclaimer when org_configured is false."
+  - id: mode_c_portfolio_json_upload
+    mode: mode_c
+    prompt: "Rank Cymbal Financial, Apex Manufacturing, and Northstar Retail by ARR at risk."
+    expected_assertions:
+      - "Sorts worst health score and highest ARR at risk first."
+      - "Computes exact aggregate arr_at_risk_usd across RED and AMBER accounts."
+rubric:
+  - criterion: multi_signal_scoring
+    weight: 0.4
+    description: Accurately combines P1/P2 counts, touchpoint age, NPS, and renewal proximity.
+  - criterion: missing_feed_honesty
+    weight: 0.35
+    description: Surfaces missing connector feeds instead of treating absent signals as zero risk.
+  - criterion: baseline_and_hitl_compliance
+    weight: 0.25
+    description: Applies baseline banner when unconfigured and prevents unapproved external comms.

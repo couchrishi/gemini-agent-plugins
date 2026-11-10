@@ -1,0 +1,16 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "max_avg_sentence_words": 22,
+  "min_production_buffer_days": 5,
+  "required_locales": [
+    "ja-JP",
+    "de-DE",
+    "fr-FR"
+  ],
+  "do_not_translate_terms": [
+    "Gemini Enterprise",
+    "BigQuery",
+    "Vertex AI"
+  ]
+}

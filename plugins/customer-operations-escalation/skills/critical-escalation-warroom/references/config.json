@@ -1,0 +1,10 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "war_room_score_threshold": 70.0,
+  "vip_arr_threshold_usd": 250000.0,
+  "imminent_renewal_days": 90,
+  "detractor_csat_max": 2,
+  "detractor_nps_max": 6,
+  "max_resolution_hops": 6
+}

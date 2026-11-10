@@ -1,0 +1,48 @@
+skill_id: csat-churn-signal-miner
+plugin_id: customer-operations-escalation
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/verbatim_driver_quantifier.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - driver_pareto
+  - churn_alerts
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - unrated_csat_excluded
+  must_not_include_patterns:
+  - averaged null csat_score as zero
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Excludes null ratings from avg_csat and NPS denominators cleanly.
+  - Weights driver_pareto by detractor ARR and flags churn phrases.
+scenarios:
+- id: mode_a_null_denominator_guard
+  mode: mode_a
+  prompt: Analyze Veloce SuperApp CSAT responses where 2 of 6 rows omitted csat_score.
+  expected_assertions:
+  - Excludes null rows from avg_csat denominator (sets unrated_csat_excluded=2).
+  - Captures explicit churn-intent phrases in churn_alerts.
+- id: mode_b_sheets_arr_pareto
+  mode: mode_b
+  prompt: Quantify latency vs support responsiveness ARR exposure in Drive CSAT Sheet.
+  expected_assertions:
+  - Ranks driver_pareto descending by arr_exposed_usd.
+  - Emits baseline banner when org_configured is false.
+- id: mode_c_local_nps_miner
+  mode: mode_c
+  prompt: Run verbatim_driver_quantifier.py on survey_responses.json.
+  expected_assertions:
+  - Computes exact NPS score and detractor ARR totals.
+  - Maintains HITL gate before CRM outreach.
+rubric:
+- criterion: denominator_null_hygiene
+  weight: 0.45
+  description: Never coerces null ratings to zero when computing CSAT/NPS.
+- criterion: driver_arr_quantification
+  weight: 0.3
+  description: Maps verbatims to driver taxonomy and churn alerts accurately.
+- criterion: baseline_and_hitl_safety
+  weight: 0.25
+  description: Includes baseline stamp and preserves human outreach gate.

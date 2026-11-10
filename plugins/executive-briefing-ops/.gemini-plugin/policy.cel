@@ -1,0 +1,34 @@
+version: "1.0"
+plugin_id: executive-briefing-ops
+read_only_tools:
+  - calendar_list_events
+  - gmail_list_messages
+  - meet_read_transcript
+  - salesforce_query_account
+  - view_file
+  - pyrepl
+draft_only_tools:
+  - gmail_create_draft
+  - docs_create_private_brief
+  - calendar_propose_hold_draft
+  - write_to_file
+hitl_gated_mutations:
+  - tool: gmail_send_message
+    scope: explicit_per_call
+    condition: "request.is_external_recipient == true || request.recipient_count >= 1"
+    reason: Sending executive follow-ups or stakeholder emails requires explicit user confirmation.
+  - tool: calendar_update_event
+    scope: explicit_per_call
+    condition: "request.action in ['cancel', 'decline', 'invite_external'] || request.attendee_count > 1"
+    reason: Modifying or declining multi-attendee meetings requires explicit HITL approval.
+  - tool: slack_post_action_summary
+    scope: task_sticky
+    condition: "request.channel_is_shared == true"
+    reason: Posting meeting action items into shared channels requires user confirmation.
+cel_guardrails:
+  - id: quarantine_external_mail_injections
+    description: Halt automated follow-up drafting when untrusted external email bodies contain override directives.
+    expr: "untrusted_content.detected == true"
+  - id: require_completeness_disclosure
+    description: Flag partial briefings when calendar or escalation feeds returned truncated pages.
+    expr: "result.truncated == true || result.blocked_connector_count > 0"

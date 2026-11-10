@@ -1,0 +1,49 @@
+skill_id: bench-skill-demand-matcher
+plugin_id: gsi-proposal-ip-factory
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/talent_bench_matcher.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - role_matches
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - fill_status
+  must_not_include_patterns:
+  - assigned consultant below skill overlap floor
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Excludes late bench availability beyond max_start_delay_days.
+  - Flags unfilled roles explicitly as EXTERNAL_SUBCONTRACT_REQUIRED.
+scenarios:
+- id: mode_a_bench_gap_subcontract
+  mode: mode_a
+  prompt: Match Cascade State University project demands against Workday bench roster
+    where SAP Basis lacks local coverage.
+  expected_assertions:
+  - Shortlists qualified seats and flags SAP Basis as EXTERNAL_SUBCONTRACT_REQUIRED.
+  - Computes exact skill_match_pct and margin %.
+- id: mode_b_sheets_delay_filter
+  mode: mode_b
+  prompt: Check Drive Bench Sheet filtering out consultants rolling off > 21 days
+    after start date.
+  expected_assertions:
+  - Excludes consultants exceeding max_start_delay_days (14d).
+  - Applies standard baseline stamp when org_configured is false.
+- id: mode_c_local_matcher_rank
+  mode: mode_c
+  prompt: Run talent_bench_matcher.py on bench_demands.json.
+  expected_assertions:
+  - Ranks top 3 candidates per seat by composite_fit_score.
+  - Maintains HITL booking confirmation.
+rubric:
+- criterion: matching_and_filter_rigor
+  weight: 0.45
+  description: Applies overlap %, start-date delay, and margin ranking accurately.
+- criterion: subcontract_gap_reporting
+  weight: 0.3
+  description: Flags unfillable demands transparently rather than lowering thresholds.
+- criterion: baseline_and_hitl_safety
+  weight: 0.25
+  description: Enforces baseline disclosure and Resource Manager HITL gate.

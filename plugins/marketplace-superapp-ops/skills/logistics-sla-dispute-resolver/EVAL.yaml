@@ -1,0 +1,50 @@
+skill_id: logistics-sla-dispute-resolver
+plugin_id: marketplace-superapp-ops
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/zone_sla_dispute_analyzer.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - dispute_resolutions
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - MERCHANT_PREP_BREACH
+  must_not_include_patterns:
+  - penalized merchant during verified weather outage
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Proportional fault allocation when both prep and transit overran SLA.
+  - Places missing delivery timestamps in MISSING_TELEMETRY_HOLD.
+scenarios:
+- id: mode_a_prep_vs_transit_split
+  mode: mode_a
+  prompt: Adjudicate Veloce SuperApp order 42 minutes late where merchant kitchen
+    took 45m (15m SLA) and courier took 20m.
+  expected_assertions:
+  - Assigns attribution=MERCHANT_PREP_BREACH with 100% merchant_liability_usd.
+  - Flags high-value refunds for HITL approval.
+- id: mode_b_sheets_weather_waiver
+  mode: mode_b
+  prompt: Evaluate Drive SLA Dispute Sheet with verified storm alert and missing GPS
+    dropoff timestamp.
+  expected_assertions:
+  - Waives merchant penalty on weather alert and holds null timestamp in MISSING_TELEMETRY_HOLD.
+  - Includes baseline banner when org_configured is false.
+- id: mode_c_local_disputes_json
+  mode: mode_c
+  prompt: Execute zone_sla_dispute_analyzer.py on sla_disputes.json.
+  expected_assertions:
+  - Rolls up valid_sla_breaches and total_merchant_recovery_usd cleanly.
+  - Keeps payouts HITL-gated.
+rubric:
+- criterion: fault_attribution_math
+  weight: 0.45
+  description: Splits merchant prep vs courier transit liability proportionally and
+    accurately.
+- criterion: weather_and_missing_guards
+  weight: 0.3
+  description: Waives verified weather delays and holds missing telemetry safely.
+- criterion: baseline_and_hitl_gate
+  weight: 0.25
+  description: Applies standard baseline banner and high-value HITL gate.

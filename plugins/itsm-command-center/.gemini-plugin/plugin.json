@@ -1,0 +1,40 @@
+{
+  "id": "itsm-command-center",
+  "name": "ITSM & Service Desk Command Center",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "itsm", "servicenow", "jira", "service-desk"],
+  "description": "Accelerates incident triage with business-elapsed SLA breach tracking and spike clustering, scores CAB change requests against freeze windows and blast radius, and mines resolved tickets for Problem candidates and KCS deflection savings.",
+  "skills": [
+    {
+      "id": "incident-triage-routing",
+      "script": "scripts/sla_cluster_triage.py",
+      "summary": "Computes business-elapsed vs wall-clock SLA risk, clusters correlated incident spikes by CI and error signature, and ranks matching runbooks."
+    },
+    {
+      "id": "change-risk-cab-review",
+      "script": "scripts/cab_risk_scorer.py",
+      "summary": "Scores ServiceNow and Jira change requests across blast radius, freeze-window collisions, rollback validation, CI failure history, and CAB tier."
+    },
+    {
+      "id": "problem-rca-kb-generator",
+      "script": "scripts/kcs_deflection_analyzer.py",
+      "summary": "Groups repeat resolved tickets into Problem candidates, calculates MTTR and annualized L1 deflection savings, and validates KCS draft completeness."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "servicenow-jira-itsm-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/itsm-command-center-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/hourly-sla-breach-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

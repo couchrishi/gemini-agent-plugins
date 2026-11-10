@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gemini-agent-plugins"
+version = "1.0.0"
+description = "Production-grade enterprise plugins, workflow skills, deterministic computation engines, API trap sheets, and CEL guardrails for Gemini Enterprise and Gemini Agent."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.11"
+# Core computation engines and packaging/validation tools rely exclusively on the Python 3.11+ standard library.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pyyaml>=6.0",
+  "jsonschema>=4.20",
+]
+analytics = [
+  "pandas>=2.1",
+  "openpyxl>=3.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"

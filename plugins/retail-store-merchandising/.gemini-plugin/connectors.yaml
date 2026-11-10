@@ -1,0 +1,28 @@
+version: '1.0'
+plugin_id: retail-store-merchandising
+capabilities:
+- id: retail_pos_wms_and_erp
+  description: Store POS transaction feeds, perpetual inventory ledger, promotional
+    calendars, and DC dock receipt logs.
+  required: true
+  mode_a_live_connectors:
+  - connector: bigquery_sql_api
+    endpoint_template: https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/queries
+    auth_type: workload_identity
+    scopes:
+    - https://www.googleapis.com/auth/bigquery.readonly
+  - connector: sap_odata_api
+    endpoint_template: https://{erp_host}/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+    auth_type: mtls_oauth2
+    scopes:
+    - sap.mm.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read Store Shrink Cycle-Count Sheets (`UNFORMATTED_VALUE`), Promo
+      Recap Decks/Sheets, and DC Receiving Logs in Retail Ops Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

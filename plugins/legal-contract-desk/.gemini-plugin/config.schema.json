@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Legal Contract Desk Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once organization-specific contract playbook limits and jurisdictions are bound."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant organization name."
+    },
+    "lol_cap_months_min": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60,
+      "default": 12,
+      "description": "Minimum acceptable Limitation of Liability cap in months of trailing fees."
+    },
+    "lol_cap_months_max": {
+      "type": "integer",
+      "minimum": 6,
+      "maximum": 120,
+      "default": 24,
+      "description": "Maximum preferred Limitation of Liability cap in months of fees."
+    },
+    "super_cap_multiplier_max": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 10.0,
+      "default": 3.0,
+      "description": "Maximum acceptable super-cap multiple over general LoL for data/IP/confidentiality."
+    },
+    "max_renewal_notice_days": {
+      "type": "integer",
+      "minimum": 15,
+      "maximum": 180,
+      "default": 60,
+      "description": "Maximum auto-renewal advance notice window before flagging a redline."
+    },
+    "max_price_escalator_pct": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 20.0,
+      "default": 5.0,
+      "description": "Maximum annual renewal price uplift / CPI cap percentage."
+    },
+    "max_breach_notify_hours": {
+      "type": "integer",
+      "minimum": 12,
+      "maximum": 168,
+      "default": 72,
+      "description": "Maximum allowed DPA security incident notification window in hours."
+    },
+    "forbid_customer_data_training": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, clauses granting vendor AI model training rights on customer data score Score 9."
+    },
+    "approved_jurisdictions": {
+      "type": "array",
+      "default": ["Delaware", "New York", "England and Wales", "Singapore"],
+      "description": "Approved governing law jurisdictions."
+    },
+    "max_control_evidence_days": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 730,
+      "default": 365,
+      "description": "Maximum age of compliance control test evidence before flagging stale."
+    }
+  }
+}

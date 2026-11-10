@@ -1,0 +1,14 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "target_currency": "USD",
+  "auto_approve_max_discount_pct": 15.0,
+  "vp_approve_max_discount_pct": 25.0,
+  "deal_desk_max_discount_pct": 35.0,
+  "min_gross_margin_floor_pct": 60.0,
+  "stage_stale_multiplier": 1.5,
+  "max_push_count_before_flag": 2,
+  "min_commit_contacts": 2,
+  "target_pipeline_coverage_x": 3.0,
+  "rfp_min_similarity_threshold": 0.22
+}

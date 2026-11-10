@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Brand Governance, Campaign Matrix & Localization Studio Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Brand Governance, Campaign Matrix & Localization Studio organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "max_avg_sentence_words": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 40,
+      "default": 22,
+      "description": "Target maximum average words per sentence in ad/landing copy."
+    },
+    "min_production_buffer_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "default": 5,
+      "description": "Minimum calendar days between asset completion and campaign launch."
+    },
+    "required_locales": {
+      "type": "array",
+      "default": [
+        "ja-JP",
+        "de-DE",
+        "fr-FR"
+      ],
+      "description": "Default target locales expected on global launches."
+    },
+    "do_not_translate_terms": {
+      "type": "array",
+      "default": [
+        "Gemini Enterprise",
+        "BigQuery",
+        "Vertex AI"
+      ],
+      "description": "Protected product terms that must stay verbatim across locales."
+    }
+  }
+}

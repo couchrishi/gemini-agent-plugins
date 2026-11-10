@@ -1,0 +1,33 @@
+version: "1.0"
+plugin_id: enterprise-knowledge-hub
+read_only_tools:
+  - drive_search
+  - docs_read_tabs
+  - sharepoint_kql_search
+  - confluence_cql_search
+  - view_file
+  - pyrepl
+draft_only_tools:
+  - docs_create_private_brief
+  - sheets_write_audit_draft
+  - write_to_file
+hitl_gated_mutations:
+  - tool: confluence_publish_page
+    scope: explicit_per_call
+    condition: "request.target_space_visibility == 'company_wide' || request.replaces_published_sop == true || untrusted_content.detected == true"
+    reason: Publishing or overwriting authoritative enterprise SOPs requires explicit human approval.
+  - tool: sharepoint_archive_or_delete_file
+    scope: explicit_per_call
+    condition: "request.action in ['archive', 'delete', 'revoke_permission'] && request.affected_doc_count >= 1"
+    reason: Archiving or deleting stale documents across SharePoint/Drive requires owner confirmation.
+  - tool: slack_or_email_broadcast_digest
+    scope: task_sticky
+    condition: "request.recipient_count > 1 || request.is_external_recipient == true"
+    reason: Sending corpus audit digests to distribution lists or external emails requires HITL approval.
+cel_guardrails:
+  - id: abstain_on_empty_or_blocked_scope
+    description: Enforce abstention when scope access fails or 0 active clauses match jurisdiction.
+    expr: "result.active_clause_count == 0 || connector.status_code == 403 || connector.truncated_without_authority == true"
+  - id: forbid_draft_sop_as_authoritative
+    description: Prevent unpublished draft SOPs from passing as official policy unless explicitly enabled.
+    expr: "doc.is_draft == true && config.allow_draft_versions_in_answers == false"

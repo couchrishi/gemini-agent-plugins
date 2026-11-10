@@ -1,0 +1,38 @@
+version: '1.0'
+plugin_id: public-sector-higher-ed
+read_only_tools:
+- case_read_applicant_packet
+- procurement_read_sealed_bids
+- grants_read_budget_ledger
+- view_file
+- pyrepl
+draft_only_tools:
+- docs_draft_cure_notice
+- sheets_draft_bid_scorecard
+- docs_draft_grant_audit
+- write_to_file
+hitl_gated_mutations:
+- tool: case_issue_benefit_determination
+  scope: explicit_per_call
+  condition: request.cases_triaged >= 1
+  reason: Approving or denying citizen benefits requires licensed public-sector caseworker
+    HITL authorization.
+- tool: procurement_award_contract
+  scope: explicit_per_call
+  condition: request.compliant_bids >= 1
+  reason: Awarding public procurement tenders requires Evaluation Board Chair HITL
+    sign-off.
+- tool: grants_submit_sponsor_package
+  scope: explicit_per_call
+  condition: request.blocker_count == 0
+  reason: Certifying grant budgets to federal/foundation sponsors requires Sponsored
+    Programs Officer HITL sign-off.
+cel_guardrails:
+- id: block_award_to_disqualified_bidder
+  description: Never allow contract award recommendations when zero compliant bids
+    exist.
+  expr: tender.compliant_bids >= 1
+- id: block_grant_submit_with_unallowables
+  description: Halt sponsor submission if unallowable costs, F&A cap breaches, or
+    PI >100% effort exist.
+  expr: grants.blocker_count == 0

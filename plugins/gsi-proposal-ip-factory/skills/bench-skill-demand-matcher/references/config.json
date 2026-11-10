@@ -1,0 +1,10 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "min_sow_gross_margin_pct": 30.0,
+  "critical_margin_floor_pct": 20.0,
+  "target_offshore_leverage_pct": 55.0,
+  "max_acceptance_business_days": 10,
+  "min_skill_overlap_pct": 60.0,
+  "max_start_delay_days": 14
+}

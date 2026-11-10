@@ -1,0 +1,20 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: daily-critical-spares-watch
+  plugin: industrial-shopfloor-maintenance
+spec:
+  cron_expression: 0 6 * * 1-5
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: asset-reliability-spares-planner
+  prompt: Run the daily critical spare parts ROP check via scripts/mtbf_spares_optimizer.py
+    across plant rotating equipment and flag zero-stock critical assets.
+  goal_verifier:
+    command_check: python3 skills/asset-reliability-spares-planner/scripts/mtbf_spares_optimizer.py
+      --help
+    nl_criteria:
+    - Zero-failure assets use right-censored conservative MTBF rather than dividing
+      by zero.
+    - Critical zero-on-hand parts flag CRITICAL_STOCKOUT_EXPEDITE.
+    - Standard baseline stamp appears when org_configured is false.

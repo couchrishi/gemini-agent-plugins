@@ -1,0 +1,39 @@
+{
+  "as_of_date": "2026-11-10",
+  "permits": [
+    {
+      "permit_id": "PTW-APEX-101",
+      "facility": "Apex Stamping Plant 2",
+      "work_type": "confined_space",
+      "work_date": "2026-11-10",
+      "worker_cert_valid_until": "2027-06-01",
+      "issuer_signed": true,
+      "loto_isolated": true,
+      "gas_test_o2_pct": 18.2,
+      "gas_test_lel_pct": 0.0,
+      "gas_test_age_mins": 20
+    },
+    {
+      "permit_id": "PTW-APEX-102",
+      "facility": "Apex Stamping Plant 2",
+      "work_type": "hot_work",
+      "work_date": "2026-11-10",
+      "worker_cert_valid_until": "2026-10-01",
+      "issuer_signed": true,
+      "loto_isolated": false,
+      "fire_watch_assigned": false
+    },
+    {
+      "permit_id": "PTW-APEX-103",
+      "facility": "Apex Stamping Plant 2",
+      "work_type": "confined_space",
+      "work_date": "2026-11-10",
+      "worker_cert_valid_until": "2027-08-15",
+      "issuer_signed": true,
+      "loto_isolated": true,
+      "gas_test_o2_pct": 20.9,
+      "gas_test_lel_pct": 0.0,
+      "gas_test_age_mins": 15
+    }
+  ]
+}

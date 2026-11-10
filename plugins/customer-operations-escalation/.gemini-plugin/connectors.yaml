@@ -1,0 +1,28 @@
+version: '1.0'
+plugin_id: customer-operations-escalation
+capabilities:
+- id: crm_and_support_case_data
+  description: CRM ARR/renewal snapshots, active Sev1/Sev2 case backlogs, CSAT/NPS
+    survey verbatims, and support troubleshooting trees.
+  required: true
+  mode_a_live_connectors:
+  - connector: salesforce_soql_api
+    endpoint_template: https://{instance}.my.salesforce.com/services/data/v60.0/query
+    auth_type: oauth2_user
+    scopes:
+    - api
+  - connector: servicenow_csm_api
+    endpoint_template: https://{instance}.service-now.com/api/now/table/sn_customerservice_case
+    auth_type: oauth2_service_account
+    scopes:
+    - csm_case.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    - Google Drive
+    lookup_hint: Read VIP Escalation Tracker Sheets, Quarterly Survey Exports, and
+      Support Playbook Docs in CX Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv

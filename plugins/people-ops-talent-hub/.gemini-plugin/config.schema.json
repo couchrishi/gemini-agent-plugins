@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "People Ops, Talent Calibration & Workforce Analytics Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once People Ops, Talent Calibration & Workforce Analytics organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "max_score_spread": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 3.0,
+      "default": 2.0,
+      "description": "Interviewer score spread alert threshold on 1-4 scale."
+    },
+    "min_evidence_chars": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 200,
+      "default": 40,
+      "description": "Minimum behavioral evidence length per scorecard."
+    },
+    "hire_mean_threshold": {
+      "type": "number",
+      "minimum": 2.0,
+      "maximum": 4.0,
+      "default": 3.0,
+      "description": "Minimum panel mean score for hire consensus."
+    },
+    "compa_ratio_min": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 1.0,
+      "default": 0.85,
+      "description": "Lower target compa-ratio bound."
+    },
+    "compa_ratio_max": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 1.5,
+      "default": 1.15,
+      "description": "Upper target compa-ratio bound."
+    },
+    "compa_ratio_underpaid_alert": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 0.95,
+      "default": 0.8,
+      "description": "Below-band compression alert threshold."
+    },
+    "compa_ratio_overpaid_alert": {
+      "type": "number",
+      "minimum": 1.05,
+      "maximum": 2.0,
+      "default": 1.25,
+      "description": "Above-band ceiling alert threshold."
+    },
+    "min_privacy_cell_size": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 20,
+      "default": 5,
+      "description": "Minimum FTE cohort size before suppressing group comp/attrition metrics."
+    },
+    "annual_working_hours": {
+      "type": "integer",
+      "minimum": 1500,
+      "maximum": 2400,
+      "default": 2080,
+      "description": "Standard annual hours for hourly-to-annual pay normalization."
+    }
+  }
+}

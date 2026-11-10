@@ -1,0 +1,50 @@
+{
+  "id": "gsi-proposal-ip-factory",
+  "name": "GSI Proposal Architecture, SOW Margin & Bench Factory",
+  "version": "1.0.0",
+  "category": "enterprise-ops",
+  "segment_tags": [
+    "system-integrator",
+    "consulting",
+    "sow",
+    "margin",
+    "bench",
+    "delivery"
+  ],
+  "description": "Models consulting delivery staffing pyramids and onshore/offshore margin leverage, audits SOW drafts for scope creep phrasing and margin breaches, and matches open project roles to bench consultants.",
+  "skills": [
+    {
+      "id": "winning-proposal-architect",
+      "script": "scripts/staffing_pyramid_calculator.py",
+      "summary": "Calculates multi-phase effort hours, onshore/offshore leverage ratio, blended bill rate, and gross margin vs SOW floor."
+    },
+    {
+      "id": "sow-scope-margin-auditor",
+      "script": "scripts/sow_margin_linter.py",
+      "summary": "Lints SOW drafts for unbounded 'all work required' obligations, missing acceptance criteria, >10d deemed acceptance, and margin floors."
+    },
+    {
+      "id": "bench-skill-demand-matcher",
+      "script": "scripts/talent_bench_matcher.py",
+      "summary": "Matches open project seats against bench skills, roll-off dates, location overlap, and target role margin."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "google-workspace-traps.md",
+    "sharepoint-onedrive-kql-traps.md",
+    "workday-hris-traps.md"
+  ],
+  "shared_baselines": [
+    "commercial-contract-baseline.md",
+    "deal-desk-approval-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/gsi-proposal-ip-factory-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-bench-utilization-digest.yaml"
+  ],
+  "license": "Apache-2.0"
+}

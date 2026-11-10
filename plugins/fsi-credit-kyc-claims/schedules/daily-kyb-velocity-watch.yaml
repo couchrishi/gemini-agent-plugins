@@ -1,0 +1,19 @@
+apiVersion: gemini-agent/v1alpha1
+kind: ScheduleTemplate
+metadata:
+  name: daily-kyb-velocity-watch
+  plugin: fsi-credit-kyc-claims
+spec:
+  cron_expression: 0 5 * * *
+  timezone: UTC
+  max_token_budget: 20000
+  target_skill: kyc-aml-screening-dossier
+  prompt: Run the daily AML transaction velocity and structuring sweep via scripts/ubo_velocity_screener.py
+    across active corporate banking accounts and flag EDD alerts for MLRO review.
+  goal_verifier:
+    command_check: python3 skills/kyc-aml-screening-dossier/scripts/ubo_velocity_screener.py
+      --help
+    nl_criteria:
+    - High-risk jurisdictions lower UBO threshold from 25% to 10% automatically.
+    - Rolling 30d spikes >=3x and structured $8k-$9.99k deposits trigger MLRO review.
+    - Standard baseline stamp appears when org_configured is false.

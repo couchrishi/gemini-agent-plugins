@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+"""Audits effective-dated HRIS pay & attrition rows with CWK isolation, pay normalization, and privacy floors."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+from datetime import date
+from pathlib import Path
+from typing import Any
+
+BASELINE_BANNER = "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+DEFAULT_CONFIG: dict[str, Any] = {
+    "org_configured": False,
+    "organization_name": "Standard Baseline Tenant",
+    "compa_ratio_min": 0.85,
+    "compa_ratio_max": 1.15,
+    "compa_ratio_underpaid_alert": 0.8,
+    "compa_ratio_overpaid_alert": 1.25,
+    "min_privacy_cell_size": 5,
+    "annual_working_hours": 2080,
+}
+
+
+def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[str, Any], bool, str]:
+    cfg = dict(DEFAULT_CONFIG)
+    if isinstance(config_arg, dict):
+        cfg.update(config_arg)
+    elif config_arg is not None:
+        p = Path(config_arg)
+        if p.is_file():
+            cfg.update(json.loads(p.read_text(encoding="utf-8")))
+    org_cfg = bool(cfg.get("org_configured", False))
+    return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
+
+
+def load_payload(input_arg: str | Path | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(input_arg, dict):
+        return input_arg
+    p = Path(input_arg)
+    if p.suffix.lower() == ".csv":
+        with p.open(encoding="utf-8", newline="") as fh:
+            return {"workers": list(csv.DictReader(fh))}
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def _parse_date(val: Any) -> date | None:
+    if not val:
+        return None
+    s = str(val).strip()
+    return date.fromisoformat(s[:10]) if s else None
+
+
+def analyze(
+    payload: str | Path | dict[str, Any],
+    config: str | Path | dict[str, Any] | None = None,
+    as_of_date: str | None = None,
+) -> dict[str, Any]:
+    data = load_payload(payload)
+    cfg, org_configured, banner = load_config(config)
+    as_of = _parse_date(as_of_date or data.get("as_of_date")) or date(2026, 11, 10)
+
+    fx_rates = {str(k).upper(): float(v) for k, v in data.get("fx_rates", {"USD": 1.0}).items()}
+    annual_hours = float(cfg.get("annual_working_hours", 2080))
+    underpaid_thresh = float(cfg.get("compa_ratio_underpaid_alert", 0.8))
+    overpaid_thresh = float(cfg.get("compa_ratio_overpaid_alert", 1.25))
+    min_cell = int(cfg.get("min_privacy_cell_size", 5))
+
+    # Deduplicate effective-dated HRIS snapshots: pick latest effective_date <= as_of
+    raw_workers = data.get("workers", [])
+    deduped: dict[str, tuple[date, dict[str, Any]]] = {}
+    future_rows_skipped = 0
+    historical_rows_collapsed = 0
+
+    for row in raw_workers:
+        wid = str(row.get("worker_id") or "").strip()
+        if not wid:
+            continue
+        eff_dt = _parse_date(row.get("effective_date")) or as_of
+        if eff_dt > as_of:
+            future_rows_skipped += 1
+            continue
+        if wid in deduped:
+            historical_rows_collapsed += 1
+            if eff_dt > deduped[wid][0]:
+                deduped[wid] = (eff_dt, row)
+        else:
+            deduped[wid] = (eff_dt, row)
+
+    band_midpoints = {
+        str(b.get("job_level")).upper(): float(b.get("midpoint_usd"))
+        for b in data.get("comp_bands", [])
+        if b.get("midpoint_usd") is not None
+    }
+
+    fte_records: list[dict[str, Any]] = []
+    cwk_records: list[dict[str, Any]] = []
+    dept_groups: dict[str, dict[str, Any]] = {}
+
+    for _dt, w in sorted(deduped.values(), key=lambda pair: str(pair[1].get("worker_id"))):
+        wid = str(w.get("worker_id"))
+        wtype = str(w.get("worker_type") or "FTE").upper().strip()
+        dept = str(w.get("department") or "General")
+        level = str(w.get("job_level") or "L3").upper().strip()
+        status = str(w.get("employment_status") or "ACTIVE").upper().strip()
+        freq = str(w.get("pay_frequency") or "ANNUAL").upper().strip()
+        curr = str(w.get("currency") or "USD").upper().strip()
+        raw_pay = w.get("base_pay") if w.get("base_pay") is not None else w.get("base_pay_amount")
+        base_pay = float(raw_pay or 0.0)
+        rate_usd = float(fx_rates.get(curr, 1.0))
+
+        if freq == "HOURLY":
+            annual_local = base_pay * annual_hours
+        elif freq == "MONTHLY":
+            annual_local = base_pay * 12.0
+        else:
+            annual_local = base_pay
+        annual_usd = annual_local * rate_usd
+
+        if wtype != "FTE":
+            cwk_records.append(
+                {
+                    "worker_id": wid,
+                    "worker_type": wtype,
+                    "department": dept,
+                    "annualized_rate_usd": round(annual_usd, 2),
+                }
+            )
+            continue
+
+        midpoint = float(w.get("band_midpoint_usd") or band_midpoints.get(level, 0.0))
+        compa = (annual_usd / midpoint) if midpoint > 0 else None
+        outlier = None
+        if compa is not None:
+            if compa < underpaid_thresh:
+                outlier = "BELOW_BAND_COMPRESSION"
+            elif compa > overpaid_thresh:
+                outlier = "ABOVE_BAND_CEILING"
+
+        rec = {
+            "worker_id": wid,
+            "department": dept,
+            "job_level": level,
+            "employment_status": status,
+            "annualized_base_usd": round(annual_usd, 2),
+            "band_midpoint_usd": round(midpoint, 2) if midpoint > 0 else None,
+            "compa_ratio": round(compa, 3) if compa is not None else None,
+            "comp_outlier_flag": outlier,
+        }
+        fte_records.append(rec)
+
+        is_terminated = status.startswith("TERMINATED")
+        g = dept_groups.setdefault(dept, {"fte_total": 0, "active": 0, "terminated": 0, "compa_ratios": []})
+        g["fte_total"] += 1
+        if is_terminated:
+            g["terminated"] += 1
+        else:
+            g["active"] += 1
+        if compa is not None and not is_terminated:
+            g["compa_ratios"].append(compa)
+
+    dept_rollups: list[dict[str, Any]] = []
+    suppressed_count = 0
+    for dept, g in sorted(dept_groups.items()):
+        n = g["fte_total"]
+        comp_n = len(g["compa_ratios"])
+        suppressed = (n < min_cell) or (comp_n < min_cell)
+        if suppressed:
+            suppressed_count += 1
+            avg_compa = None
+        else:
+            avg_compa = round(sum(g["compa_ratios"]) / comp_n, 3) if comp_n > 0 else None
+        attrition_pct = None if (n < min_cell) else (round((g["terminated"] / n * 100.0), 2) if n > 0 else 0.0)
+
+        dept_rollups.append(
+            {
+                "department": dept,
+                "fte_headcount": n,
+                "active_fte": g["active"],
+                "suppressed_for_privacy": suppressed,
+                "avg_compa_ratio": avg_compa,
+                "attrition_pct": attrition_pct,
+            }
+        )
+
+    active_ftes = [r for r in fte_records if not r["employment_status"].startswith("TERMINATED")]
+    outliers = [r for r in active_ftes if r["comp_outlier_flag"]]
+    all_compas = [r["compa_ratio"] for r in active_ftes if r["compa_ratio"] is not None]
+
+    return {
+        "skill": "workforce-attrition-comp-audit",
+        "baseline_mode": "ORG_CONFIGURED" if org_configured else "STANDARD_BASELINE",
+        "baseline_banner": banner,
+        "as_of_date": as_of.isoformat(),
+        "summary": {
+            "raw_rows_processed": len(raw_workers),
+            "historical_snapshots_collapsed": historical_rows_collapsed,
+            "future_effective_rows_excluded": future_rows_skipped,
+            "unique_fte_count": len(fte_records),
+            "active_fte_count": len(active_ftes),
+            "contingent_worker_isolated_count": len(cwk_records),
+            "overall_active_avg_compa_ratio": round(sum(all_compas) / len(all_compas), 3) if all_compas else None,
+            "comp_outlier_count": len(outliers),
+            "privacy_suppressed_departments": suppressed_count,
+        },
+        "department_rollups": dept_rollups,
+        "comp_outliers": outliers,
+        "isolated_contingent_workers": cwk_records,
+        "truncation_warnings": [],
+    }
+
+
+def render_markdown(result: dict[str, Any]) -> str:
+    lines: list[str] = []
+    if result.get("baseline_banner"):
+        lines.extend([result["baseline_banner"], ""])
+    s = result["summary"]
+    lines.extend(
+        [
+            f"# Workforce Compensation & Attrition Audit (As Of {result['as_of_date']})",
+            "",
+            f"- **Unique FTEs:** {s['unique_fte_count']} (Active: {s['active_fte_count']}) | "
+            f"**CWK Contractors Isolated:** {s['contingent_worker_isolated_count']} | "
+            f"**Historical Snapshots Collapsed:** {s['historical_snapshots_collapsed']}",
+            f"- **Overall Active Avg Compa-Ratio:** {s['overall_active_avg_compa_ratio'] or 'N/A'} | "
+            f"**Outliers:** {s['comp_outlier_count']} | **Privacy-Suppressed Depts (n < 5):** {s['privacy_suppressed_departments']}",
+            "",
+            "| Department | FTE Count | Avg Compa-Ratio | Attrition % | Privacy Suppressed |",
+            "| :--- | ---: | ---: | ---: | :--- |",
+        ]
+    )
+    for d in result["department_rollups"]:
+        comp_s = f"{d['avg_compa_ratio']:.3f}" if d["avg_compa_ratio"] is not None else "REDACTED (n<5)"
+        att_s = f"{d['attrition_pct']:.1f}%" if d["attrition_pct"] is not None else "REDACTED (n<5)"
+        lines.append(
+            f"| {d['department']} | {d['fte_headcount']} | {comp_s} | {att_s} | {'YES' if d['suppressed_for_privacy'] else 'No'} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Audit Workday compa-ratios and attrition with privacy/CWK guards.")
+    parser.add_argument("--input", required=True, type=Path, help="Path to effective-dated workers JSON or CSV")
+    parser.add_argument("--config", type=Path, help="Optional config.json path")
+    parser.add_argument("--as-of", type=str, help="Reference ISO date YYYY-MM-DD")
+    parser.add_argument("--format", choices=["json", "markdown"], default="json")
+    parser.add_argument("--output", type=Path, help="Optional output file path")
+    args = parser.parse_args(argv)
+    result = analyze(args.input, config=args.config, as_of_date=args.as_of)
+    out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
+    if args.output:
+        args.output.write_text(out + "\n", encoding="utf-8")
+    else:
+        print(out)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

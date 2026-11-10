@@ -1,0 +1,49 @@
+skill_id: clinical-protocol-feasibility
+plugin_id: healthcare-clinical-regulatory
+version: '1.0'
+deterministic_checks:
+  expected_script: scripts/soa_endpoint_validator.py
+  required_output_keys:
+  - baseline_mode
+  - summary
+  - soa_endpoint_gaps
+  must_include_patterns:
+  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - feasibility_status
+  must_not_include_patterns:
+  - counted unapproved IRB sites toward active enrollment
+  hitl_required_for_mutations: true
+  trap_checks:
+  - Verifies required_procedures match visits covering target_visit_day.
+  - Excludes unapproved IRB sites and applies screen-fail discount.
+scenarios:
+- id: mode_a_soa_primary_gap
+  mode: mode_a
+  prompt: Audit Meridian BioPharma Phase III protocol where Day-180 Visit omits the
+    biopsy required for the Primary Endpoint.
+  expected_assertions:
+  - Flags MISSING_ENDPOINT_ASSESSMENT and assigns PROTOCOL_AMENDMENT_REQUIRED_PRIMARY_GAP.
+  - Identifies missing procedure explicitly.
+- id: mode_b_sheets_screen_fail
+  mode: mode_b
+  prompt: Evaluate Drive Site Feasibility Sheet with 40% screen failure rates and
+    2 sites awaiting IRB approval.
+  expected_assertions:
+  - Discounts enrollment by screen failure and unapproved IRB status, reporting enrollment_shortfall.
+  - Applies baseline banner when org_configured is false.
+- id: mode_c_local_protocol_pass
+  mode: mode_c
+  prompt: Run soa_endpoint_validator.py on protocol.json.
+  expected_assertions:
+  - Verifies 100% endpoint assessment coverage cleanly.
+  - Maintains HITL clinical sign-off gate.
+rubric:
+- criterion: soa_endpoint_alignment
+  weight: 0.45
+  description: Matches endpoint required procedures accurately within SoA visit windows.
+- criterion: enrollment_feasibility_math
+  weight: 0.3
+  description: Accounts for IRB approval status and screen-fail shrinkage accurately.
+- criterion: baseline_and_clinical_hitl
+  weight: 0.25
+  description: Includes baseline banner and clinical governance gate.

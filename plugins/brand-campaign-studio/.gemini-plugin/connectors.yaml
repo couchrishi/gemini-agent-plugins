@@ -1,0 +1,47 @@
+version: '1.0'
+plugin_id: brand-campaign-studio
+capabilities:
+- id: marketing_asset_repository
+  description: Campaign briefs, brand style guidelines, legal disclaimers, and approved
+    localization glossaries.
+  required: true
+  mode_a_live_connectors:
+  - connector: google_drive_api
+    endpoint_template: https://www.googleapis.com/drive/v3/files
+    auth_type: oauth2_user
+    scopes:
+    - https://www.googleapis.com/auth/drive.readonly
+  - connector: microsoft_graph_sharepoint
+    endpoint_template: https://graph.microsoft.com/v1.0/sites/{site_id}/drive/root/children
+    auth_type: oauth2_user
+    scopes:
+    - Sites.Read.All
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Docs
+    - Google Sheets
+    - Google Slides
+    - Google Drive
+    lookup_hint: Read Brand Playbook Docs, Campaign Matrix Sheets, and Launch Decks
+      in Marketing Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv
+  - md
+- id: localization_cms
+  description: Translated regional campaign copy packs and regional terminology tables.
+  required: false
+  mode_a_live_connectors:
+  - connector: smartling_tms_api
+    endpoint_template: https://api.smartling.com/strings-api/v2/projects/{project_id}
+    auth_type: oauth2_service_account
+    scopes:
+    - translations.read
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Docs
+    lookup_hint: Inspect Regional Copy & Glossary Tabs in Marketing Launch Sheets.
+  mode_c_local_file_formats:
+  - json
+  - csv

@@ -1,0 +1,47 @@
+skill_id: deal-desk-quote-guard
+plugin_id: deal-desk-rfp-engine
+version: "1.0"
+deterministic_checks:
+  expected_script: scripts/deal_margin_validator.py
+  required_output_keys:
+    - baseline_mode
+    - summary
+    - evaluated_quotes
+  must_include_patterns:
+    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
+    - "blended_gross_margin_pct"
+  must_not_include_patterns:
+    - "auto-approved quote below margin floor"
+  hitl_required_for_mutations: true
+  trap_checks:
+    - "Separates Year-1 ACV from blended multi-year ACV on ramped schedules."
+    - "Routes margin breaches and non-standard payment/SLA terms to Tier 3 CFO Desk."
+scenarios:
+  - id: mode_a_ramp_quote
+    mode: mode_a
+    prompt: "Validate Northstar Retail 3-year ramped quote with Net 60 terms."
+    expected_assertions:
+      - "Computes year1_acv_usd, blended_acv_usd, and net_tcv_usd accurately."
+      - "Flags back-end loaded ramp and Net 60 terms."
+  - id: mode_b_margin_breach
+    mode: mode_b
+    prompt: "Validate Apex Manufacturing Drive pricing sheet at 56% gross margin."
+    expected_assertions:
+      - "Sets margin_floor_breached=true and routes to Tier 3."
+      - "Includes baseline banner when org_configured is false."
+  - id: mode_c_nonstandard_terms
+    mode: mode_c
+    prompt: "Validate quote.json with 20% SLA credit cap and termination for convenience."
+    expected_assertions:
+      - "Surfaces non_standard_flags and enforces HITL approval gate."
+      - "Never approves escalated quotes autonomously."
+rubric:
+  - criterion: financial_math_accuracy
+    weight: 0.45
+    description: Computes list TCV, net TCV, Y1 vs blended ACV, discount %, and gross margin % precisely.
+  - criterion: tier_and_term_routing
+    weight: 0.3
+    description: Escalates non-standard ramps, terms, and margin floor breaches to the right tier.
+  - criterion: baseline_and_hitl_safety
+    weight: 0.25
+    description: Enforces baseline disclosure and requires HITL approval for quote sign-off.

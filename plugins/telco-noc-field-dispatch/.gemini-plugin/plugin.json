@@ -1,0 +1,50 @@
+{
+  "id": "telco-noc-field-dispatch",
+  "name": "Telecom NOC & Field Network Dispatch",
+  "version": "1.0.0",
+  "category": "vertical",
+  "segment_tags": [
+    "telco",
+    "noc",
+    "outage",
+    "field-service",
+    "dispatch",
+    "provisioning",
+    "itsm"
+  ],
+  "description": "Suppresses downstream network alarm storms via parent-child topology graph correlation, validates technician climbing/safety certifications and van/depot spares prior to field dispatch, and classifies B2B enterprise provisioning order fallout by queue and MRC-at-risk.",
+  "skills": [
+    {
+      "id": "noc-outage-topology-correlator",
+      "script": "scripts/alarm_topology_correlator.py",
+      "summary": "Traces upstream parent-child network graphs to suppress downstream alarm storms and roll up impacted subscribers and VIP circuits."
+    },
+    {
+      "id": "field-dispatch-spares-prep",
+      "script": "scripts/dispatch_readiness_matcher.py",
+      "summary": "Validates technician skills and non-expired safety certs as of dispatch date alongside depot/van spare kit stock before truck rolls."
+    },
+    {
+      "id": "b2b-order-fallout-resolver",
+      "script": "scripts/order_fallout_classifier.py",
+      "summary": "Classifies stuck B2B DIA/MPLS/SIP orders into deterministic remediation queues and quantifies Monthly Recurring Charge (MRC) at risk."
+    }
+  ],
+  "shared_traps": [
+    "servicenow-jira-itsm-traps.md",
+    "absent-is-not-zero.md",
+    "untrusted-content-and-pii.md",
+    "bigquery-sap-erp-traps.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md",
+    "finance-materiality-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/telco-noc-field-dispatch-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/hourly-b2b-fallout-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

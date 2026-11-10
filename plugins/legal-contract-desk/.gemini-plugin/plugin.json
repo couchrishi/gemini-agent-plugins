@@ -1,0 +1,41 @@
+{
+  "id": "legal-contract-desk",
+  "name": "Legal Contract Desk & Regulatory Compliance",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "legal", "contracts", "compliance", "clm"],
+  "description": "Redlines commercial NDAs, MSAs, and DPAs against 1/3/9 risk playbooks, calculates exact auto-renewal opt-out deadlines and escalator caps from executed contracts, and maps regulatory articles against internal control inventories.",
+  "skills": [
+    {
+      "id": "contract-playbook-redliner",
+      "script": "scripts/clause_risk_matrix.py",
+      "summary": "Scores commercial contract clauses on a 1/3/9 risk scale against playbook rules, flags walk-away blockers, and generates fallback redlines."
+    },
+    {
+      "id": "executed-obligation-extractor",
+      "script": "scripts/obligation_calendar_builder.py",
+      "summary": "Calculates exact notice deadlines prior to auto-renewal, flags CPI escalator breaches, and builds executed obligation calendars."
+    },
+    {
+      "id": "regulatory-change-mapper",
+      "script": "scripts/control_gap_mapper.py",
+      "summary": "Maps regulatory articles against internal controls to detect uncovered mandates, stale test evidence, and prioritized remediation queues."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "google-workspace-traps.md",
+    "sharepoint-onedrive-kql-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "commercial-contract-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/legal-contract-desk-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-renewal-notice-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Industrial Shopfloor Reliability, Quality & EHS Safety Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "org_configured": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once Industrial Shopfloor Reliability, Quality & EHS Safety organization thresholds and connectors are configured."
+    },
+    "organization_name": {
+      "type": "string",
+      "default": "Standard Baseline Tenant",
+      "description": "Tenant legal entity or department name."
+    },
+    "service_level_z": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 3.5,
+      "default": 1.65,
+      "description": "Z-score for spare parts safety stock (1.65 = ~95% service level)."
+    },
+    "max_capex_payback_years": {
+      "type": "number",
+      "minimum": 0.25,
+      "maximum": 10.0,
+      "default": 2.0,
+      "description": "Maximum CapEx payback horizon in years."
+    },
+    "lot_spike_multiplier": {
+      "type": "number",
+      "minimum": 1.2,
+      "maximum": 5.0,
+      "default": 2.0,
+      "description": "Ratio over plant lot scrap average triggering supplier containment alert."
+    },
+    "o2_min_pct": {
+      "type": "number",
+      "minimum": 18.0,
+      "maximum": 21.0,
+      "default": 19.5,
+      "description": "Minimum safe confined-space O2 percentage."
+    },
+    "o2_max_pct": {
+      "type": "number",
+      "minimum": 21.0,
+      "maximum": 25.0,
+      "default": 23.5,
+      "description": "Maximum safe confined-space O2 percentage."
+    },
+    "max_lel_pct": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 10.0,
+      "default": 0.0,
+      "description": "Maximum permitted Lower Explosive Limit % for confined-space entry."
+    },
+    "max_gas_test_age_mins": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 240,
+      "default": 60,
+      "description": "Maximum elapsed minutes since atmospheric gas test."
+    }
+  }
+}

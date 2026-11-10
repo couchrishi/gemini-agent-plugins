@@ -1,0 +1,48 @@
+{
+  "id": "customer-operations-escalation",
+  "name": "Customer Operations, VIP Escalation & Knowledge Quality",
+  "version": "1.0.0",
+  "category": "enterprise-ops",
+  "segment_tags": [
+    "cx",
+    "support",
+    "escalations",
+    "csat",
+    "nps",
+    "knowledge-ops"
+  ],
+  "description": "Scores VIP account escalations by ARR exposure and Sev1 outages, mines CSAT/NPS verbatims into ARR-weighted driver paretos with null-rating hygiene, and validates support troubleshooting decision trees for graph defects.",
+  "skills": [
+    {
+      "id": "critical-escalation-warroom",
+      "script": "scripts/escalation_exposure_scorer.py",
+      "summary": "Scores VIP account escalations (0-100) from Sev1/Sev2 cases, SLA breaches, ARR, imminent renewals, outages, and competitor risk."
+    },
+    {
+      "id": "csat-churn-signal-miner",
+      "script": "scripts/verbatim_driver_quantifier.py",
+      "summary": "Classifies survey verbatims into ARR-weighted friction drivers, excludes null scores from averages, and catches explicit churn intent."
+    },
+    {
+      "id": "troubleshooting-tree-author",
+      "script": "scripts/decision_tree_validator.py",
+      "summary": "Validates customer support diagnostic trees via BFS/DFS for cycles, dead-end questions, orphan nodes, broken refs, and depth."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "salesforce-crm-soql-traps.md",
+    "servicenow-jira-itsm-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "itsm-sla-severity-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/customer-operations-escalation-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/hourly-vip-escalation-radar.yaml"
+  ],
+  "license": "Apache-2.0"
+}

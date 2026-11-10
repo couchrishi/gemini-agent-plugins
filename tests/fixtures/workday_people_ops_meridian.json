@@ -1,0 +1,103 @@
+{
+  "as_of_date": "2026-11-10",
+  "fx_rates": {
+    "USD": 1.0,
+    "EUR": 1.08,
+    "JPY": 0.0067
+  },
+  "comp_bands": [
+    {"job_level": "L4", "midpoint_usd": 140000.0},
+    {"job_level": "L5", "midpoint_usd": 180000.0},
+    {"job_level": "L6", "midpoint_usd": 220000.0}
+  ],
+  "workers": [
+    {
+      "worker_id": "W-101",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "ACTIVE",
+      "effective_date": "2025-01-01",
+      "base_pay_amount": 150000.0,
+      "currency": "USD",
+      "pay_frequency": "ANNUAL"
+    },
+    {
+      "worker_id": "W-101",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-04-01",
+      "base_pay_amount": 135000.0,
+      "currency": "USD",
+      "pay_frequency": "ANNUAL"
+    },
+    {
+      "worker_id": "W-102",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-03-01",
+      "base_pay_amount": 85.0,
+      "currency": "USD",
+      "pay_frequency": "HOURLY"
+    },
+    {
+      "worker_id": "W-103",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-02-01",
+      "base_pay_amount": 15000.0,
+      "currency": "EUR",
+      "pay_frequency": "MONTHLY"
+    },
+    {
+      "worker_id": "W-104",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-01-15",
+      "base_pay_amount": 175000.0,
+      "currency": "USD",
+      "pay_frequency": "ANNUAL"
+    },
+    {
+      "worker_id": "W-105",
+      "worker_type": "FTE",
+      "department": "Clinical R&D",
+      "job_level": "L5",
+      "employment_status": "TERMINATED_VOLUNTARY",
+      "effective_date": "2026-09-30",
+      "base_pay_amount": 172000.0,
+      "currency": "USD",
+      "pay_frequency": "ANNUAL"
+    },
+    {
+      "worker_id": "CWK-901",
+      "worker_type": "CWK",
+      "department": "Legal",
+      "job_level": "L4",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-05-01",
+      "base_pay_amount": 120.0,
+      "currency": "USD",
+      "pay_frequency": "HOURLY"
+    },
+    {
+      "worker_id": "W-201",
+      "worker_type": "FTE",
+      "department": "Legal",
+      "job_level": "L6",
+      "employment_status": "ACTIVE",
+      "effective_date": "2026-01-01",
+      "base_pay_amount": 225000.0,
+      "currency": "USD",
+      "pay_frequency": "ANNUAL"
+    }
+  ]
+}

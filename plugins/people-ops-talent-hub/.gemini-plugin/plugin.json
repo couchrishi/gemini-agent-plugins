@@ -1,0 +1,49 @@
+{
+  "id": "people-ops-talent-hub",
+  "name": "People Ops, Talent Calibration & Workforce Analytics",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": [
+    "cross-industry",
+    "hr",
+    "recruiting",
+    "workday",
+    "compensation",
+    "onboarding"
+  ],
+  "description": "Calibrates structured interview scorecards for score dispersion and bias signals, orchestrates 30/60/90 onboarding plans with mandatory Day-1 gate checks, and audits effective-dated Workday compensation bands with FTE/CWK separation and small-cell privacy redaction.",
+  "skills": [
+    {
+      "id": "structured-hiring-rubric",
+      "script": "scripts/rubric_calibration_checker.py",
+      "summary": "Audits 1-4 interview scorecards for >=2.0 dispersion, thin behavioral evidence (<40 chars), and protected-class bias signals."
+    },
+    {
+      "id": "employee-onboarding-navigator",
+      "script": "scripts/onboarding_plan_builder.py",
+      "summary": "Tracks 30/60/90 onboarding milestones, enforces mandatory Day-1 IT/security gates, and detects blocked upstream dependencies."
+    },
+    {
+      "id": "workforce-attrition-comp-audit",
+      "script": "scripts/comp_band_analyzer.py",
+      "summary": "Deduplicates effective-dated HRIS rows, isolates CWKs from FTEs, normalizes hourly/monthly/FX pay, and suppresses <5 privacy cells."
+    }
+  ],
+  "shared_traps": [
+    "workday-hris-traps.md",
+    "absent-is-not-zero.md",
+    "chain-denominator-seams.md",
+    "google-workspace-traps.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "hr-hiring-comp-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/people-ops-talent-hub-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-onboarding-stall-watch.yaml"
+  ],
+  "license": "Apache-2.0"
+}

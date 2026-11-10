@@ -1,0 +1,11 @@
+{
+  "org_configured": false,
+  "organization_name": "Standard Baseline Tenant",
+  "zero_scan_days_threshold": 5,
+  "min_book_qty_for_phantom": 4,
+  "high_shrink_usd_threshold": 250.0,
+  "min_acceptable_promo_roi": 0.15,
+  "target_otif_pct": 95.0,
+  "in_full_tolerance_pct": 98.0,
+  "on_time_grace_minutes": 30
+}

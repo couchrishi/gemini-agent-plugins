@@ -1,0 +1,33 @@
+version: "1.0"
+plugin_id: itsm-command-center
+read_only_tools:
+  - servicenow_query_incidents
+  - servicenow_query_changes
+  - servicenow_query_cmdb
+  - jira_jql_search
+  - view_file
+  - pyrepl
+draft_only_tools:
+  - servicenow_create_kcs_draft
+  - docs_create_private_brief
+  - write_to_file
+hitl_gated_mutations:
+  - tool: servicenow_update_incident_or_assign
+    scope: explicit_per_call
+    condition: "request.priority in ['P1', 'P2'] || request.bulk_ticket_count > 1 || untrusted_content.detected == true"
+    reason: Reassigning P1/P2 incidents or updating tickets in bulk requires explicit engineer confirmation.
+  - tool: servicenow_approve_or_reject_change
+    scope: explicit_per_call
+    condition: "request.cab_risk_score >= 30 || request.freeze_collision == true"
+    reason: Approving or rejecting CAB change requests requires human CAB authority sign-off.
+  - tool: servicenow_publish_kcs_article
+    scope: task_sticky
+    condition: "request.visibility == 'external_portal' || request.kcs_completeness_passed == false"
+    reason: Publishing KCS knowledge articles externally requires explicit approval.
+cel_guardrails:
+  - id: require_display_value_and_business_sla
+    description: Prevent ServiceNow raw state integer misuse or wall-clock SLA confusion.
+    expr: "ticket.used_business_elapsed_sla == true && ticket.state_code != 8"
+  - id: block_high_risk_cab_without_rollback
+    description: Flag critical CAB changes lacking tested rollback plans or colliding with freeze windows.
+    expr: "change.cab_risk_score >= 60 && (change.has_tested_rollback == false || change.freeze_collision == true)"

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/couchrishi/gemini-agent-plugins/shared/schema/connectors.schema.json",
+  "title": "Gemini Agent Declarative Connectors Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "plugin_id", "capabilities"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "plugin_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "required",
+          "mode_a_live_connectors",
+          "mode_b_workspace_fallback",
+          "mode_c_local_file_formats"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]+$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "mode_a_live_connectors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["connector", "endpoint_template", "auth_type", "scopes"],
+              "properties": {
+                "connector": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "endpoint_template": {
+                  "type": "string",
+                  "minLength": 12,
+                  "pattern": "^(https://|connector://)"
+                },
+                "auth_type": {
+                  "type": "string",
+                  "enum": [
+                    "oauth2_user",
+                    "oauth2_service_account",
+                    "workload_identity",
+                    "api_key_secret_manager",
+                    "mtls_oauth2"
+                  ]
+                },
+                "scopes": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 2
+                  }
+                }
+              }
+            }
+          },
+          "mode_b_workspace_fallback": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["google_workspace_sources", "lookup_hint"],
+            "properties": {
+              "google_workspace_sources": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "Google Drive",
+                    "Google Docs",
+                    "Google Sheets",
+                    "Google Slides",
+                    "Gmail",
+                    "Google Calendar",
+                    "Google Meet",
+                    "Google Chat"
+                  ]
+                }
+              },
+              "lookup_hint": {
+                "type": "string",
+                "minLength": 10
+              }
+            }
+          },
+          "mode_c_local_file_formats": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": ["csv", "tsv", "xlsx", "json", "jsonl", "md", "pdf", "txt", "yaml", "sql", "diff"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

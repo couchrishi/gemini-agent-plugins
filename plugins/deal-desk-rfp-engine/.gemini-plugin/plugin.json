@@ -1,0 +1,42 @@
+{
+  "id": "deal-desk-rfp-engine",
+  "name": "Deal Desk, RFP & Pipeline Hygiene Engine",
+  "version": "1.0.0",
+  "category": "horizontal",
+  "segment_tags": ["cross-industry", "sales-ops", "deal-desk", "salesforce", "rfp"],
+  "description": "Accelerates RFP security/compliance questionnaires with TF-IDF answer matching, validates multi-year SaaS quote discounts and gross margins against Deal Desk approval tiers, and audits CRM pipeline for slippage and multi-currency traps.",
+  "skills": [
+    {
+      "id": "rfp-questionnaire-responder",
+      "script": "scripts/rfp_matrix_builder.py",
+      "summary": "Matches RFP requirement rows against verified answer libraries using TF-IDF cosine similarity and flags mandatory compliance gaps."
+    },
+    {
+      "id": "deal-desk-quote-guard",
+      "script": "scripts/deal_margin_validator.py",
+      "summary": "Computes net effective discount, multi-year ramp ACV/TCV, gross margin floor compliance, non-standard terms, and required Deal Desk tier."
+    },
+    {
+      "id": "pipeline-hygiene-slippage",
+      "script": "scripts/pipeline_slippage_auditor.py",
+      "summary": "Audits CRM opportunities for stage staleness, push counts, missing MEDDPICC commit gates, single-threading, and multi-currency FX alignment."
+    }
+  ],
+  "shared_traps": [
+    "absent-is-not-zero.md",
+    "salesforce-crm-soql-traps.md",
+    "chain-denominator-seams.md",
+    "untrusted-content-and-pii.md"
+  ],
+  "shared_baselines": [
+    "deal-desk-approval-baseline.md",
+    "commercial-contract-baseline.md"
+  ],
+  "agent_templates": [
+    "agents/deal-desk-rfp-engine-coworker.yaml"
+  ],
+  "schedules": [
+    "schedules/weekly-pipeline-hygiene-audit.yaml"
+  ],
+  "license": "Apache-2.0"
+}

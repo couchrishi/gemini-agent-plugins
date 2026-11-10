@@ -1,0 +1,50 @@
+{
+  "target_entity_id": "ENT-CYMBAL-SPV",
+  "rolling_30d_volume_usd": 4200000.0,
+  "trailing_90d_monthly_avg_usd": 1000000.0,
+  "ownership_edges": [
+    {
+      "owner_id": "HOLD-KY-1",
+      "owner_name": "Meridian Cayman Holdings Ltd",
+      "owner_type": "ENTITY",
+      "target_id": "ENT-CYMBAL-SPV",
+      "direct_pct": 60.0,
+      "jurisdiction": "KY",
+      "is_pep": false
+    },
+    {
+      "owner_id": "UBO-IND-01",
+      "owner_name": "Alex Morgan",
+      "owner_type": "INDIVIDUAL",
+      "target_id": "HOLD-KY-1",
+      "direct_pct": 30.0,
+      "jurisdiction": "US",
+      "is_pep": false
+    },
+    {
+      "owner_id": "HOLD-US-2",
+      "owner_name": "Vanguard Industrial GP",
+      "owner_type": "ENTITY",
+      "target_id": "ENT-CYMBAL-SPV",
+      "direct_pct": 40.0,
+      "jurisdiction": "US",
+      "is_pep": false
+    },
+    {
+      "owner_id": "UBO-IND-01",
+      "owner_name": "Alex Morgan",
+      "owner_type": "INDIVIDUAL",
+      "target_id": "HOLD-US-2",
+      "direct_pct": 25.0,
+      "jurisdiction": "US",
+      "is_pep": false
+    }
+  ],
+  "transactions": [
+    {"tx_id": "T1", "tx_type": "CASH", "amount_usd": 9500.0},
+    {"tx_id": "T2", "tx_type": "CASH", "amount_usd": 9650.0},
+    {"tx_id": "T3", "tx_type": "CASH", "amount_usd": 9200.0},
+    {"tx_id": "T4", "tx_type": "CASH", "amount_usd": 9800.0},
+    {"tx_id": "T5", "tx_type": "CASH", "amount_usd": 9400.0}
+  ]
+}

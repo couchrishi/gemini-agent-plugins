@@ -1,0 +1,32 @@
+version: '1.0'
+plugin_id: erp-procure-to-pay
+read_only_tools:
+- sap_read_ekbe_grir
+- sap_read_bom_hierarchy
+- bigquery_query_ppv
+- view_file
+- pyrepl
+draft_only_tools:
+- sheets_write_clearing_proposal
+- docs_create_sourcing_memo
+- write_to_file
+hitl_gated_mutations:
+- tool: sap_execute_mr11_clearing
+  scope: explicit_per_call
+  condition: request.imbalance_count >= 1 || request.write_off_usd > 0
+  reason: Executing SAP MR11/F.13 GR/IR clearing postings impacts GL accruals and
+    requires Controller approval.
+- tool: sap_award_purchase_order
+  scope: explicit_per_call
+  condition: request.annual_spend_usd > 0
+  reason: Awarding supplier RFx contracts or modifying standard BOM costs requires
+    Procurement VP sign-off.
+cel_guardrails:
+- id: block_clearing_ir_without_gr
+  description: Prevent clearing proposals on IR_WITHOUT_GR lines without physical
+    receipt verification.
+  expr: grir.ir_without_gr_count == 0
+- id: halt_rollup_on_bom_cycle
+  description: Block standard cost rollup output if circular BOM graph references
+    exist.
+  expr: bom.cycle_count == 0

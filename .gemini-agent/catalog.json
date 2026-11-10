@@ -1,0 +1,996 @@
+{
+  "version": "1.0.0",
+  "total_plugins": 20,
+  "total_skills": 60,
+  "plugins": [
+    {
+      "id": "enterprise-knowledge-hub",
+      "name": "Enterprise Knowledge Hub",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "knowledge-management",
+        "intranet",
+        "policy-ops"
+      ],
+      "description": "Synthesizes cross-source enterprise knowledge with strict citation conflict detection, jurisdiction-scoped SOP/policy answering with abstention gates, and corpus freshness/duplication auditing across Google Workspace, SharePoint, and Confluence.",
+      "path": "plugins/enterprise-knowledge-hub",
+      "bundle_zip": "dist/bundles/enterprise-knowledge-hub.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "google-workspace-traps.md",
+        "sharepoint-onedrive-kql-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md",
+        "commercial-contract-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "cross-source-knowledge-synthesis",
+          "path": "plugins/enterprise-knowledge-hub/skills/cross-source-knowledge-synthesis",
+          "skill_zip": "dist/skills/cross-source-knowledge-synthesis.zip",
+          "script": "scripts/citation_conflict_auditor.py",
+          "summary": "Scores source authority and recency across multi-repo hits, flags conflicting numerical/date claims, and verifies 100% claim citation coverage."
+        },
+        {
+          "id": "policy-sop-answering",
+          "path": "plugins/enterprise-knowledge-hub/skills/policy-sop-answering",
+          "skill_zip": "dist/skills/policy-sop-answering.zip",
+          "script": "scripts/policy_scope_matcher.py",
+          "summary": "Filters policy and SOP clauses by jurisdiction, entity, and effective date, enforcing abstention when active coverage is missing."
+        },
+        {
+          "id": "knowledge-gap-freshness-audit",
+          "path": "plugins/enterprise-knowledge-hub/skills/knowledge-gap-freshness-audit",
+          "skill_zip": "dist/skills/knowledge-gap-freshness-audit.zip",
+          "script": "scripts/corpus_hygiene_scanner.py",
+          "summary": "Audits Drive, SharePoint, and Confluence inventories for overdue review dates, departed owners, near-duplicate titles, and unindexed ticket gaps."
+        }
+      ]
+    },
+    {
+      "id": "executive-briefing-ops",
+      "name": "Executive Briefing & Chief of Staff Ops",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "leadership",
+        "chief-of-staff",
+        "account-ops"
+      ],
+      "description": "Prepares daily executive briefings with calendar conflict and commitment tracking, extracts structured action/decision packs from meeting transcripts, and synthesizes multi-signal stakeholder account dossiers.",
+      "path": "plugins/executive-briefing-ops",
+      "bundle_zip": "dist/bundles/executive-briefing-ops.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "google-workspace-traps.md",
+        "salesforce-crm-soql-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "deal-desk-approval-baseline.md",
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "daily-executive-briefing",
+          "path": "plugins/executive-briefing-ops/skills/daily-executive-briefing",
+          "skill_zip": "dist/skills/daily-executive-briefing.zip",
+          "script": "scripts/agenda_commitment_tracker.py",
+          "summary": "Reconciles calendar events, priority threads, and open action items into time-boxed prep blocks with conflict and overdue alerts."
+        },
+        {
+          "id": "meeting-to-execution-pack",
+          "path": "plugins/executive-briefing-ops/skills/meeting-to-execution-pack",
+          "skill_zip": "dist/skills/meeting-to-execution-pack.zip",
+          "script": "scripts/transcript_action_extractor.py",
+          "summary": "Extracts owner-assigned commitments, decision logs, unresolved blockers, and repeat carryovers from meeting transcripts."
+        },
+        {
+          "id": "stakeholder-account-prep",
+          "path": "plugins/executive-briefing-ops/skills/stakeholder-account-prep",
+          "skill_zip": "dist/skills/stakeholder-account-prep.zip",
+          "script": "scripts/dossier_synthesizer.py",
+          "summary": "Aggregates account ARR milestones, open escalations, executive touchpoints, and renewal countdowns into scored stakeholder dossiers."
+        }
+      ]
+    },
+    {
+      "id": "itsm-command-center",
+      "name": "ITSM & Service Desk Command Center",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "itsm",
+        "servicenow",
+        "jira",
+        "service-desk"
+      ],
+      "description": "Accelerates incident triage with business-elapsed SLA breach tracking and spike clustering, scores CAB change requests against freeze windows and blast radius, and mines resolved tickets for Problem candidates and KCS deflection savings.",
+      "path": "plugins/itsm-command-center",
+      "bundle_zip": "dist/bundles/itsm-command-center.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "servicenow-jira-itsm-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "incident-triage-routing",
+          "path": "plugins/itsm-command-center/skills/incident-triage-routing",
+          "skill_zip": "dist/skills/incident-triage-routing.zip",
+          "script": "scripts/sla_cluster_triage.py",
+          "summary": "Computes business-elapsed vs wall-clock SLA risk, clusters correlated incident spikes by CI and error signature, and ranks matching runbooks."
+        },
+        {
+          "id": "change-risk-cab-review",
+          "path": "plugins/itsm-command-center/skills/change-risk-cab-review",
+          "skill_zip": "dist/skills/change-risk-cab-review.zip",
+          "script": "scripts/cab_risk_scorer.py",
+          "summary": "Scores ServiceNow and Jira change requests across blast radius, freeze-window collisions, rollback validation, CI failure history, and CAB tier."
+        },
+        {
+          "id": "problem-rca-kb-generator",
+          "path": "plugins/itsm-command-center/skills/problem-rca-kb-generator",
+          "skill_zip": "dist/skills/problem-rca-kb-generator.zip",
+          "script": "scripts/kcs_deflection_analyzer.py",
+          "summary": "Groups repeat resolved tickets into Problem candidates, calculates MTTR and annualized L1 deflection savings, and validates KCS draft completeness."
+        }
+      ]
+    },
+    {
+      "id": "deal-desk-rfp-engine",
+      "name": "Deal Desk, RFP & Pipeline Hygiene Engine",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "sales-ops",
+        "deal-desk",
+        "salesforce",
+        "rfp"
+      ],
+      "description": "Accelerates RFP security/compliance questionnaires with TF-IDF answer matching, validates multi-year SaaS quote discounts and gross margins against Deal Desk approval tiers, and audits CRM pipeline for slippage and multi-currency traps.",
+      "path": "plugins/deal-desk-rfp-engine",
+      "bundle_zip": "dist/bundles/deal-desk-rfp-engine.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "salesforce-crm-soql-traps.md",
+        "chain-denominator-seams.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "deal-desk-approval-baseline.md",
+        "commercial-contract-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "rfp-questionnaire-responder",
+          "path": "plugins/deal-desk-rfp-engine/skills/rfp-questionnaire-responder",
+          "skill_zip": "dist/skills/rfp-questionnaire-responder.zip",
+          "script": "scripts/rfp_matrix_builder.py",
+          "summary": "Matches RFP requirement rows against verified answer libraries using TF-IDF cosine similarity and flags mandatory compliance gaps."
+        },
+        {
+          "id": "deal-desk-quote-guard",
+          "path": "plugins/deal-desk-rfp-engine/skills/deal-desk-quote-guard",
+          "skill_zip": "dist/skills/deal-desk-quote-guard.zip",
+          "script": "scripts/deal_margin_validator.py",
+          "summary": "Computes net effective discount, multi-year ramp ACV/TCV, gross margin floor compliance, non-standard terms, and required Deal Desk tier."
+        },
+        {
+          "id": "pipeline-hygiene-slippage",
+          "path": "plugins/deal-desk-rfp-engine/skills/pipeline-hygiene-slippage",
+          "skill_zip": "dist/skills/pipeline-hygiene-slippage.zip",
+          "script": "scripts/pipeline_slippage_auditor.py",
+          "summary": "Audits CRM opportunities for stage staleness, push counts, missing MEDDPICC commit gates, single-threading, and multi-currency FX alignment."
+        }
+      ]
+    },
+    {
+      "id": "conversational-bi-analyst",
+      "name": "Conversational BI & Variance Analyst",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "analytics",
+        "bigquery",
+        "snowflake",
+        "looker",
+        "bi"
+      ],
+      "description": "Guards SQL generation against missing partition filters and join fanout explosions, computes exact Volume-Mix-Rate KPI bridges with z-score anomaly detection, and profiles datasets in RAM to emit verified A2UI chart payloads.",
+      "path": "plugins/conversational-bi-analyst",
+      "bundle_zip": "dist/bundles/conversational-bi-analyst.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "bigquery-sap-erp-traps.md",
+        "chain-denominator-seams.md",
+        "google-workspace-traps.md"
+      ],
+      "shared_baselines": [
+        "finance-materiality-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "schema-grounded-sql-analyst",
+          "path": "plugins/conversational-bi-analyst/skills/schema-grounded-sql-analyst",
+          "skill_zip": "dist/skills/schema-grounded-sql-analyst.zip",
+          "script": "scripts/sql_safety_and_fanout_checker.py",
+          "summary": "Inspects SQL queries and table metadata for missing partition filters, M:N join fanout risks, destructive DDL/DML, and denominator seams."
+        },
+        {
+          "id": "kpi-anomaly-driver-tree",
+          "path": "plugins/conversational-bi-analyst/skills/kpi-anomaly-driver-tree",
+          "skill_zip": "dist/skills/kpi-anomaly-driver-tree.zip",
+          "script": "scripts/mix_rate_volume_bridge.py",
+          "summary": "Computes exact zero-residual Volume-Mix-Rate variance decomposition and segment z-score anomaly detection."
+        },
+        {
+          "id": "executive-data-story-pack",
+          "path": "plugins/conversational-bi-analyst/skills/executive-data-story-pack",
+          "skill_zip": "dist/skills/executive-data-story-pack.zip",
+          "script": "scripts/dataset_profiler_guard.py",
+          "summary": "Profiles tabular datasets in RAM for completeness, null rates, quantiles, outliers, truncation ceilings, and A2UI Canvas payloads."
+        }
+      ]
+    },
+    {
+      "id": "sdlc-modernization-sre",
+      "name": "SDLC Modernization, Security PR & SRE Ops",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "engineering",
+        "sre",
+        "github",
+        "gitlab",
+        "security"
+      ],
+      "description": "Reverse-engineers legacy codebases into PRD traceability matrices, computes exact SLO error-budget burn and TTD/TTM/TTR postmortem timelines, and gates PR diffs for secrets, removed authz checks, and unsafe DB migrations.",
+      "path": "plugins/sdlc-modernization-sre",
+      "bundle_zip": "dist/bundles/sdlc-modernization-sre.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "servicenow-jira-itsm-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "legacy-code-to-prd",
+          "path": "plugins/sdlc-modernization-sre/skills/legacy-code-to-prd",
+          "skill_zip": "dist/skills/legacy-code-to-prd.zip",
+          "script": "scripts/spec_traceability_matrix.py",
+          "summary": "Parses legacy code inventories for entrypoints, DB read/write couplings, complexity hotspots, and requirement-to-test traceability coverage."
+        },
+        {
+          "id": "sre-incident-postmortem",
+          "path": "plugins/sdlc-modernization-sre/skills/sre-incident-postmortem",
+          "skill_zip": "dist/skills/sre-incident-postmortem.zip",
+          "script": "scripts/slo_timeline_calculator.py",
+          "summary": "Computes error-budget burn rates, TTD/TTM/TTR intervals, availability impact, and postmortem action-item SLA compliance."
+        },
+        {
+          "id": "security-pr-readiness-gate",
+          "path": "plugins/sdlc-modernization-sre/skills/security-pr-readiness-gate",
+          "skill_zip": "dist/skills/security-pr-readiness-gate.zip",
+          "script": "scripts/diff_risk_inspector.py",
+          "summary": "Scans unified PR diffs and dependency manifests for hardcoded secrets, removed authz checks, unsafe migrations, and breaking API changes."
+        }
+      ]
+    },
+    {
+      "id": "legal-contract-desk",
+      "name": "Legal Contract Desk & Regulatory Compliance",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "legal",
+        "contracts",
+        "compliance",
+        "clm"
+      ],
+      "description": "Redlines commercial NDAs, MSAs, and DPAs against 1/3/9 risk playbooks, calculates exact auto-renewal opt-out deadlines and escalator caps from executed contracts, and maps regulatory articles against internal control inventories.",
+      "path": "plugins/legal-contract-desk",
+      "bundle_zip": "dist/bundles/legal-contract-desk.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "google-workspace-traps.md",
+        "sharepoint-onedrive-kql-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "commercial-contract-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "contract-playbook-redliner",
+          "path": "plugins/legal-contract-desk/skills/contract-playbook-redliner",
+          "skill_zip": "dist/skills/contract-playbook-redliner.zip",
+          "script": "scripts/clause_risk_matrix.py",
+          "summary": "Scores commercial contract clauses on a 1/3/9 risk scale against playbook rules, flags walk-away blockers, and generates fallback redlines."
+        },
+        {
+          "id": "executed-obligation-extractor",
+          "path": "plugins/legal-contract-desk/skills/executed-obligation-extractor",
+          "skill_zip": "dist/skills/executed-obligation-extractor.zip",
+          "script": "scripts/obligation_calendar_builder.py",
+          "summary": "Calculates exact notice deadlines prior to auto-renewal, flags CPI escalator breaches, and builds executed obligation calendars."
+        },
+        {
+          "id": "regulatory-change-mapper",
+          "path": "plugins/legal-contract-desk/skills/regulatory-change-mapper",
+          "skill_zip": "dist/skills/regulatory-change-mapper.zip",
+          "script": "scripts/control_gap_mapper.py",
+          "summary": "Maps regulatory articles against internal controls to detect uncovered mandates, stale test evidence, and prioritized remediation queues."
+        }
+      ]
+    },
+    {
+      "id": "finance-variance-recon",
+      "name": "Finance Variance, 3-Way Match & AR Reconciliation",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "finance",
+        "fp&a",
+        "ap",
+        "ar",
+        "erp",
+        "sap",
+        "bigquery"
+      ],
+      "description": "Reconciles AP 3-way PO/GR/Invoice matches with SAP TCURX/SHKZG guards and duplicate/bank-change fraud holds, builds constant-currency P&L variance bridges without summary double-counting, and audits AR aging buckets with strict credit-memo isolation.",
+      "path": "plugins/finance-variance-recon",
+      "bundle_zip": "dist/bundles/finance-variance-recon.zip",
+      "shared_traps": [
+        "bigquery-sap-erp-traps.md",
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "google-workspace-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "finance-materiality-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "ap-three-way-match",
+          "path": "plugins/finance-variance-recon/skills/ap-three-way-match",
+          "skill_zip": "dist/skills/ap-three-way-match.zip",
+          "script": "scripts/reconcile_3way.py",
+          "summary": "Performs deterministic PO/GR/Invoice 3-way matching with SAP TCURX decimal normalization, SHKZG sign handling, duplicate invoice detection, and bank-change fraud holds."
+        },
+        {
+          "id": "pnl-budget-variance-bridge",
+          "path": "plugins/finance-variance-recon/skills/pnl-budget-variance-bridge",
+          "skill_zip": "dist/skills/pnl-budget-variance-bridge.zip",
+          "script": "scripts/pnl_variance_engine.py",
+          "summary": "Computes P&L Actual vs Budget/Forecast variance bridges split by constant-FX vs currency impact while enforcing leaf-vs-summary hierarchy tie-outs."
+        },
+        {
+          "id": "ar-aging-collections-audit",
+          "path": "plugins/finance-variance-recon/skills/ar-aging-collections-audit",
+          "skill_zip": "dist/skills/ar-aging-collections-audit.zip",
+          "script": "scripts/aging_bucket_auditor.py",
+          "summary": "Buckets open accounts receivable across Current to 90+ days while isolating unapplied credit memos so negative rows never mask delinquent balances."
+        }
+      ]
+    },
+    {
+      "id": "people-ops-talent-hub",
+      "name": "People Ops, Talent Calibration & Workforce Analytics",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "hr",
+        "recruiting",
+        "workday",
+        "compensation",
+        "onboarding"
+      ],
+      "description": "Calibrates structured interview scorecards for score dispersion and bias signals, orchestrates 30/60/90 onboarding plans with mandatory Day-1 gate checks, and audits effective-dated Workday compensation bands with FTE/CWK separation and small-cell privacy redaction.",
+      "path": "plugins/people-ops-talent-hub",
+      "bundle_zip": "dist/bundles/people-ops-talent-hub.zip",
+      "shared_traps": [
+        "workday-hris-traps.md",
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "google-workspace-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "hr-hiring-comp-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "structured-hiring-rubric",
+          "path": "plugins/people-ops-talent-hub/skills/structured-hiring-rubric",
+          "skill_zip": "dist/skills/structured-hiring-rubric.zip",
+          "script": "scripts/rubric_calibration_checker.py",
+          "summary": "Audits 1-4 interview scorecards for >=2.0 dispersion, thin behavioral evidence (<40 chars), and protected-class bias signals."
+        },
+        {
+          "id": "employee-onboarding-navigator",
+          "path": "plugins/people-ops-talent-hub/skills/employee-onboarding-navigator",
+          "skill_zip": "dist/skills/employee-onboarding-navigator.zip",
+          "script": "scripts/onboarding_plan_builder.py",
+          "summary": "Tracks 30/60/90 onboarding milestones, enforces mandatory Day-1 IT/security gates, and detects blocked upstream dependencies."
+        },
+        {
+          "id": "workforce-attrition-comp-audit",
+          "path": "plugins/people-ops-talent-hub/skills/workforce-attrition-comp-audit",
+          "skill_zip": "dist/skills/workforce-attrition-comp-audit.zip",
+          "script": "scripts/comp_band_analyzer.py",
+          "summary": "Deduplicates effective-dated HRIS rows, isolates CWKs from FTEs, normalizes hourly/monthly/FX pay, and suppresses <5 privacy cells."
+        }
+      ]
+    },
+    {
+      "id": "brand-campaign-studio",
+      "name": "Brand Governance, Campaign Matrix & Localization Studio",
+      "version": "1.0.0",
+      "category": "horizontal",
+      "segment_tags": [
+        "cross-industry",
+        "marketing",
+        "brand",
+        "localization",
+        "campaigns",
+        "compliance"
+      ],
+      "description": "Lints marketing copy against brand voice rules, prohibited claims, and channel limits, validates audience-by-channel multimodal campaign matrices, and audits global localization packs against do-not-translate glossaries.",
+      "path": "plugins/brand-campaign-studio",
+      "bundle_zip": "dist/bundles/brand-campaign-studio.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "google-workspace-traps.md",
+        "sharepoint-onedrive-kql-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "commercial-contract-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "brand-voice-compliance-gate",
+          "path": "plugins/brand-campaign-studio/skills/brand-voice-compliance-gate",
+          "skill_zip": "dist/skills/brand-voice-compliance-gate.zip",
+          "script": "scripts/copy_compliance_linter.py",
+          "summary": "Lints marketing copy for banned guarantees, missing substantiation disclaimers, readability density, and channel char caps."
+        },
+        {
+          "id": "multimodal-campaign-brief",
+          "path": "plugins/brand-campaign-studio/skills/multimodal-campaign-brief",
+          "skill_zip": "dist/skills/multimodal-campaign-brief.zip",
+          "script": "scripts/campaign_asset_matrix.py",
+          "summary": "Audits audience-by-channel and funnel coverage matrices, planned spend vs budget, and critical-path launch buffers."
+        },
+        {
+          "id": "market-localization-adapter",
+          "path": "plugins/brand-campaign-studio/skills/market-localization-adapter",
+          "skill_zip": "dist/skills/market-localization-adapter.zip",
+          "script": "scripts/locale_glossary_checker.py",
+          "summary": "Verifies target locale translations for missing markets, untranslated leaks, DNT term preservation, and regional glossary fidelity."
+        }
+      ]
+    },
+    {
+      "id": "erp-procure-to-pay",
+      "name": "ERP Procure-to-Pay, GR/IR Clearing & Tariff Cost Engine",
+      "version": "1.0.0",
+      "category": "enterprise-ops",
+      "segment_tags": [
+        "manufacturing",
+        "supply-chain",
+        "sap",
+        "procurement",
+        "finance",
+        "erp"
+      ],
+      "description": "Reconciles SAP GR/IR clearing imbalances across goods receipts and invoice postings with TCURX scaling, simulates multi-supplier RFx total landed cost under tariff shocks, and rolls up multi-level BOM purchase price variances with cycle detection.",
+      "path": "plugins/erp-procure-to-pay",
+      "bundle_zip": "dist/bundles/erp-procure-to-pay.zip",
+      "shared_traps": [
+        "bigquery-sap-erp-traps.md",
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "finance-materiality-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "gr-ir-clearing-orchestrator",
+          "path": "plugins/erp-procure-to-pay/skills/gr-ir-clearing-orchestrator",
+          "skill_zip": "dist/skills/gr-ir-clearing-orchestrator.zip",
+          "script": "scripts/gr_ir_reconciler.py",
+          "summary": "Reconciles SAP WE goods receipts and RE invoice postings with TCURX currency scaling, SHKZG sign flips, and >60d aging classification."
+        },
+        {
+          "id": "supplier-rfx-tariff-modeler",
+          "path": "plugins/erp-procure-to-pay/skills/supplier-rfx-tariff-modeler",
+          "skill_zip": "dist/skills/supplier-rfx-tariff-modeler.zip",
+          "script": "scripts/landed_cost_simulator.py",
+          "summary": "Simulates multi-supplier RFx bids across FOB, freight, tariffs, shock scenarios, payment financing, and quality defect penalties."
+        },
+        {
+          "id": "bom-cost-rollup-variance",
+          "path": "plugins/erp-procure-to-pay/skills/bom-cost-rollup-variance",
+          "skill_zip": "dist/skills/bom-cost-rollup-variance.zip",
+          "script": "scripts/bom_ppv_rollup.py",
+          "summary": "Explodes multi-level BOMs with scrap factors, guards against circular BOM graphs, and rolls up leaf PPV drivers."
+        }
+      ]
+    },
+    {
+      "id": "gsi-proposal-ip-factory",
+      "name": "GSI Proposal Architecture, SOW Margin & Bench Factory",
+      "version": "1.0.0",
+      "category": "enterprise-ops",
+      "segment_tags": [
+        "system-integrator",
+        "consulting",
+        "sow",
+        "margin",
+        "bench",
+        "delivery"
+      ],
+      "description": "Models consulting delivery staffing pyramids and onshore/offshore margin leverage, audits SOW drafts for scope creep phrasing and margin breaches, and matches open project roles to bench consultants.",
+      "path": "plugins/gsi-proposal-ip-factory",
+      "bundle_zip": "dist/bundles/gsi-proposal-ip-factory.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "google-workspace-traps.md",
+        "sharepoint-onedrive-kql-traps.md",
+        "workday-hris-traps.md"
+      ],
+      "shared_baselines": [
+        "commercial-contract-baseline.md",
+        "deal-desk-approval-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "winning-proposal-architect",
+          "path": "plugins/gsi-proposal-ip-factory/skills/winning-proposal-architect",
+          "skill_zip": "dist/skills/winning-proposal-architect.zip",
+          "script": "scripts/staffing_pyramid_calculator.py",
+          "summary": "Calculates multi-phase effort hours, onshore/offshore leverage ratio, blended bill rate, and gross margin vs SOW floor."
+        },
+        {
+          "id": "sow-scope-margin-auditor",
+          "path": "plugins/gsi-proposal-ip-factory/skills/sow-scope-margin-auditor",
+          "skill_zip": "dist/skills/sow-scope-margin-auditor.zip",
+          "script": "scripts/sow_margin_linter.py",
+          "summary": "Lints SOW drafts for unbounded 'all work required' obligations, missing acceptance criteria, >10d deemed acceptance, and margin floors."
+        },
+        {
+          "id": "bench-skill-demand-matcher",
+          "path": "plugins/gsi-proposal-ip-factory/skills/bench-skill-demand-matcher",
+          "skill_zip": "dist/skills/bench-skill-demand-matcher.zip",
+          "script": "scripts/talent_bench_matcher.py",
+          "summary": "Matches open project seats against bench skills, roll-off dates, location overlap, and target role margin."
+        }
+      ]
+    },
+    {
+      "id": "customer-operations-escalation",
+      "name": "Customer Operations, VIP Escalation & Knowledge Quality",
+      "version": "1.0.0",
+      "category": "enterprise-ops",
+      "segment_tags": [
+        "cx",
+        "support",
+        "escalations",
+        "csat",
+        "nps",
+        "knowledge-ops"
+      ],
+      "description": "Scores VIP account escalations by ARR exposure and Sev1 outages, mines CSAT/NPS verbatims into ARR-weighted driver paretos with null-rating hygiene, and validates support troubleshooting decision trees for graph defects.",
+      "path": "plugins/customer-operations-escalation",
+      "bundle_zip": "dist/bundles/customer-operations-escalation.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "salesforce-crm-soql-traps.md",
+        "servicenow-jira-itsm-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "critical-escalation-warroom",
+          "path": "plugins/customer-operations-escalation/skills/critical-escalation-warroom",
+          "skill_zip": "dist/skills/critical-escalation-warroom.zip",
+          "script": "scripts/escalation_exposure_scorer.py",
+          "summary": "Scores VIP account escalations (0-100) from Sev1/Sev2 cases, SLA breaches, ARR, imminent renewals, outages, and competitor risk."
+        },
+        {
+          "id": "csat-churn-signal-miner",
+          "path": "plugins/customer-operations-escalation/skills/csat-churn-signal-miner",
+          "skill_zip": "dist/skills/csat-churn-signal-miner.zip",
+          "script": "scripts/verbatim_driver_quantifier.py",
+          "summary": "Classifies survey verbatims into ARR-weighted friction drivers, excludes null scores from averages, and catches explicit churn intent."
+        },
+        {
+          "id": "troubleshooting-tree-author",
+          "path": "plugins/customer-operations-escalation/skills/troubleshooting-tree-author",
+          "skill_zip": "dist/skills/troubleshooting-tree-author.zip",
+          "script": "scripts/decision_tree_validator.py",
+          "summary": "Validates customer support diagnostic trees via BFS/DFS for cycles, dead-end questions, orphan nodes, broken refs, and depth."
+        }
+      ]
+    },
+    {
+      "id": "fsi-credit-kyc-claims",
+      "name": "Financial Services Credit, KYB/AML & Claims Underwriting",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "fsi",
+        "banking",
+        "insurance",
+        "credit",
+        "kyc",
+        "aml",
+        "claims"
+      ],
+      "description": "Calculates commercial borrower DSCR, net leverage, and interest coverage under multi-shock stress scenarios, resolves multi-hop UBO beneficial ownership with AML velocity/structuring checks, and evaluates insurance claims deterministically.",
+      "path": "plugins/fsi-credit-kyc-claims",
+      "bundle_zip": "dist/bundles/fsi-credit-kyc-claims.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "bigquery-sap-erp-traps.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "fsi-credit-kyc-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "commercial-credit-memo-analyst",
+          "path": "plugins/fsi-credit-kyc-claims/skills/commercial-credit-memo-analyst",
+          "skill_zip": "dist/skills/commercial-credit-memo-analyst.zip",
+          "script": "scripts/credit_covenant_stress.py",
+          "summary": "Calculates DSCR, Net Leverage, Interest Coverage, and Current Ratio across Base, -10%/-20% revenue, and +200bps rate shocks."
+        },
+        {
+          "id": "kyc-aml-screening-dossier",
+          "path": "plugins/fsi-credit-kyc-claims/skills/kyc-aml-screening-dossier",
+          "skill_zip": "dist/skills/kyc-aml-screening-dossier.zip",
+          "script": "scripts/ubo_velocity_screener.py",
+          "summary": "Traverses multi-hop holding DAGs to compute cumulative UBO ownership %, enforces 10% EDD drop, and detects velocity/structuring spikes."
+        },
+        {
+          "id": "insurance-claims-triage-pack",
+          "path": "plugins/fsi-credit-kyc-claims/skills/insurance-claims-triage-pack",
+          "skill_zip": "dist/skills/insurance-claims-triage-pack.zip",
+          "script": "scripts/coverage_limit_evaluator.py",
+          "summary": "Validates policy effective periods and peril exclusions, computes deductible/coinsurance/sublimit payouts, and flags >$100k reserves."
+        }
+      ]
+    },
+    {
+      "id": "industrial-shopfloor-maintenance",
+      "name": "Industrial Shopfloor Reliability, Quality & EHS Safety",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "manufacturing",
+        "industrial",
+        "reliability",
+        "ehs",
+        "safety",
+        "quality",
+        "sap-pm"
+      ],
+      "description": "Optimizes critical spare-part safety stocks and reorder points via censored MTBF reliability modeling, builds 80/20 scrap defect Paretos with CapEx payback evaluation, and enforces strict EHS Permit-to-Work LOTO and gas-test safety gates.",
+      "path": "plugins/industrial-shopfloor-maintenance",
+      "bundle_zip": "dist/bundles/industrial-shopfloor-maintenance.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "bigquery-sap-erp-traps.md",
+        "chain-denominator-seams.md",
+        "servicenow-jira-itsm-traps.md"
+      ],
+      "shared_baselines": [
+        "finance-materiality-baseline.md",
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "asset-reliability-spares-planner",
+          "path": "plugins/industrial-shopfloor-maintenance/skills/asset-reliability-spares-planner",
+          "skill_zip": "dist/skills/asset-reliability-spares-planner.zip",
+          "script": "scripts/mtbf_spares_optimizer.py",
+          "summary": "Calculates right-censored MTBF, lead-time demand, safety stock, Reorder Point (ROP), and critical stockout expedite POs."
+        },
+        {
+          "id": "quality-capex-rca-copilot",
+          "path": "plugins/industrial-shopfloor-maintenance/skills/quality-capex-rca-copilot",
+          "skill_zip": "dist/skills/quality-capex-rca-copilot.zip",
+          "script": "scripts/defect_pareto_correlator.py",
+          "summary": "Builds 80/20 manufacturing scrap cost Paretos, isolates >=2x anomalous supplier lots, and computes CapEx payback hurdles."
+        },
+        {
+          "id": "ehs-safety-permit-auditor",
+          "path": "plugins/industrial-shopfloor-maintenance/skills/ehs-safety-permit-auditor",
+          "skill_zip": "dist/skills/ehs-safety-permit-auditor.zip",
+          "script": "scripts/hse_permit_checker.py",
+          "summary": "Enforces zero-compromise LOTO isolation, confined-space O2 (19.5-23.5%), 0% LEL gas freshness, fire watch, and worker certification checks."
+        }
+      ]
+    },
+    {
+      "id": "healthcare-clinical-regulatory",
+      "name": "Healthcare Clinical Trial, Pharmacovigilance & Prior Auth",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "healthcare",
+        "life-sciences",
+        "clinical-trials",
+        "pharmacovigilance",
+        "payer",
+        "hipaa"
+      ],
+      "description": "Validates clinical Schedule of Assessments schedules vs endpoints and enrollment capacity, checks E2B ICSR 4 minimum criteria and 7/15-day statutory clocks with PHI redaction alerts, and audits prior authorization packets against payer criteria.",
+      "path": "plugins/healthcare-clinical-regulatory",
+      "bundle_zip": "dist/bundles/healthcare-clinical-regulatory.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "untrusted-content-and-pii.md"
+      ],
+      "shared_baselines": [
+        "commercial-contract-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "clinical-protocol-feasibility",
+          "path": "plugins/healthcare-clinical-regulatory/skills/clinical-protocol-feasibility",
+          "skill_zip": "dist/skills/clinical-protocol-feasibility.zip",
+          "script": "scripts/soa_endpoint_validator.py",
+          "summary": "Detects missing endpoint procedures in trial Schedules of Assessments and projects net IRB-approved screen-adjusted enrollment."
+        },
+        {
+          "id": "pharmacovigilance-safety-intake",
+          "path": "plugins/healthcare-clinical-regulatory/skills/pharmacovigilance-safety-intake",
+          "skill_zip": "dist/skills/pharmacovigilance-safety-intake.zip",
+          "script": "scripts/icsr_completeness_checker.py",
+          "summary": "Validates 4 ICH minimum ICSR criteria, calculates 7-day/15-day/90-day statutory clocks from awareness_date, and traps raw PHI leaks."
+        },
+        {
+          "id": "prior-auth-medical-necessity",
+          "path": "plugins/healthcare-clinical-regulatory/skills/prior-auth-medical-necessity",
+          "skill_zip": "dist/skills/prior-auth-medical-necessity.zip",
+          "script": "scripts/medical_criteria_matcher.py",
+          "summary": "Matches CPT prior-auth packets against covered ICD-10 prefixes, step-therapy trial durations, and required diagnostic labs."
+        }
+      ]
+    },
+    {
+      "id": "retail-store-merchandising",
+      "name": "Retail & CPG Store Ops + Merchandising",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "retail",
+        "cpg",
+        "store-ops",
+        "shrink",
+        "merchandising",
+        "otif",
+        "supply-chain"
+      ],
+      "description": "Ranks store shrink loss and phantom inventory (zero-scan anomalies) while skipping unpolled POS stores, attributes promotional unit/margin lift net of cannibalization and basket halo, and audits supplier OTIF scorecards, chargebacks, and carrier detention.",
+      "path": "plugins/retail-store-merchandising",
+      "bundle_zip": "dist/bundles/retail-store-merchandising.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "chain-denominator-seams.md",
+        "bigquery-sap-erp-traps.md",
+        "sharepoint-onedrive-kql-traps.md"
+      ],
+      "shared_baselines": [
+        "finance-materiality-baseline.md",
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "store-ops-shrink-copilot",
+          "path": "plugins/retail-store-merchandising/skills/store-ops-shrink-copilot",
+          "skill_zip": "dist/skills/store-ops-shrink-copilot.zip",
+          "script": "scripts/store_shrink_task_ranker.py",
+          "summary": "Ranks store physical shrink loss $, detects zero-scan phantom inventory cleanly, and prioritizes store floor cycle counts."
+        },
+        {
+          "id": "merchandising-assortment-planner",
+          "path": "plugins/retail-store-merchandising/skills/merchandising-assortment-planner",
+          "skill_zip": "dist/skills/merchandising-assortment-planner.zip",
+          "script": "scripts/promo_lift_analyzer.py",
+          "summary": "Normalizes baseline vs promo durations, deducts sibling cannibalization, adds basket halo, and computes net promo margin ROI."
+        },
+        {
+          "id": "supplier-otif-chargeback-auditor",
+          "path": "plugins/retail-store-merchandising/skills/supplier-otif-chargeback-auditor",
+          "skill_zip": "dist/skills/supplier-otif-chargeback-auditor.zip",
+          "script": "scripts/otif_detention_calculator.py",
+          "summary": "Scores PO On-Time and In-Full compliance, honors weather/buyer exclusions, and computes vendor chargebacks vs detention fees."
+        }
+      ]
+    },
+    {
+      "id": "marketplace-superapp-ops",
+      "name": "Marketplace, Ride-Hailing & SuperApp Ops",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "marketplace",
+        "superapp",
+        "ecommerce",
+        "trust-safety",
+        "logistics",
+        "payouts"
+      ],
+      "description": "Screens merchant catalog listings for prohibited terms, prompt-injection payloads, and price outliers, attributes on-demand delivery SLA breaches across merchant prep vs courier transit with force-majeure waivers, and reconciles merchant GMV, commission fees, FX, and PSP settlements.",
+      "path": "plugins/marketplace-superapp-ops",
+      "bundle_zip": "dist/bundles/marketplace-superapp-ops.zip",
+      "shared_traps": [
+        "absent-is-not-zero.md",
+        "untrusted-content-and-pii.md",
+        "chain-denominator-seams.md",
+        "bigquery-sap-erp-traps.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md",
+        "finance-materiality-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "merchant-catalog-trust-gate",
+          "path": "plugins/marketplace-superapp-ops/skills/merchant-catalog-trust-gate",
+          "skill_zip": "dist/skills/merchant-catalog-trust-gate.zip",
+          "script": "scripts/catalog_quality_scorer.py",
+          "summary": "Detects indirect prompt injection in merchant copy, screens counterfeit/prohibited goods, flags price outliers, and checks attributes."
+        },
+        {
+          "id": "logistics-sla-dispute-resolver",
+          "path": "plugins/marketplace-superapp-ops/skills/logistics-sla-dispute-resolver",
+          "skill_zip": "dist/skills/logistics-sla-dispute-resolver.zip",
+          "script": "scripts/zone_sla_dispute_analyzer.py",
+          "summary": "Splits order delays into merchant prep vs courier transit faults, waives verified weather delays, and assigns refund liability."
+        },
+        {
+          "id": "commission-payout-reconciler",
+          "path": "plugins/marketplace-superapp-ops/skills/commission-payout-reconciler",
+          "skill_zip": "dist/skills/commission-payout-reconciler.zip",
+          "script": "scripts/payout_ledger_reconciler.py",
+          "summary": "Reconciles gross GMV, commission take-rates, promo splits, FX conversions, and PSP wires while flagging negative clawbacks."
+        }
+      ]
+    },
+    {
+      "id": "telco-noc-field-dispatch",
+      "name": "Telecom NOC & Field Network Dispatch",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "telco",
+        "noc",
+        "outage",
+        "field-service",
+        "dispatch",
+        "provisioning",
+        "itsm"
+      ],
+      "description": "Suppresses downstream network alarm storms via parent-child topology graph correlation, validates technician climbing/safety certifications and van/depot spares prior to field dispatch, and classifies B2B enterprise provisioning order fallout by queue and MRC-at-risk.",
+      "path": "plugins/telco-noc-field-dispatch",
+      "bundle_zip": "dist/bundles/telco-noc-field-dispatch.zip",
+      "shared_traps": [
+        "servicenow-jira-itsm-traps.md",
+        "absent-is-not-zero.md",
+        "untrusted-content-and-pii.md",
+        "bigquery-sap-erp-traps.md"
+      ],
+      "shared_baselines": [
+        "itsm-sla-severity-baseline.md",
+        "finance-materiality-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "noc-outage-topology-correlator",
+          "path": "plugins/telco-noc-field-dispatch/skills/noc-outage-topology-correlator",
+          "skill_zip": "dist/skills/noc-outage-topology-correlator.zip",
+          "script": "scripts/alarm_topology_correlator.py",
+          "summary": "Traces upstream parent-child network graphs to suppress downstream alarm storms and roll up impacted subscribers and VIP circuits."
+        },
+        {
+          "id": "field-dispatch-spares-prep",
+          "path": "plugins/telco-noc-field-dispatch/skills/field-dispatch-spares-prep",
+          "skill_zip": "dist/skills/field-dispatch-spares-prep.zip",
+          "script": "scripts/dispatch_readiness_matcher.py",
+          "summary": "Validates technician skills and non-expired safety certs as of dispatch date alongside depot/van spare kit stock before truck rolls."
+        },
+        {
+          "id": "b2b-order-fallout-resolver",
+          "path": "plugins/telco-noc-field-dispatch/skills/b2b-order-fallout-resolver",
+          "skill_zip": "dist/skills/b2b-order-fallout-resolver.zip",
+          "script": "scripts/order_fallout_classifier.py",
+          "summary": "Classifies stuck B2B DIA/MPLS/SIP orders into deterministic remediation queues and quantifies Monthly Recurring Charge (MRC) at risk."
+        }
+      ]
+    },
+    {
+      "id": "public-sector-higher-ed",
+      "name": "Public Sector Casework, Grants & Higher-Ed Ops",
+      "version": "1.0.0",
+      "category": "vertical",
+      "segment_tags": [
+        "public-sector",
+        "government",
+        "higher-ed",
+        "grants",
+        "procurement",
+        "eligibility",
+        "compliance"
+      ],
+      "description": "Evaluates citizen benefits/aid eligibility with strict missing-document cure holds (never silent denials) and SSN redaction, scores public procurement tenders after mandatory debarment/COI pass-fail gates, and validates research grant budgets (F&A indirect caps, unallowables, PI effort) plus accreditation evidence freshness.",
+      "path": "plugins/public-sector-higher-ed",
+      "bundle_zip": "dist/bundles/public-sector-higher-ed.zip",
+      "shared_traps": [
+        "untrusted-content-and-pii.md",
+        "absent-is-not-zero.md",
+        "servicenow-jira-itsm-traps.md",
+        "google-workspace-traps.md"
+      ],
+      "shared_baselines": [
+        "commercial-contract-baseline.md",
+        "itsm-sla-severity-baseline.md"
+      ],
+      "skills": [
+        {
+          "id": "citizen-case-eligibility-triager",
+          "path": "plugins/public-sector-higher-ed/skills/citizen-case-eligibility-triager",
+          "skill_zip": "dist/skills/citizen-case-eligibility-triager.zip",
+          "script": "scripts/statutory_eligibility_engine.py",
+          "summary": "Computes household FPL income eligibility, enforces missing-document cure holds instead of silent denials, and counts PII redactions."
+        },
+        {
+          "id": "procurement-tender-evaluator",
+          "path": "plugins/public-sector-higher-ed/skills/procurement-tender-evaluator",
+          "skill_zip": "dist/skills/procurement-tender-evaluator.zip",
+          "script": "scripts/tender_weighted_scorer.py",
+          "summary": "Enforces mandatory debarment/COI/tax pass-fail gates first, then computes lowest-compliant commercial normalization and weighted rank."
+        },
+        {
+          "id": "grant-accreditation-evidence-pack",
+          "path": "plugins/public-sector-higher-ed/skills/grant-accreditation-evidence-pack",
+          "skill_zip": "dist/skills/grant-accreditation-evidence-pack.zip",
+          "script": "scripts/grant_accreditation_validator.py",
+          "summary": "Validates MTDC base vs F&A indirect cost caps, flags unallowable expenses, checks PI 100% effort cap, and checks accreditation freshness."
+        }
+      ]
+    }
+  ]
+}

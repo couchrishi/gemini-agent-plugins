@@ -1,0 +1,28 @@
+version: '1.0'
+plugin_id: erp-procure-to-pay
+capabilities:
+- id: erp_p2p_and_bom_data
+  description: SAP EKBE GR/IR histories, multi-level BOM structures, standard/actual
+    material costs, and supplier RFx bids.
+  required: true
+  mode_a_live_connectors:
+  - connector: sap_odata_api
+    endpoint_template: https://{erp_host}/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+    auth_type: mtls_oauth2
+    scopes:
+    - sap.mm.read
+    - sap.pp.read
+  - connector: bigquery_sql_api
+    endpoint_template: https://bigquery.googleapis.com/bigquery/v2/projects/{project_id}/queries
+    auth_type: workload_identity
+    scopes:
+    - https://www.googleapis.com/auth/bigquery.readonly
+  mode_b_workspace_fallback:
+    google_workspace_sources:
+    - Google Sheets
+    - Google Drive
+    lookup_hint: Read Procurement GR/IR Aging Sheets, RFx Bid Matrix Sheets, and BOM
+      Cost Rollup tabs in Supply Chain Shared Drives.
+  mode_c_local_file_formats:
+  - json
+  - csv
