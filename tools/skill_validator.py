@@ -18,9 +18,13 @@ except ImportError:  # pragma: no cover - stdlib fallback only used if PyYAML mi
     yaml = None
 
 KEBAB_RE = re.compile(r"^[a-z0-9-]+$")
-FENCED_CODE_RE = re.compile(r"```[\s\S]*?```", re.MULTILINE)
-INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
-MD_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+FENCED_CODE_RE = re.compile(
+    r"^[ \t]*(`{3,}|~{3,})[\s\S]*?^[ \t]*\1[ \t]*$", re.MULTILINE
+)
+INLINE_CODE_RE = re.compile(r"(`+)(?:(?!\1)[^\n])+\1")
+INLINE_CODE_CAPTURE_RE = re.compile(r"`([^`\n]+)`")
+MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\n]*)\)")
+WEB_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 FORBIDDEN_TOOL_NAME = "file" + "_edit"
 PLACEHOLDER_TODO = "[" + "todo]"
 PLACEHOLDER_TILDE = "~" * 2
@@ -63,19 +67,58 @@ def _parse_yaml_frontmatter(raw_yaml: str) -> dict:
 
 def _strip_code_spans(markdown_text: str) -> str:
     without_fences = FENCED_CODE_RE.sub("", markdown_text)
-    return INLINE_CODE_RE.sub("", without_fences)
+    return INLINE_CODE_RE.sub("code", without_fences)
+
+
+def _check_markdown_links(body: str) -> str:
+    """Verify that markdown links in body are only used for web links (http:// or https://)."""
+    cleaned = _strip_code_spans(body)
+    for match in MD_LINK_RE.finditer(cleaned):
+        raw_target = match.group(1).strip()
+        if raw_target.startswith("<") and ">" in raw_target:
+            target = raw_target[1 : raw_target.index(">")].strip()
+        else:
+            target = raw_target.split()[0] if raw_target else ""
+        if not WEB_URL_RE.match(target):
+            return (
+                f"SKILL.md body contains non-web markdown link target '{target}'."
+                " Markdown links may only be used for web links (http:// or"
+                " https://); format skill files and paths as code strings instead"
+                " (e.g. `scripts/foo.py`)."
+            )
+    return ""
 
 
 def extract_relative_links(markdown_text: str) -> list[str]:
     """Return normalized relative file targets referenced by Markdown links outside code blocks."""
     cleaned = _strip_code_spans(markdown_text)
     targets: list[str] = []
-    for _label, raw_target in MD_LINK_RE.findall(cleaned):
-        if raw_target.startswith(("http://", "https://", "mailto:", "#")):
+    for match in MD_LINK_RE.finditer(cleaned):
+        raw_target = match.group(1).strip()
+        if raw_target.startswith("<") and ">" in raw_target:
+            target = raw_target[1 : raw_target.index(">")].strip()
+        else:
+            target = raw_target.split()[0] if raw_target else ""
+        if target.startswith(("http://", "https://", "mailto:", "#")):
             continue
-        target_no_frag = raw_target.split("#", 1)[0]
+        target_no_frag = target.split("#", 1)[0]
         if target_no_frag:
             targets.append(target_no_frag)
+    return targets
+
+
+def extract_code_path_references(markdown_text: str) -> list[str]:
+    """Return skill-relative file paths formatted as inline code spans outside fenced code blocks."""
+    without_fences = FENCED_CODE_RE.sub("", markdown_text)
+    targets: list[str] = []
+    for code_text in INLINE_CODE_CAPTURE_RE.findall(without_fences):
+        candidate = code_text.strip()
+        if (
+            candidate.startswith(("scripts/", "references/"))
+            and " " not in candidate
+            and "*" not in candidate
+        ):
+            targets.append(candidate)
     return targets
 
 
@@ -237,17 +280,21 @@ def validate_skill_content(
             ValidationIssue("ERROR", location, "SKILL.md body must specify HITL confirmation gate.")
         )
 
-    # 5. Relative link existence and completeness bijection
-    raw_links = extract_relative_links(body)
-    linked_paths: set[str] = set()
-    for target in raw_links:
+    # 5. Enforce web-only markdown links and code-path completeness bijection
+    link_error = _check_markdown_links(body)
+    if link_error:
+        issues.append(ValidationIssue("ERROR", location, link_error))
+
+    code_paths = extract_code_path_references(body)
+    referenced_paths: set[str] = set()
+    for target in code_paths:
         norm = posixpath.normpath(target)
         if norm.startswith("..") or norm.startswith("/"):
             issues.append(
                 ValidationIssue(
                     "ERROR",
                     location,
-                    f"Relative link {target!r} escapes skill root directory.",
+                    f"Skill code path {target!r} escapes skill root directory.",
                 )
             )
             continue
@@ -256,11 +303,11 @@ def validate_skill_content(
                 ValidationIssue(
                     "ERROR",
                     location,
-                    f"Broken relative link in SKILL.md: {target!r} -> {norm!r} not found in package.",
+                    f"Broken skill path reference in SKILL.md: {target!r} -> {norm!r} not found in package.",
                 )
             )
         else:
-            linked_paths.add(norm)
+            referenced_paths.add(norm)
 
     managed_files = sorted(
         p
@@ -278,12 +325,12 @@ def validate_skill_content(
             )
         )
     for rel_file in managed_files:
-        if rel_file not in linked_paths:
+        if rel_file not in referenced_paths:
             issues.append(
                 ValidationIssue(
                     "ERROR",
                     location,
-                    f"Unlinked resource in skill package: {rel_file!r} must be explicitly linked in SKILL.md.",
+                    f"Unreferenced resource in skill package: {rel_file!r} must be explicitly formatted as a code path in SKILL.md.",
                 )
             )
 
@@ -298,7 +345,7 @@ def validate_skill_content(
                 )
             )
 
-    # 6. Validate links inside extra markdown files (e.g., references/workflows/*.md in bundles)
+    # 6. Validate links and code paths inside extra markdown files (e.g., references/workflows/*.md in bundles)
     if extra_markdown_files:
         for md_rel, md_content in sorted(extra_markdown_files.items()):
             md_dir = posixpath.dirname(md_rel)
@@ -310,6 +357,16 @@ def validate_skill_content(
                             "ERROR",
                             f"{location}::{md_rel}",
                             f"Broken relative link {target!r} (resolved to {resolved!r}).",
+                        )
+                    )
+            for target in extract_code_path_references(md_content):
+                norm = posixpath.normpath(target)
+                if norm.startswith("..") or norm not in inventory:
+                    issues.append(
+                        ValidationIssue(
+                            "ERROR",
+                            f"{location}::{md_rel}",
+                            f"Broken skill path reference {target!r} (resolved to {norm!r}).",
                         )
                     )
 

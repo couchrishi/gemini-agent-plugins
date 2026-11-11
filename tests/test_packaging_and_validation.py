@@ -33,12 +33,12 @@ Handles deterministic domain analysis.
 
 ## Config & Baseline
 
-Inspect [config.json](references/config.json) for `org_configured`. When false, stamp:
+Inspect `references/config.json` for `org_configured`. When false, stamp:
 `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]`
 
 ## Execution
 
-Run [engine.py](scripts/engine.py) via `pyrepl` or `python3` CLI, and persist drafts with `write_to_file`.
+Run `scripts/engine.py` via `pyrepl` or `python3` CLI, and persist drafts with `write_to_file`.
 Always require HITL explicit user confirmation before external mutations.
 """
 
@@ -100,11 +100,22 @@ def test_skill_validator_positive_and_negative_cases() -> None:
     issues = skill_validator.validate_skill_content(bad_tool, inventory, expected_name="valid-sample-skill")
     assert any("forbidden tool name" in i.message for i in issues)
 
-    # Reject broken relative link and unlinked resource
-    bad_link = ok_md.replace("(scripts/engine.py)", "(scripts/missing.py)")
+    # Reject broken code path reference and unreferenced resource
+    bad_link = ok_md.replace("`scripts/engine.py`", "`scripts/missing.py`")
     issues = skill_validator.validate_skill_content(bad_link, inventory, expected_name="valid-sample-skill")
-    assert any("Broken relative link" in i.message for i in issues)
-    assert any("Unlinked resource" in i.message for i in issues)
+    assert any("Broken skill path reference" in i.message for i in issues)
+    assert any("Unreferenced resource" in i.message for i in issues)
+
+    # Reject non-web markdown link while allowing https:// links
+    non_web_md = ok_md.replace("`scripts/engine.py`", "[engine.py](scripts/engine.py)")
+    issues = skill_validator.validate_skill_content(non_web_md, inventory, expected_name="valid-sample-skill")
+    assert any("non-web markdown link" in i.message for i in issues)
+
+    web_md = ok_md + "\nSee [Reference Docs](https://example.com/docs) for API details.\n"
+    assert (
+        skill_validator.validate_skill_content(web_md, inventory, expected_name="valid-sample-skill")
+        == []
+    )
 
 
 def test_cel_syntax_validator() -> None:

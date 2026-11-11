@@ -217,9 +217,8 @@ def render_bundle_skill_md(
     for s in skill_entries:
         sid = s["id"]
         script_rel = s["script"]
-        script_name = posixpath.basename(script_rel)
         lines.append(
-            f"| `{sid}` | [{sid}.md](references/workflows/{sid}.md) | [{script_name}]({script_rel}) | {s['summary']} |"
+            f"| `{sid}` | `references/workflows/{sid}.md` | `{script_rel}` | {s['summary']} |"
         )
 
     lines.extend(
@@ -247,7 +246,7 @@ def render_bundle_skill_md(
             "",
             "## Org Configuration & Starter Baseline Rule",
             "",
-            "1. Read [config.json](references/config.json) using `view_file` (or check a user-supplied organization playbook file).",
+            "1. Read `references/config.json` using `view_file` (or check a user-supplied organization playbook file).",
             "2. Check the boolean flag `org_configured`.",
             "3. When `org_configured` is `false`, evaluate strictly against the bundled starter baseline rubrics and stamp the top of every deliverable verbatim with:",
             "   `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]`",
@@ -256,7 +255,7 @@ def render_bundle_skill_md(
         ]
     )
     for b in plugin_meta["shared_baselines"]:
-        lines.append(f"- [{b}](references/baselines/{b})")
+        lines.append(f"- `references/baselines/{b}`")
 
     first_script_rel = skill_entries[0]["script"]
     first_module = posixpath.splitext(posixpath.basename(first_script_rel))[0]
@@ -268,7 +267,7 @@ def render_bundle_skill_md(
             "",
             "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Because runtime shells start in `/workspace` while bundles and individual skills unpack under `skills/<slug>/` or `skills/user-skills/<slug>/`, always resolve `SKILL_DIR` dynamically before importing scripts or reading references.",
             "",
-            "- **Zero-dependency enterprise ingestion:** Every engine uses [enterprise_io.py](scripts/enterprise_io.py) to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabNameOrIndex>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet by tab name or 0-based index.",
+            "- **Zero-dependency enterprise ingestion:** Every engine uses `scripts/enterprise_io.py` to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabNameOrIndex>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet by tab name or 0-based index.",
             "",
             "Using persistent `pyrepl`:",
             "",
@@ -334,7 +333,7 @@ def render_bundle_skill_md(
         ]
     )
     for t in plugin_meta["shared_traps"]:
-        lines.append(f"- [{t}](references/traps/{t})")
+        lines.append(f"- `references/traps/{t}`")
 
     lines.extend(
         [
