@@ -78,4 +78,4 @@ Once `org_configured` evaluates `true`, all generated quote scorecards, pipeline
 1. Convert every international quote and opportunity line via dated `fx_rates` into `target_currency` before computing discount % or quota coverage.
 2. Separate clean `Commit` pipeline (`>= 2` contacts, `push_count < 2`, `days_in_stage <= 1.5x` median) from at-risk `Commit` deals.
 3. Flag every RFP questionnaire row scoring below `rfp_min_similarity_threshold (0.22)` as `NEEDS_SME_AUTHORING` rather than guessing compliance answers.
-4. Keep CRM stage updates, SFDC quote approvals, and customer emails strictly behind `task_sticky` or `explicit_per_call` HITL confirmation.
+4. Keep CRM stage updates, SFDC quote approvals, and customer emails gated behind Agent Gateway (`Auto-Guardian`) and explicit HITL confirmation.

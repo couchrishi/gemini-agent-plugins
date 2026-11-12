@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "target_currency": "USD",
   "auto_approve_max_discount_pct": 15.0,
   "vp_approve_max_discount_pct": 25.0,

@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "max_avg_sentence_words": 22,
   "min_production_buffer_days": 5,
   "required_locales": [

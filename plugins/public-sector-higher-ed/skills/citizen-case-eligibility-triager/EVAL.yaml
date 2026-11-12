@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - case_determinations
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - PENDING_VERIFICATION_CURE_NOTICE
   must_not_include_patterns:
   - denied application solely for missing proof_of_income
@@ -17,22 +17,20 @@ deterministic_checks:
   - Routes missing document packets strictly to PENDING_VERIFICATION_CURE_NOTICE.
   - Detects and counts SSN patterns in applicant notes without echoing them.
 scenarios:
-- id: mode_a_missing_doc_cure
-  mode: mode_a
-  prompt: Triage CivicFirst Agency household-of-4 packet missing proof_of_income with
-    an SSN in free-text notes.
+- id: live_missing_doc_cure
+  mode: live_connector
+  prompt: Triage CivicFirst Agency household-of-4 packet missing proof_of_income with an SSN in free-text notes.
   expected_assertions:
   - Outputs PENDING_VERIFICATION_CURE_NOTICE (not denial) and detects pii_tokens_redacted=1.
   - Calculates 200% FPL household threshold accurately.
-- id: mode_b_sheets_fpl_check
-  mode: mode_b
-  prompt: Audit Intake Case Sheet in Drive with eligible household under 200% FPL
-    and over-income case.
+- id: workspace_sheets_fpl_check
+  mode: workspace_connector
+  prompt: Audit Intake Case Sheet in Drive with eligible household under 200% FPL and over-income case.
   expected_assertions:
   - Separates ELIGIBLE_RECOMMEND_AWARD from RECOMMEND_DENIAL_OVER_INCOME cleanly.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_cases_json
-  mode: mode_c
+- id: local_local_cases_json
+  mode: local_file
   prompt: Run statutory_eligibility_engine.py on cases.json.
   expected_assertions:
   - All determinations enforce hitl_caseworker_signoff_required=true.

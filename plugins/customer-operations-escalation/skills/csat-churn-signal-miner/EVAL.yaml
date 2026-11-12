@@ -9,7 +9,7 @@ deterministic_checks:
   - driver_pareto
   - churn_alerts
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - unrated_csat_excluded
   must_not_include_patterns:
   - averaged null csat_score as zero
@@ -18,20 +18,20 @@ deterministic_checks:
   - Excludes null ratings from avg_csat and NPS denominators cleanly.
   - Weights driver_pareto by detractor ARR and flags churn phrases.
 scenarios:
-- id: mode_a_null_denominator_guard
-  mode: mode_a
+- id: live_null_denominator_guard
+  mode: live_connector
   prompt: Analyze Veloce SuperApp CSAT responses where 2 of 6 rows omitted csat_score.
   expected_assertions:
   - Excludes null rows from avg_csat denominator (sets unrated_csat_excluded=2).
   - Captures explicit churn-intent phrases in churn_alerts.
-- id: mode_b_sheets_arr_pareto
-  mode: mode_b
+- id: workspace_sheets_arr_pareto
+  mode: workspace_connector
   prompt: Quantify latency vs support responsiveness ARR exposure in Drive CSAT Sheet.
   expected_assertions:
   - Ranks driver_pareto descending by arr_exposed_usd.
   - Emits baseline banner when org_configured is false.
-- id: mode_c_local_nps_miner
-  mode: mode_c
+- id: local_local_nps_miner
+  mode: local_file
   prompt: Run verbatim_driver_quantifier.py on survey_responses.json.
   expected_assertions:
   - Computes exact NPS score and detractor ARR totals.

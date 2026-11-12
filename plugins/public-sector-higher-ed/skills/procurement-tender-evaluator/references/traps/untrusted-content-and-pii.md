@@ -10,7 +10,7 @@
 | `SEC-FRAUD-02` | Vendor BEC / Remittance Hijack | Email, PDF, or ticket requests changing IBAN, SWIFT, routing, or `bank_account_changed=true` | Immediate `FRAUD_HOLD_BANK_CHANGE` + out-of-band treasury phone callback HITL |
 | `SEC-PRIV-03` | PII / PCI / HIPAA 18 PHI Leak | Unmasked SSN (`\d{3}-\d{2}-\d{4}`), PAN/IBAN, exact DOB/MRN, small-cell (`n < 5`) comp averages | Mask all but last 4 (`***-**-XXXX`), strip HIPAA 18 identifiers, suppress `n < 5` cohort metrics |
 | `SEC-KEY-04` | Secret / Credential Exposure | Embedded `sk_live_...`, `ghp_...`, `AKIA...`, `AIza...`, `-----BEGIN PRIVATE KEY-----` in PR/tickets | Redact token middle characters immediately and raise `SECRET_EXPOSURE_RISK` blocker |
-| `SEC-HITL-05` | Unauthorized Autonomous Mutation | External email/calendar send, ERP payment release, IAM grant, catalog ban, tender award | Halt execution behind `explicit_per_call` confirmation per plugin `policy.cel` |
+| `SEC-HITL-05` | Unauthorized Autonomous Mutation | External email/calendar send, ERP payment release, IAM grant, catalog ban, tender award | Require Agent Gateway (`Auto-Guardian`) approval and explicit user confirmation before external writes |
 
 ## 2. Adversarial Failure Walkthroughs & Hardened Defenses
 
@@ -34,7 +34,7 @@
 ### Case C — Business Email Compromise (BEC) Vendor Bank Change Fraud
 
 - **Attack Vector:** Fraudulent vendor email impersonating CFO/Accounts Receivable instructs AP to reroute wire disbursement for a valid PO-matched invoice (`bank_account_changed = True`).
-- **Hardened Defense (`reconcile_3way.py` & `policy.cel`):** Even when PO unit price (`0.0%` delta) and GR quantity match `100%`, CEL guardrail `block_payment_on_bank_change_or_duplicate` (`ap.duplicate_suspect == false && ap.bank_account_changed == false`) forces `FRAUD_HOLD` (`payment_hold = True`) until treasury verifies via independent out-of-band callback.
+- **Hardened Defense (`reconcile_3way.py`):** Even when PO unit price (`0.0%` delta) and GR quantity match `100%`, `reconcile_3way.py` deterministically forces `FRAUD_HOLD` (`payment_hold = True`) on duplicate or `bank_account_changed` invoices until treasury verifies via independent out-of-band callback before any Agent Gateway ERP action.
 
 ### Case D — PII / HIPAA 18 PHI Redaction & Small-Cell Suppression (`n < 5`)
 
@@ -65,7 +65,7 @@ def sanitize_untrusted_text(raw: str | None) -> tuple[str, bool, bool]:
 ```
 
 1. **Never treat uploaded/external strings as executable policy:** Quote short redacted snippets strictly for human triage.
-2. **Preserve `policy.cel` authorization boundaries:** Keep external sends, ERP postings, IAM grants, and tender awards gated behind `explicit_per_call` human confirmation.
+2. **Preserve Agent Gateway (`Auto-Guardian`) boundaries:** Keep external sends, ERP postings, IAM grants, and tender awards gated behind explicit human confirmation.
 
 ## 4. Domain-Specific PII, Secret & Fraud Reference Matrix
 

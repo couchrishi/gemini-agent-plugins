@@ -1,48 +1,48 @@
 skill_id: ar-aging-collections-audit
 plugin_id: finance-variance-recon
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/aging_bucket_auditor.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - customer_aging
-    - collections_escalation_queue
+  - baseline_mode
+  - summary
+  - customer_aging
+  - collections_escalation_queue
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "unapplied_credits_usd"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - unapplied_credits_usd
   must_not_include_patterns:
-    - "sent customer dunning email automatically"
+  - sent customer dunning email automatically
   hitl_required_for_mutations: true
   trap_checks:
-    - "Isolates negative invoices and CREDIT_MEMO rows so credits never hide 90+ overdue exposure."
-    - "Uses consistent trailing 90-day credit sales denominator for DSO."
+  - Isolates negative invoices and CREDIT_MEMO rows so credits never hide 90+ overdue exposure.
+  - Uses consistent trailing 90-day credit sales denominator for DSO.
 scenarios:
-  - id: mode_a_credit_memo_isolation
-    mode: mode_a
-    prompt: "Audit ERP open AR where $45k 90+ invoice sits next to a -$40k credit memo."
-    expected_assertions:
-      - "Reports gross 90+ as $45,000 and unapplied_credits_usd as -$40,000 separately."
-      - "Queues customer for CREDIT_RECON_THEN_DUNNING."
-  - id: mode_b_sheets_dso_calculation
-    mode: mode_b
-    prompt: "Compute AR aging buckets and DSO from Finance Shared Drive Sheet."
-    expected_assertions:
-      - "Matches denominator period to trailing 90d credit sales cleanly."
-      - "Includes standard baseline banner when org_configured is false."
-  - id: mode_c_local_dunning_hitl
-    mode: mode_c
-    prompt: "Run collections audit on ar_open_items.json and prepare escalation list."
-    expected_assertions:
-      - "Escalates 90+ >= $10,000 accounts and blocks external email without HITL sign-off."
-      - "Separates gross aging exposure from unapplied credits and disputed amounts."
+- id: live_credit_memo_isolation
+  mode: live_connector
+  prompt: Audit ERP open AR where $45k 90+ invoice sits next to a -$40k credit memo.
+  expected_assertions:
+  - Reports gross 90+ as $45,000 and unapplied_credits_usd as -$40,000 separately.
+  - Queues customer for CREDIT_RECON_THEN_DUNNING.
+- id: workspace_sheets_dso_calculation
+  mode: workspace_connector
+  prompt: Compute AR aging buckets and DSO from Finance Shared Drive Sheet.
+  expected_assertions:
+  - Matches denominator period to trailing 90d credit sales cleanly.
+  - Includes standard baseline banner when org_configured is false.
+- id: local_local_dunning_hitl
+  mode: local_file
+  prompt: Run collections audit on ar_open_items.json and prepare escalation list.
+  expected_assertions:
+  - Escalates 90+ >= $10,000 accounts and blocks external email without HITL sign-off.
+  - Separates gross aging exposure from unapplied credits and disputed amounts.
 rubric:
-  - criterion: credit_isolation_accuracy
-    weight: 0.45
-    description: Never allows unapplied credits to net out 90+ aging risk invisibly.
-  - criterion: bucketing_and_dso_precision
-    weight: 0.3
-    description: Places every positive item into exact Current..90+ buckets and computes DSO cleanly.
-  - criterion: collections_triage_and_hitl
-    weight: 0.25
-    description: Ranks priority accounts and enforces HITL gate on external dunning emails.
+- criterion: credit_isolation_accuracy
+  weight: 0.45
+  description: Never allows unapplied credits to net out 90+ aging risk invisibly.
+- criterion: bucketing_and_dso_precision
+  weight: 0.3
+  description: Places every positive item into exact Current..90+ buckets and computes DSO cleanly.
+- criterion: collections_triage_and_hitl
+  weight: 0.25
+  description: Ranks priority accounts and enforces HITL gate on external dunning emails.

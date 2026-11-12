@@ -13,6 +13,7 @@
     "itsm"
   ],
   "description": "Suppresses downstream network alarm storms via parent-child topology graph correlation, validates technician climbing/safety certifications and van/depot spares prior to field dispatch, and classifies B2B enterprise provisioning order fallout by queue and MRC-at-risk.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "noc-outage-topology-correlator",
@@ -40,11 +41,36 @@
     "itsm-sla-severity-baseline.md",
     "finance-materiality-baseline.md"
   ],
-  "agent_templates": [
-    "agents/telco-noc-field-dispatch-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/hourly-b2b-fallout-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "ServiceNow",
+      "BigQuery",
+      "Postgres",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs"
+    ],
+    "byo_mcp": [
+      "NMS Alarm Topology & Field Service Dispatch MCP server"
+    ],
+    "connector_fetch_guidance": "Fetch live network alarm graphs, technician safety certifications, depot spare inventory, and B2B provisioning fallout orders from ServiceNow, BigQuery, Postgres, or customer NMS/Dispatch MCP servers via remote_cli mcp before Python BFS and readiness checks."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Dispatching field truck rolls and reserving depot spares in customer Field Service MCP",
+      "Bulk-closing or linking correlated child alarms in ServiceNow / NMS MCP"
+    ],
+    "python_code_guardrails": [
+      "Visited-set BFS optical ring correlation preventing infinite topology loops while deduplicating downstream child alarms",
+      "Hard dispatch block whenever tower-climb/electrical safety certs are expired or required depot spares are unavailable",
+      "Revenue-weighted MRC escalation prioritization on aged B2B order fallout"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "hourly-b2b-fallout-watch",
+    "title": "Hourly B2B Provisioning Fallout Watch",
+    "cron_expression": "0 * * * *",
+    "time_zone": "UTC",
+    "instruction": "Run the hourly B2B provisioning fallout sweep via scripts/order_fallout_classifier.py and highlight P1 executive escalations where aged MRC breaches SLA."
+  }
 }

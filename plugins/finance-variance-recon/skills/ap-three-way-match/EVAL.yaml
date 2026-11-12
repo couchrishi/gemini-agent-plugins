@@ -1,47 +1,47 @@
 skill_id: ap-three-way-match
 plugin_id: finance-variance-recon
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/reconcile_3way.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - reconciliation_results
+  - baseline_mode
+  - summary
+  - reconciliation_results
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "FRAUD_HOLD_BANK_CHANGE"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - FRAUD_HOLD_BANK_CHANGE
   must_not_include_patterns:
-    - "posted payment despite duplicate"
+  - posted payment despite duplicate
   hitl_required_for_mutations: true
   trap_checks:
-    - "Applies TCURX decimal factor (100x JPY/KRW, 0.1x KWD) when sap_raw_encoding is true."
-    - "Treats SAP SHKZG='H' lines as credits and holds missing GRNs."
+  - Applies TCURX decimal factor (100x JPY/KRW, 0.1x KWD) when sap_raw_encoding is true.
+  - Treats SAP SHKZG='H' lines as credits and holds missing GRNs.
 scenarios:
-  - id: mode_a_sap_tcurx_shkzg
-    mode: mode_a
-    prompt: "Run 3-way match across Apex Manufacturing SAP JPY PO, GRN, and SHKZG='H' credit memo."
-    expected_assertions:
-      - "Normalizes JPY SAP encoding without 100x inflation."
-      - "Classifies SHKZG='H' rows as CREDIT_MEMO_POSTED."
-  - id: mode_b_sheets_fraud_duplicate
-    mode: mode_b
-    prompt: "Check Drive AP Sheet for fuzzy duplicates and vendor bank-change alerts."
-    expected_assertions:
-      - "Blocks clearance with FRAUD_HOLD and DUPLICATE_BLOCK."
-      - "Applies baseline banner when org_configured is false."
-  - id: mode_c_split_files_cli
-    mode: mode_c
-    prompt: "Reconcile --po po.json --gr gr.json --invoice inv.json locally."
-    expected_assertions:
-      - "Flags PRICE_VARIANCE > 2% or $500 and requires HITL before payment posting."
-      - "Outputs structured Markdown and JSON reconciliation summaries with baseline banner."
+- id: live_sap_tcurx_shkzg
+  mode: live_connector
+  prompt: Run 3-way match across Apex Manufacturing SAP JPY PO, GRN, and SHKZG='H' credit memo.
+  expected_assertions:
+  - Normalizes JPY SAP encoding without 100x inflation.
+  - Classifies SHKZG='H' rows as CREDIT_MEMO_POSTED.
+- id: workspace_sheets_fraud_duplicate
+  mode: workspace_connector
+  prompt: Check Drive AP Sheet for fuzzy duplicates and vendor bank-change alerts.
+  expected_assertions:
+  - Blocks clearance with FRAUD_HOLD and DUPLICATE_BLOCK.
+  - Applies baseline banner when org_configured is false.
+- id: local_split_files_cli
+  mode: local_file
+  prompt: Reconcile --po po.json --gr gr.json --invoice inv.json locally.
+  expected_assertions:
+  - Flags PRICE_VARIANCE > 2% or $500 and requires HITL before payment posting.
+  - Outputs structured Markdown and JSON reconciliation summaries with baseline banner.
 rubric:
-  - criterion: erp_currency_and_sign_rigor
-    weight: 0.4
-    description: Correctly normalizes TCURX currency decimals and SHKZG credit indicators.
-  - criterion: exception_and_fraud_detection
-    weight: 0.35
-    description: Catches missing GRNs, price/qty variances, fuzzy duplicates, and bank-change holds.
-  - criterion: baseline_and_hitl_guardrails
-    weight: 0.25
-    description: Preserves baseline disclosure and enforces HITL gate before ERP writes.
+- criterion: erp_currency_and_sign_rigor
+  weight: 0.4
+  description: Correctly normalizes TCURX currency decimals and SHKZG credit indicators.
+- criterion: exception_and_fraud_detection
+  weight: 0.35
+  description: Catches missing GRNs, price/qty variances, fuzzy duplicates, and bank-change holds.
+- criterion: baseline_and_hitl_guardrails
+  weight: 0.25
+  description: Preserves baseline disclosure and enforces HITL gate before ERP writes.

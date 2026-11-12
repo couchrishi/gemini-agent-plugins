@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - locale_audits
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - dnt_violations
   must_not_include_patterns:
   - approved localization with missing locale
@@ -17,22 +17,20 @@ deterministic_checks:
   - Flags missing target locales and literal source-language leaks.
   - Verifies protected do_not_translate_terms stay verbatim.
 scenarios:
-- id: mode_a_dnt_tampering
-  mode: mode_a
-  prompt: Audit Veloce SuperApp regional packs in Smartling where ja-JP translated
-    'Gemini Enterprise' literally.
+- id: live_dnt_tampering
+  mode: live_connector
+  prompt: Audit Veloce SuperApp regional packs in Smartling where ja-JP translated 'Gemini Enterprise' literally.
   expected_assertions:
   - Flags dnt_violations containing 'Gemini Enterprise' -> LOCALIZATION_REWORK_REQUIRED.
   - Detects glossary term mismatches.
-- id: mode_b_sheets_missing_locale
-  mode: mode_b
-  prompt: Check Regional Copy Sheet in Drive where fr-FR is blank and de-DE still
-    holds untranslated English.
+- id: workspace_sheets_missing_locale
+  mode: workspace_connector
+  prompt: Check Regional Copy Sheet in Drive where fr-FR is blank and de-DE still holds untranslated English.
   expected_assertions:
   - Flags fr-FR as MISSING_LOCALE_TRANSLATION and de-DE untranslated_leak=true.
   - Emits baseline banner when org_configured is false.
-- id: mode_c_local_pack_pass
-  mode: mode_c
+- id: local_local_pack_pass
+  mode: local_file
   prompt: Run locale_glossary_checker.py on localization_pack.json.
   expected_assertions:
   - Passes compliant locales cleanly and isolates rework locales.

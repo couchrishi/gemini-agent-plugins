@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "p1_resolution_minutes": 240,
   "p2_resolution_minutes": 480,
   "p3_resolution_minutes": 1440,

@@ -75,6 +75,13 @@ def _validate_value_against_prop(key: str, val: Any, prop: dict[str, Any], plugi
     elif expected_type == "object":
         if not isinstance(val, dict):
             raise ValueError(f"{plugin_id}.{key}: expected object, got {type(val).__name__}")
+        addl = prop.get("additionalProperties")
+        if isinstance(addl, dict) and addl.get("type") == "string":
+            for mk, mv in val.items():
+                if not isinstance(mk, str) or not isinstance(mv, str):
+                    raise ValueError(
+                        f"{plugin_id}.{key}[{mk!r}]: expected string mapping value, got {type(mv).__name__}"
+                    )
 
     if "enum" in prop and val not in prop["enum"]:
         raise ValueError(f"{plugin_id}.{key}: {val!r} not in allowed enum {prop['enum']}")
@@ -176,8 +183,6 @@ def _rewrite_workflow_links(body: str) -> str:
 
 def render_bundle_skill_md(
     plugin_meta: dict[str, Any],
-    connectors_meta: dict[str, Any],
-    policy_meta: dict[str, Any],
     skill_entries: list[dict[str, Any]],
 ) -> str:
     """Synthesize the root router SKILL.md for a 1-click department bundle."""
@@ -188,13 +193,24 @@ def render_bundle_skill_md(
     # Ensure strictly <= 1024 chars and free of '<' or '>'
     pos_clause = f"Use when routing or executing {plugin_name} workflows ({skill_names})."
     neg_clause = (
-        f"Don't use for unrelated domains outside {plugin_id} or automated external mutations without HITL confirmation."
+        f"Don't use for unrelated domains outside {plugin_id} or automated external mutations without explicit user confirmation."
     )
     base_desc = plugin_meta["description"].replace("<", "").replace(">", "").strip()
     desc = f"{base_desc} {pos_clause} {neg_clause}"
     if len(desc) > 1024:
         avail = 1024 - len(pos_clause) - len(neg_clause) - 5
         desc = f"{base_desc[:avail].rstrip()}... {pos_clause} {neg_clause}"
+
+    conns = plugin_meta["connectors"]
+    managed_1p = conns["managed_1p"]
+    byo_raw = conns.get("byo_mcp") or []
+    byo_list = [byo_raw] if isinstance(byo_raw, str) else list(byo_raw)
+    conn_guidance = conns["connector_fetch_guidance"]
+
+    gov = plugin_meta["write_governance"]
+    gateway_actions = gov["gateway_approval_actions"]
+    python_guardrails = gov["python_code_guardrails"]
+    routine = plugin_meta["scheduled_routine"]
 
     lines: list[str] = [
         "---",
@@ -224,55 +240,72 @@ def render_bundle_skill_md(
     lines.extend(
         [
             "",
-            "## Three-Mode Connector Graceful Degradation",
+            "## Step 1 — Fetch Data via Live `/work` Connectors or Attached Files",
             "",
-            "Inspect available tools first and degrade cleanly without failing when enterprise connectors are absent:",
+            "Probe enabled Gemini Enterprise connectors first before falling back to user-attached exports:",
             "",
-            "| Capability | Mode A — Live Enterprise Connectors | Mode B — Google Workspace Fallback | Mode C — Direct Local File Upload |",
-            "| :--- | :--- | :--- | :--- |",
+            f"- **Built-in Managed 1P Connectors:** {', '.join(f'`{c}`' for c in managed_1p)}.",
         ]
     )
-    for cap in connectors_meta.get("capabilities", []):
-        mode_a = ", ".join(c["connector"] for c in cap["mode_a_live_connectors"])
-        mode_b_srcs = ", ".join(cap["mode_b_workspace_fallback"]["google_workspace_sources"])
-        mode_b_hint = cap["mode_b_workspace_fallback"]["lookup_hint"]
-        mode_c = ", ".join(f".{fmt}" for fmt in cap["mode_c_local_file_formats"])
+    if byo_list:
         lines.append(
-            f"| `{cap['id']}` | {mode_a} | {mode_b_srcs} ({mode_b_hint}) | {mode_c} |"
+            f"- **Optional Customer BYO-MCP Servers:** {', '.join(f'`{c}`' for c in byo_list)} (discover exposed tools via `remote_cli mcp <connector> list-tools`)."
         )
+    else:
+        lines.append(
+            "- **Connector Tool Discovery:** Query enabled 1P/MCP servers via `remote_cli mcp <connector> list-tools` before calling Python engines."
+        )
+    lines.extend(
+        [
+            f"- **Fetch Guidance:** {conn_guidance}",
+            "- **Connected Docs & Attached File Fallback:** Fetch Google Docs (`includeTabsContent=true`), Google Sheets (`UNFORMATTED_VALUE`), Shared Drives (`supportsAllDrives=true`), and SharePoint/OneDrive workbooks (`@odata.nextLink`), or read chat-attached `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, and `.jsonl` snapshots via `view_file` and `scripts/enterprise_io.py`.",
+        ]
+    )
+    if plugin_id == "itsm-command-center":
+        lines.append(
+            "- **Single-Pass Multi-Surface Execution Budget:** Batch all workbook tab reads via `scripts/enterprise_io.py` and execute all ITSM scoring engines in a single `pyrepl` pass while capping external ServiceNow, Jira, Calendar, and Confluence lookups to at most 3 targeted queries so 6-tab workbooks and ITSM/KB cross-joins complete within turn timeouts."
+        )
+
+    first_script_rel = skill_entries[0]["script"]
+    first_module = posixpath.splitext(posixpath.basename(first_script_rel))[0]
+    first_skill_id = skill_entries[0]["id"]
 
     lines.extend(
         [
             "",
-            "## Org Configuration & Starter Baseline Rule",
+            "## Step 2 — Inspect & Shape Custom Customer Fields in `pyrepl`",
             "",
-            "1. Read `references/config.json` using `view_file` (or check a user-supplied organization playbook file).",
-            "2. Check the boolean flag `org_configured`.",
-            "3. When `org_configured` is `false`, evaluate strictly against the bundled starter baseline rubrics and stamp the top of every deliverable verbatim with:",
+            "Customer exports and live connector responses often use custom tab names or column headers. Check the matching workflow guide from the Workflow Router Matrix above for canonical keys and inspect the real source shape in `pyrepl` before computing:",
+            "",
+            "- **Inspect Real Headers & Shape:** Read attached files via `scripts/enterprise_io.py` (`read_xlsx_workbook`, `read_docx`, `read_csv_tsv`, `read_json_or_jsonl`) or inspect connector JSON keys directly in `pyrepl` so you see actual tab names, headers, and sample rows first.",
+            "- **Normalize in Python (`payload`):** Shape messy customer headers or nested JSON objects in 5-10 lines of Python into a canonical `payload` dict and call `analyze(payload, config=cfg_path)` (pass file paths directly when headers already match canonical names). Call `ask_question` only when two source columns remain genuinely ambiguous.",
+            "",
+            "## Step 3 — Run Deterministic Python Engine in `pyrepl` (or CLI)",
+            "",
+            "1. Read `references/config.json` using `view_file` and check `org_configured`.",
+            "2. When `org_configured` is `false`, apply the bundled starter rubrics and stamp the top of every deliverable verbatim with:",
             "   `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]`",
+            "3. Resolve `SKILL_DIR` dynamically under `/workspace/skills/` so both `pyrepl` and shell CLI invocations work regardless of install root, and enforce every bundled baseline (`"
+            + "`, `".join(f"references/baselines/{b}" for b in plugin_meta["shared_baselines"])
+            + "`) and trap sheet (`"
+            + "`, `".join(f"references/traps/{t}" for t in plugin_meta["shared_traps"])
+            + "`).",
             "",
             "Bundled baseline rubrics:",
         ]
     )
     for b in plugin_meta["shared_baselines"]:
         lines.append(f"- `references/baselines/{b}`")
+    lines.extend(["", "Bundled API and analytical trap guides:"])
+    for t in plugin_meta["shared_traps"]:
+        lines.append(f"- `references/traps/{t}`")
 
-    first_script_rel = skill_entries[0]["script"]
-    first_module = posixpath.splitext(posixpath.basename(first_script_rel))[0]
-    first_skill_id = skill_entries[0]["id"]
     lines.extend(
         [
-            "",
-            "## In-Memory Python RAM Execution Pattern",
-            "",
-            "Always run deterministic calculations in Python RAM rather than estimating tables or totals in prompt tokens. Because runtime shells start in `/workspace` while bundles and individual skills unpack under `skills/<slug>/` or `skills/user-skills/<slug>/`, always resolve `SKILL_DIR` dynamically before importing scripts or reading references.",
-            "",
-            "- **Zero-dependency enterprise ingestion:** Every engine uses `scripts/enterprise_io.py` to parse multi-tab `.xlsx`/`.xlsm` workbooks (1900/1904 dates, inline/shared strings, formula cached values), `.docx` documents (sections, headings, embedded tables, footnotes/comments), UTF-8 BOM `.csv`/`.tsv`, `.json`, and `.jsonl` directly from `--input` without needing `openpyxl` or `python-docx`. Pass `--sheet <TabNameOrIndex>` (or `sheet='...'` in `analyze()`) to analyze a specific worksheet by tab name or 0-based index.",
             "",
             "Using persistent `pyrepl`:",
             "",
             "```python",
-            "import json",
             "import sys",
             "from pathlib import Path",
             "",
@@ -292,15 +325,21 @@ def render_bundle_skill_md(
             ")",
             "sys.modules.pop(\"scripts\", None)",
             "sys.path.insert(0, str(SKILL_DIR))",
+            "from scripts.enterprise_io import read_xlsx_workbook, read_docx, read_csv_tsv, read_json_or_jsonl",
             f"from scripts.{first_module} import analyze, render_markdown",
             "",
-            "cfg = json.loads((SKILL_DIR / \"references\" / \"config.json\").read_text(encoding=\"utf-8\"))",
-            "# Pass loaded Mode A/B/C payload in RAM without flooding prompt tokens:",
-            "# result = analyze(payload, config=SKILL_DIR / \"references\" / \"config.json\")",
-            "# print(render_markdown(result))",
+            "cfg_path = SKILL_DIR / \"references\" / \"config.json\"",
+            "",
+            "# If headers differ from canonical names, inspect in Python first and normalize:",
+            "# wb = read_xlsx_workbook(Path(\"customer_export.xlsx\"))",
+            "# print({tab: (list(rows[0].keys()) if rows else []) for tab, rows in wb.items()})",
+            "# payload = { ...shape customer columns into canonical keys... }",
+            "payload = source_path_or_dict",
+            "result = analyze(payload, config=cfg_path)",
+            "print(render_markdown(result))",
             "```",
             "",
-            "Using CLI fallback (`python3` from `/workspace` or bundle root):",
+            "CLI fallback (`python3` from `/workspace` or bundle root):",
             "",
             "```bash",
             "SKILL_DIR=\".\"",
@@ -313,46 +352,29 @@ def render_bundle_skill_md(
         lines.append(
             f"python3 \"$SKILL_DIR/{s['script']}\" --input payload.json --config \"$SKILL_DIR/references/config.json\" --format markdown"
         )
-    lines.extend(
-        [
-            "# Or pass .xlsx / .docx / .csv directly (optional --sheet \"TabName\" or --sheet 0):",
-            f"# python3 \"$SKILL_DIR/{first_script_rel}\" --input workbook.xlsx --config \"$SKILL_DIR/references/config.json\" --format markdown",
-            "# Inspect CLI flags directly:",
-        ]
-    )
     for s in skill_entries:
         lines.append(f"python3 \"$SKILL_DIR/{s['script']}\" --help")
     lines.extend(
         [
             "```",
             "",
-            "## Enterprise API & Analytical Traps",
+            "## Step 4 — Write-Back Governance (`Auto-Guardian`) & Conversational Scheduling (`schedule_task`)",
             "",
-            "Apply every bundled trap sheet before interpreting missing records, API page limits, currency scales, or untrusted external text:",
-            "",
+            "- **Read-Only & Local Draft Actions:** Connector reads via `remote_cli mcp`, file inspection via `view_file`, `pyrepl` scoring, interactive Canvas (`emit_a2ui`), and saving local deliverables via `write_to_file` run without mutating external systems.",
+            "- **Agent Gateway (`Auto-Guardian`) & Explicit User Confirmation:** External write-backs executed via authorized connectors are protected by Agent Gateway (`Auto-Guardian`) and require explicit user confirmation prior to execution:",
         ]
     )
-    for t in plugin_meta["shared_traps"]:
-        lines.append(f"- `references/traps/{t}`")
-
+    for act in gateway_actions:
+        lines.append(f"  - {act}")
+    lines.append("- **Code-Enforced Python Guardrails (`scripts/*.py`):**")
+    for grd in python_guardrails:
+        lines.append(f"  - {grd}")
     lines.extend(
         [
+            f"- **Conversational Scheduling (`schedule_task`):** Only when the user asks to automate recurring monitoring, invoke `schedule_task(title={json.dumps(routine['title'])}, cron_expression={json.dumps(routine['cron_expression'])}, time_zone={json.dumps(routine['time_zone'])}, instruction={json.dumps(routine['instruction'])})`.",
             "",
-            "## HITL Mutation & Policy Guardrails",
-            "",
-            "- **Read-only operations (auto-run):** "
-            + ", ".join(f"`{t}`" for t in policy_meta.get("read_only_tools", [])),
-            "- **Draft-only operations (auto-run):** "
-            + ", ".join(f"`{t}`" for t in policy_meta.get("draft_only_tools", [])),
-            "- **HITL-gated external mutations (require explicit user confirmation):**",
         ]
     )
-    for gate in policy_meta.get("hitl_gated_mutations", []):
-        lines.append(
-            f"  - `{gate['tool']}` (scope: `{gate['scope']}`) — {gate['reason']}"
-        )
-
-    lines.append("")
     return "\n".join(lines)
 
 
@@ -405,8 +427,6 @@ def sync_and_build(
     for plugin_dir in plugins:
         plugin_meta = load_json(plugin_dir / ".gemini-plugin" / "plugin.json")
         plugin_id = plugin_meta["id"]
-        connectors_meta = load_yaml(plugin_dir / ".gemini-plugin" / "connectors.yaml")
-        policy_meta = load_yaml(plugin_dir / ".gemini-plugin" / "policy.cel")
         config_schema = load_json(plugin_dir / ".gemini-plugin" / "config.schema.json")
 
         default_cfg_bytes = format_config_json(build_default_config(config_schema))
@@ -522,9 +542,7 @@ def sync_and_build(
             bundle_entries[f"references/workflows/{skill_id}.md"] = (wf_md.encode("utf-8"), 0o100644)
             bundle_entries[script_rel] = (script_bytes, 0o100755)
 
-        bundle_skill_md = render_bundle_skill_md(
-            plugin_meta, connectors_meta, policy_meta, skill_entries
-        )
+        bundle_skill_md = render_bundle_skill_md(plugin_meta, skill_entries)
         bundle_entries["SKILL.md"] = (bundle_skill_md.encode("utf-8"), 0o100644)
         bundle_zip_bytes = _make_zip_bytes(bundle_entries)
         bundle_zip_path = bundles_dir / f"{plugin_id}.zip"

@@ -9,7 +9,7 @@ deterministic_checks:
   - department_rollups
   - comp_outliers
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - contingent_worker_isolated_count
   must_not_include_patterns:
   - disclosed small-cell cohort averages below privacy floor
@@ -18,22 +18,20 @@ deterministic_checks:
   - Deduplicates effective_date <= as_of_date per worker_id.
   - Suppresses avg_compa_ratio and attrition_pct when fte_headcount < 5.
 scenarios:
-- id: mode_a_workday_effective_dates
-  mode: mode_a
-  prompt: Audit Workday roster where promoted employees have 3 historical effective_date
-    rows plus 1 future-dated row and 4 CWKs.
+- id: live_workday_effective_dates
+  mode: live_connector
+  prompt: Audit Workday roster where promoted employees have 3 historical effective_date rows plus 1 future-dated row and 4 CWKs.
   expected_assertions:
   - Selects latest effective_date <= as_of_date and excludes future rows.
   - Isolates CWKs so FTE headcount and compa-ratios are exact.
-- id: mode_b_sheets_privacy_floor
-  mode: mode_b
-  prompt: Check department compa-ratios from Drive Sheet where Legal has 3 FTEs and
-    Engineering has hourly + EUR staff.
+- id: workspace_sheets_privacy_floor
+  mode: workspace_connector
+  prompt: Check department compa-ratios from Drive Sheet where Legal has 3 FTEs and Engineering has hourly + EUR staff.
   expected_assertions:
   - Redacts Legal avg_compa_ratio and attrition_pct (suppressed_for_privacy=true).
   - Normalizes hourly * 2080 and EUR FX properly.
-- id: mode_c_local_csv_outliers
-  mode: mode_c
+- id: local_local_csv_outliers
+  mode: local_file
   prompt: Analyze workers.csv for <0.80 compression and >1.25 ceiling outliers.
   expected_assertions:
   - Flags BELOW_BAND_COMPRESSION and ABOVE_BAND_CEILING outliers accurately.

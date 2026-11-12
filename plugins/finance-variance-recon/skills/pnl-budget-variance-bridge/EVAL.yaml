@@ -1,48 +1,48 @@
 skill_id: pnl-budget-variance-bridge
 plugin_id: finance-variance-recon
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/pnl_variance_engine.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - hierarchy_tieout_breaks
-    - variance_lines
+  - baseline_mode
+  - summary
+  - hierarchy_tieout_breaks
+  - variance_lines
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "constant_fx_variance_usd"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - constant_fx_variance_usd
   must_not_include_patterns:
-    - "summed summary and leaf rows together"
+  - summed summary and leaf rows together
   hitl_required_for_mutations: true
   trap_checks:
-    - "Excludes summary rollup rows from consolidated EBITDA sums and verifies leaf tie-out."
-    - "Inverts favorability direction between revenue and expense categories."
+  - Excludes summary rollup rows from consolidated EBITDA sums and verifies leaf tie-out.
+  - Inverts favorability direction between revenue and expense categories.
 scenarios:
-  - id: mode_a_bigquery_gl_bridge
-    mode: mode_a
-    prompt: "Compute Q3 P&L variance bridge from BigQuery GL summary and leaf rows."
-    expected_assertions:
-      - "Prevents parent-child double counting and verifies revenue/expense sign conventions."
-      - "Surfaces material drivers exceeding $25,000 or 10% materiality thresholds."
-  - id: mode_b_sheets_fx_decomposition
-    mode: mode_b
-    prompt: "Decompose constant-FX vs translation variance from Finance Close Sheet."
-    expected_assertions:
-      - "Separates constant_fx_variance_usd and fx_translation_impact_usd accurately."
-      - "Includes baseline banner when org_configured is false."
-  - id: mode_c_local_hierarchy_break
-    mode: mode_c
-    prompt: "Audit gl_variance.json where parent summary exceeds leaf sum by $12,000."
-    expected_assertions:
-      - "Records HIERARCHY break in hierarchy_tieout_breaks and surfaces material drivers."
-      - "Enforces HITL sign-off prior to posting close adjustment journals."
+- id: live_bigquery_gl_bridge
+  mode: live_connector
+  prompt: Compute Q3 P&L variance bridge from BigQuery GL summary and leaf rows.
+  expected_assertions:
+  - Prevents parent-child double counting and verifies revenue/expense sign conventions.
+  - Surfaces material drivers exceeding $25,000 or 10% materiality thresholds.
+- id: workspace_sheets_fx_decomposition
+  mode: workspace_connector
+  prompt: Decompose constant-FX vs translation variance from Finance Close Sheet.
+  expected_assertions:
+  - Separates constant_fx_variance_usd and fx_translation_impact_usd accurately.
+  - Includes baseline banner when org_configured is false.
+- id: local_local_hierarchy_break
+  mode: local_file
+  prompt: Audit gl_variance.json where parent summary exceeds leaf sum by $12,000.
+  expected_assertions:
+  - Records HIERARCHY break in hierarchy_tieout_breaks and surfaces material drivers.
+  - Enforces HITL sign-off prior to posting close adjustment journals.
 rubric:
-  - criterion: hierarchy_and_sign_discipline
-    weight: 0.4
-    description: Never double-counts summary rows and applies proper revenue/cost favorability signs.
-  - criterion: constant_fx_math_accuracy
-    weight: 0.35
-    description: Splits constant-currency performance vs FX translation precisely.
-  - criterion: materiality_and_hitl_safety
-    weight: 0.25
-    description: Surfaces material drivers >= $25k/10% and guards close journal edits with HITL.
+- criterion: hierarchy_and_sign_discipline
+  weight: 0.4
+  description: Never double-counts summary rows and applies proper revenue/cost favorability signs.
+- criterion: constant_fx_math_accuracy
+  weight: 0.35
+  description: Splits constant-currency performance vs FX translation precisely.
+- criterion: materiality_and_hitl_safety
+  weight: 0.25
+  description: Surfaces material drivers >= $25k/10% and guards close journal edits with HITL.

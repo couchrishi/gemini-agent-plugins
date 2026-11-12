@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "max_score_spread": 2.0,
   "min_evidence_chars": 40,
   "hire_mean_threshold": 3.0,

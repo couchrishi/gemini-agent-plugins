@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "min_enrollment_coverage_pct": 100.0,
   "max_screen_fail_warn_pct": 35.0,
   "fatal_lt_susar_days": 7,

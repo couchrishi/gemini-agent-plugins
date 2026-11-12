@@ -1,48 +1,48 @@
 skill_id: sre-incident-postmortem
 plugin_id: sdlc-modernization-sre
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/slo_timeline_calculator.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - incident_timelines
-    - action_items
+  - baseline_mode
+  - summary
+  - incident_timelines
+  - action_items
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "error_budget_consumed_pct"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - error_budget_consumed_pct
   must_not_include_patterns:
-    - "marked action item missing due date as compliant"
+  - marked action item missing due date as compliant
   hitl_required_for_mutations: true
   trap_checks:
-    - "Computes TTD, TTM, TTR, and weighted 30-day SLO burn deterministically."
-    - "Flags open action items missing due_date as MISSING_DUE_DATE."
+  - Computes TTD, TTM, TTR, and weighted 30-day SLO burn deterministically.
+  - Flags open action items missing due_date as MISSING_DUE_DATE.
 scenarios:
-  - id: mode_a_slo_burn
-    mode: mode_a
-    prompt: "Compute 30-day SLO burn and TTD/TTM/TTR for Stratos Telecom core auth incidents."
-    expected_assertions:
-      - "Computes monthly_error_budget_minutes and error_budget_consumed_pct."
-      - "Sets slo_breached=true when achieved availability < target."
-  - id: mode_b_postmortem_action_sla
-    mode: mode_b
-    prompt: "Audit SRE Postmortem Google Doc open corrective action items."
-    expected_assertions:
-      - "Distinguishes OVERDUE vs MISSING_DUE_DATE vs COMPLETED."
-      - "Includes baseline stamp when org_configured is false."
-  - id: mode_c_markdown_brief
-    mode: mode_c
-    prompt: "Generate Markdown postmortem SLO brief from postmortem_timeline.json."
-    expected_assertions:
-      - "Renders exact TTD/TTM/TTR intervals without manual estimation."
-      - "Keeps Jira/ticket creation behind HITL approval."
+- id: live_slo_burn
+  mode: live_connector
+  prompt: Compute 30-day SLO burn and TTD/TTM/TTR for Stratos Telecom core auth incidents.
+  expected_assertions:
+  - Computes monthly_error_budget_minutes and error_budget_consumed_pct.
+  - Sets slo_breached=true when achieved availability < target.
+- id: workspace_postmortem_action_sla
+  mode: workspace_connector
+  prompt: Audit SRE Postmortem Google Doc open corrective action items.
+  expected_assertions:
+  - Distinguishes OVERDUE vs MISSING_DUE_DATE vs COMPLETED.
+  - Includes baseline stamp when org_configured is false.
+- id: local_markdown_brief
+  mode: local_file
+  prompt: Generate Markdown postmortem SLO brief from postmortem_timeline.json.
+  expected_assertions:
+  - Renders exact TTD/TTM/TTR intervals without manual estimation.
+  - Keeps Jira/ticket creation behind HITL approval.
 rubric:
-  - criterion: slo_timeline_math
-    weight: 0.45
-    description: Calculates TTD, TTM, TTR, impact-weighted burn, and availability precisely.
-  - criterion: action_item_hygiene
-    weight: 0.3
-    description: Flags overdue and unscheduled corrective actions accurately.
-  - criterion: baseline_and_hitl_compliance
-    weight: 0.25
-    description: Respects baseline stamp and avoids unconfirmed Jira updates.
+- criterion: slo_timeline_math
+  weight: 0.45
+  description: Calculates TTD, TTM, TTR, impact-weighted burn, and availability precisely.
+- criterion: action_item_hygiene
+  weight: 0.3
+  description: Flags overdue and unscheduled corrective actions accurately.
+- criterion: baseline_and_hitl_compliance
+  weight: 0.25
+  description: Respects baseline stamp and avoids unconfirmed Jira updates.

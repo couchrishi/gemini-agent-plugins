@@ -3,8 +3,15 @@
   "name": "Legal Contract Desk & Regulatory Compliance",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "legal", "contracts", "compliance", "clm"],
+  "segment_tags": [
+    "cross-industry",
+    "legal",
+    "contracts",
+    "compliance",
+    "clm"
+  ],
   "description": "Redlines commercial NDAs, MSAs, and DPAs against 1/3/9 risk playbooks, calculates exact auto-renewal opt-out deadlines and escalator caps from executed contracts, and maps regulatory articles against internal control inventories.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "contract-playbook-redliner",
@@ -31,11 +38,34 @@
   "shared_baselines": [
     "commercial-contract-baseline.md"
   ],
-  "agent_templates": [
-    "agents/legal-contract-desk-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-renewal-notice-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+      "Box",
+      "ServiceNow",
+      "Gmail"
+    ],
+    "connector_fetch_guidance": "Fetch counterparty MSAs/DPAs, multi-tab Google Docs playbooks, executed contract registers, and GRC regulatory control sheets from Drive, SharePoint, Box, or ServiceNow via remote_cli mcp before running Python clause and obligation engines."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Sending redlined contract drafts or counter-proposals to external counterparty counsel via Gmail/Outlook",
+      "Updating GRC compliance control statuses or legal approval records in ServiceNow"
+    ],
+    "python_code_guardrails": [
+      "Unilateral Score 9 walk-away blocker detection (AI training carve-outs, uncapped liability, shortened breach notice)",
+      "Indirect prompt-injection directive quarantine inside contract footnotes and exhibits",
+      "Deterministic opt-out notice deadline calculation (renewal_date - notice_days) and uncapped CPI escalation flags"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-renewal-notice-watch",
+    "title": "Weekly Renewal & Notice Deadline Watch",
+    "cron_expression": "0 8 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly executed contract renewal and obligation watch via scripts/obligation_calendar_builder.py. Compute exact opt-out notice deadlines (`renewal_date - notice_days`), surface urgent <=30 day windows and uncapped CPI escalators, and generate a draft reminder pack without emailing counterparties."
+  }
 }

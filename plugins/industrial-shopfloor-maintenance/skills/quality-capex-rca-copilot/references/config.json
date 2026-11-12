@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "service_level_z": 1.65,
   "max_capex_payback_years": 2.0,
   "lot_spike_multiplier": 2.0,

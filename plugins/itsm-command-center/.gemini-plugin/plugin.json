@@ -3,8 +3,15 @@
   "name": "ITSM & Service Desk Command Center",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "itsm", "servicenow", "jira", "service-desk"],
+  "segment_tags": [
+    "cross-industry",
+    "itsm",
+    "servicenow",
+    "jira",
+    "service-desk"
+  ],
   "description": "Accelerates incident triage with business-elapsed SLA breach tracking and spike clustering, scores CAB change requests against freeze windows and blast radius, and mines resolved tickets for Problem candidates and KCS deflection savings.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "incident-triage-routing",
@@ -30,11 +37,35 @@
   "shared_baselines": [
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/itsm-command-center-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/hourly-sla-breach-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "ServiceNow",
+      "Jira",
+      "Confluence",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs",
+      "Slack"
+    ],
+    "connector_fetch_guidance": "Query active ServiceNow incidents (sysparm_display_value=all), CAB changes, and CMDB CIs, Jira issues, and Confluence KCS runbooks via remote_cli mcp (capped to targeted batch lookups) before Python SLA clustering and CAB scoring."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Reassigning P1/P2 incidents or updating ServiceNow/Jira tickets in bulk",
+      "Approving or rejecting CAB change requests in ServiceNow",
+      "Publishing KCS knowledge articles to external service portals in Confluence or ServiceNow"
+    ],
+    "python_code_guardrails": [
+      "ServiceNow state=8 canceled exclusion and business_elapsed_minutes vs wall-clock SLA enforcement",
+      "CAB freeze-window collision, missing backout-plan verification, and blast-radius risk scoring",
+      "Single-pass multi-tab workbook and capped <=3 ITSM/KB search execution discipline"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "hourly-sla-breach-watch",
+    "title": "Hourly SLA Breach Watch",
+    "cron_expression": "0 * * * *",
+    "time_zone": "UTC",
+    "instruction": "Execute hourly incident triage and SLA breach scan via scripts/sla_cluster_triage.py. Highlight active P1/P2 tickets above 75% business-elapsed SLA budget, flag emerging CI/error spike clusters, and recommend top matching runbooks without mutating ticket assignments automatically."
+  }
 }

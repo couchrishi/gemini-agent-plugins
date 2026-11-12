@@ -71,16 +71,15 @@ Supply tenant overrides via `python3 tools/package.py --org-config org.json` so 
 
 ## 7. Close & Treasury Control Checklist
 
-1. Confirm `pnl.hierarchy_break_count == 0` (`policy.cel`) before generating final monthly P&L variance packets.
+1. Confirm `hierarchy_break_count == 0` (enforced inside `pnl_variance_engine.py`) before generating final monthly P&L variance packets.
 2. Verify all negative AP credit memos (`SHKZG='H'`) and negative AR credits stay isolated from breach counts.
 3. Require explicit Controller HITL confirmation prior to posting SAP payment batches, issuing retail chargebacks, or sending AR dunning notices.
 4. Keep non-empty `truncation_warnings` prominently visible whenever API pulls omit total pages.
 
-## 8. Treasury & Close Automation CEL Policy Gates
+## 8. Treasury & Close Automation Write Governance (`Auto-Guardian` & Python Guards)
 
-- `sap_post_invoice_payment`: `explicit_per_call` whenever `request.invoice_amount_usd > 0 || request.exception_count > 0`
-- `erp_update_vendor_bank_master`: `explicit_per_call` whenever `request.bank_account_changed == true`
-- `block_payment_on_bank_change_or_duplicate`: `ap.duplicate_suspect == false && ap.bank_account_changed == false`
-- `require_leaf_hierarchy_tieout`: `pnl.hierarchy_break_count == 0`
+- **Connected ERP MCP payment releases:** Gated via Agent Gateway (`Auto-Guardian`) and explicit Controller confirmation whenever invoice totals `> $0` or exception holds exist.
+- **Vendor remittance / bank master updates:** Never initiated from incoming emails; requires out-of-band treasury verification plus explicit approval.
+- **Python code invariants (`scripts/*.py`):** Enforce `FRAUD_HOLD` / `DUPLICATE_BLOCK` on suspect invoices and require `hierarchy_break_count == 0` before executive P&L release.
 
 Whenever `org_configured` in `references/config.json` is `false`, preserve the `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]` header above all tables.

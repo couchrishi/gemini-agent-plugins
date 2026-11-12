@@ -12,6 +12,7 @@
     "delivery"
   ],
   "description": "Models consulting delivery staffing pyramids and onshore/offshore margin leverage, audits SOW drafts for scope creep phrasing and margin breaches, and matches open project roles to bench consultants.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "winning-proposal-architect",
@@ -40,11 +41,36 @@
     "commercial-contract-baseline.md",
     "deal-desk-approval-baseline.md"
   ],
-  "agent_templates": [
-    "agents/gsi-proposal-ip-factory-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-bench-utilization-digest.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Google Slides",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)"
+    ],
+    "byo_mcp": [
+      "Workday HRIS & PSA Staffing MCP server"
+    ],
+    "connector_fetch_guidance": "Pull rate cards, SOW milestone drafts, and RFP requirements from Google Drive/SharePoint plus consultant skill inventories and clearance eligibility from Workday/PSA MCP servers via remote_cli mcp before Python staffing and margin checks."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Submitting below-margin or high-risk SOW bids for Practice VP / Finance sign-off in PSA MCP",
+      "Assigning bench consultants or initiating subcontractor requisitions in Workday/PSA MCP",
+      "Sending client proposal decks or redlined SOWs externally via Gmail or Outlook"
+    ],
+    "python_code_guardrails": [
+      "Onshore/offshore leverage ratio, blended cost/bill rate, and hard minimum gross-margin floor guard",
+      "Mandatory security-clearance and availability window matching before bench allocation",
+      "Unlimited-revisions and deemed-acceptance SOW legal/margin risk clause flagging"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-bench-utilization-digest",
+    "title": "Weekly Bench Utilization Digest",
+    "cron_expression": "0 8 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly bench-to-demand skill matching check via scripts/talent_bench_matcher.py and surface unfilled roles needing subcontractor sourcing."
+  }
 }

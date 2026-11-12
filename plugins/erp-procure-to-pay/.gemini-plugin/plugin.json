@@ -12,6 +12,7 @@
     "erp"
   ],
   "description": "Reconciles SAP GR/IR clearing imbalances across goods receipts and invoice postings with TCURX scaling, simulates multi-supplier RFx total landed cost under tariff shocks, and rolls up multi-level BOM purchase price variances with cycle detection.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "gr-ir-clearing-orchestrator",
@@ -38,11 +39,35 @@
   "shared_baselines": [
     "finance-materiality-baseline.md"
   ],
-  "agent_templates": [
-    "agents/erp-procure-to-pay-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-grir-aging-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Google Drive",
+      "Google Sheets",
+      "Gmail",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)"
+    ],
+    "byo_mcp": [
+      "SAP S/4HANA / Oracle ERP & PLM BOM MCP server"
+    ],
+    "connector_fetch_guidance": "Extract EKBE PO/GR/IR history tables, multi-level BOM explosions, and supplier RFx bids from BigQuery or customer SAP/Oracle ERP MCP servers (or Drive/SharePoint exports) via remote_cli mcp before running Python cost and clearing engines."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Posting SAP MR11/F.13 GR/IR clearing entries impacting GL accruals via customer ERP MCP",
+      "Awarding supplier RFx purchase orders or updating standard BOM costs in ERP/PLM"
+    ],
+    "python_code_guardrails": [
+      "Prohibition on clearing IR_WITHOUT_GR lines lacking verified physical goods receipt",
+      "BOM cycle detection blocking circular assembly graphs from cost rollups and compound 1/(1-scrap) yield math",
+      "TCURX decimal scaling, SHKZG credit reversal handling, and single-source vendor concentration alerts"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-grir-aging-watch",
+    "title": "Daily GR/IR Aging Watch",
+    "cron_expression": "0 7 * * 1-5",
+    "time_zone": "UTC",
+    "instruction": "Execute weekday SAP GR/IR clearing aging check via scripts/gr_ir_reconciler.py to isolate IR_WITHOUT_GR blocks and >60 day accruals."
+  }
 }

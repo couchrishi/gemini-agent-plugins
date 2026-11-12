@@ -1,20 +1,29 @@
 # Architecture of `gemini-agent-plugins`
 
-This repository implements seven architectural pillars designed to eliminate common failure modes when deploying autonomous agents against enterprise systems of record.
+This repository implements a two-layer architecture for **Gemini Enterprise (`/work`)**, combining Google's built-in `/work` data connectors and Agent Gateway (`Auto-Guardian`) with portable, deterministic Python computation packages.
 
-## 1. Declarative Capabilities & 3-Mode Connector Degradation
+## 1. Two-Layer `/work` Architecture & `pyrepl` Payload Normalization
 
-Each plugin declares its integration needs inside `.gemini-plugin/connectors.yaml` (validated by [`shared/schema/connectors.schema.json`](shared/schema/connectors.schema.json)) using three progressive fallback tiers rather than brittle hard-coded API dependencies:
+Every plugin separates **connector acquisition** (Layer 1) from **deterministic domain math** (Layer 2) inside `.gemini-plugin/plugin.json` (validated against [`shared/schema/plugin.schema.json`](shared/schema/plugin.schema.json)):
 
-1. **Mode A — Live Enterprise Connectors:** Structured OAuth2 / mTLS / Workload Identity templates targeting SAP S/4HANA OData, ServiceNow Table/EM APIs, Salesforce SOQL, Workday RaaS, BigQuery, Looker, Jira, GitHub/GitLab, or Microsoft 365 SharePoint/OneDrive.
-2. **Mode B — Google Workspace Fallback:** Read-only fallbacks into Google Drive, Docs (including Tabbed Docs), Sheets (`UNFORMATTED_VALUE`), Gmail, Calendar, and Meet exports when direct 3P enterprise connectors are unprovisioned.
-3. **Mode C — Direct Local File Upload:** Zero-connector execution against user-uploaded `.json` or `.csv` snapshots read with `view_file` and processed directly in Python.
+```mermaid
+flowchart LR
+  U["User Prompt (/skill-name)"] --> L1["Layer 1: Gemini Enterprise /work Connectors (1P remote_cli mcp + BYO-MCP)"]
+  S["Optional Sandbox File (examples/*.xlsx, *.docx)"] --> IO
+  L1 --> IO["Layer 2a: Inspect & Shape in pyrepl (enterprise_io.py -> canonical payload dict)"]
+  IO -->|"Normalized Python payload"| PY["Layer 2b: Stdlib Python 3.11+ Engine (pyrepl / python3 + Code Guards)"]
+  PY --> GW["Agent Gateway (Auto-Guardian) + Explicit User Confirmation -> Scheduled via schedule_task"]
+```
 
-## 2. Typed Tenant Configuration & Day-1 Starter Baselines
+1. **Primary — Live `/work` Enterprise Connectors (`managed_1p` + `byo_mcp`):** Each skill first invokes Gemini Enterprise's authorized 1P connectors (`BigQuery`, `Salesforce`, `ServiceNow`, `Jira`, `Confluence`, `GitHub`, `Slack`, `Microsoft 365`, `Google Workspace` via `remote_cli mcp`) or customer Bring-Your-Own MCP (`BYO-MCP`) servers discovered dynamically with `remote_cli mcp <connector> list-tools`.
+2. **Inspect & Shape Custom Exports in `pyrepl`:** Before running analytics on real customer exports or live API payloads, [`shared/scripts/enterprise_io.py`](shared/scripts/enterprise_io.py) lets the agent inspect worksheet tabs (`read_xlsx_workbook`), Word tables/paragraphs (`read_docx`), CSV/TSV (`read_csv_tsv`), and JSON/JSONL (`read_json_or_jsonl`) directly inside `pyrepl` RAM. Mismatched headers or custom tabs normalize in 5-10 lines of Python into canonical `payload` dicts (calling `ask_question` only when source columns are genuinely ambiguous), while engines fail closed if non-empty tables miss required fields.
+3. **Optional Zero-Connector Sandbox (`examples/`):** Local `.xlsx`, `.docx`, `.csv`, `.tsv`, `.json`, and `.jsonl` attachments under [`examples/`](examples/README.md) let workshops and evaluations verify all 60 Python engines before enterprise connectors are provisioned.
+
+## 2. Typed Tenant Configuration & Day-1 Baselines
 
 Prompting an agent without thresholds causes arbitrary risk ratings. Conversely, hardcoding a single customer's rules breaks portability across organizations.
 
-- Every plugin exposes a strict Draft 2020-12 JSON Schema at `.gemini-plugin/config.schema.json` with `"org_configured": { "default": false }` and safe numeric bounds.
+- Every plugin exposes a strict Draft 2020-12 JSON Schema at `.gemini-plugin/config.schema.json` with `"org_configured": { "default": false }` and safe numeric bounds for organization thresholds.
 - Six Day-1 starter rubrics live under [`shared/baselines/`](shared/baselines/):
   - [`commercial-contract-baseline.md`](shared/baselines/commercial-contract-baseline.md)
   - [`finance-materiality-baseline.md`](shared/baselines/finance-materiality-baseline.md)
@@ -24,14 +33,14 @@ Prompting an agent without thresholds causes arbitrary risk ratings. Conversely,
   - [`fsi-credit-kyc-baseline.md`](shared/baselines/fsi-credit-kyc-baseline.md)
 - When `org_configured` is `false`, every computation engine automatically emits:
   `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]`
-- Running `tools/package.py --org-config <tenant.json>` validates tenant overrides against each plugin's `config.schema.json`, injects custom thresholds into `references/config.json` with `"org_configured": true`, stamps clean tenant-specific `.zip` bundles, and suppresses the baseline banner.
+- Running `tools/package.py --org-config <tenant.json>` validates tenant threshold overrides against each plugin's `config.schema.json`, injects custom config into `references/config.json` with `"org_configured": true`, stamps clean tenant-specific `.zip` archives, and suppresses the baseline banner.
 
 ## 3. Persistent Python RAM Computation (`pyrepl` + CLI Parity)
 
-LLMs should synthesize, verify policy context, and explain decisions—never perform multi-currency arithmetic, aging buckets, BOM explosions, cohort retention, or cumulative beneficial-ownership graph traversals inside token prediction.
+LLMs should synthesize, inspect source structures, and explain decisions—never perform multi-currency arithmetic, aging buckets, BOM explosions, cohort retention, or cumulative beneficial-ownership graph traversals inside token prediction.
 
 - Every one of the 60 workflow skills executes a dedicated stdlib-first Python 3.11+ engine exporting `load_config`, `load_payload`, `analyze`, `render_markdown`, and an `argparse` `main` entrypoint (`--input`, `--config`, `--format json|markdown`, `--output`).
-- Inside Gemini Agent, the model resolves the active skill folder under `/workspace/skills/<slug>/` (or `skills/user-skills/<slug>/`) inside persistent `pyrepl` RAM for iterative slice/dice exploration without losing state, falling back cleanly to `python3 "$SKILL_DIR/scripts/<module>.py"` when executed outside `pyrepl`.
+- Inside Gemini Enterprise (`/work`), the agent resolves the mounted skill directory dynamically under `/workspace/skills/` inside persistent `pyrepl` RAM for fast single-pass evaluation, falling back cleanly to `python3 "$SKILL_DIR/scripts/<module>.py"` when executed outside `pyrepl`.
 
 ## 4. Enterprise API & Analytical Trap Defenses
 
@@ -49,23 +58,23 @@ Enterprise SaaS APIs fail in predictable ways that silently corrupt LLM conclusi
 | [`bigquery-sap-erp-traps.md`](shared/traps/bigquery-sap-erp-traps.md) | Unfiltered BigQuery full-table scans, SAP `TCURR` inverted rates, `TCURX` 0-decimal JPY/KRW shifts, `SHKZG` sign inversions, and `GR/IR` timing |
 | [`workday-hris-traps.md`](shared/traps/workday-hris-traps.md) | Counting future/historical effective-dated rows, double-counting Contingent Workers (`CWK`) in FTE totals, and small-cell `n < 5` re-identification |
 
-## 5. Typed Tool Splits & CEL HITL Policy Gates
+## 5. Agent Gateway (`Auto-Guardian`) & Code-Enforced Guardrails
 
-Every plugin separates execution permissions in `.gemini-plugin/policy.cel`:
-- `read_only_tools`: safe data-retrieval and `pyrepl` read operations.
-- `draft_only_tools`: local artifacts, redlines, Memos, PR drafts, or Doc/Sheet creation without external side effects.
-- `hitl_gated_mutations`: external mutations (ERP postings, wire transfers, credit commitments, SAR filings, vendor debit memos, P1 incident broadcasts, safety permit sign-offs) tagged with explicit CEL boolean conditions (`task_sticky` or `explicit_per_call`) and validated by the recursive-descent CEL parser in [`tools/validate_repo.py`](tools/validate_repo.py).
+Rather than shipping custom policy files that runtimes cannot enforce, each `plugin.json` (`write_governance`) pairs `/work` runtime protections with code-enforced data invariants:
+- `gateway_approval_actions`: concrete external mutations (ERP invoice releases via customer `BYO-MCP`, Jira/ServiceNow ticket updates, customer Gmail/Outlook sends, GitHub PR approvals) gated by **Gemini Enterprise Agent Gateway (`Auto-Guardian`)** and explicit user confirmation in chat.
+- `python_code_guardrails`: deterministic invariants enforced inside `scripts/*.py` before JSON or Markdown emission (such as `TCURX` scaling, `n < 5` cohort suppression in HR compensation reports, and prompt-injection quarantine flags on contract/listing inputs).
 
-## 6. Native Recurring Schedules & Goal Verifiers
+## 6. Conversational Scheduling (`schedule_task`)
 
-Each plugin defines a `ScheduleTemplate` under `plugins/<id>/schedules/*.yaml` encoding a standard 5-field `cron_expression`, an explicit `max_token_budget` ceiling, a `target_skill`, and a dual `goal_verifier`:
-- `command_check`: deterministic CLI/script sanity command.
-- `nl_criteria`: concrete post-run acceptance predicates checked against output artifacts.
+Each plugin declares a `scheduled_routine` object in `.gemini-plugin/plugin.json` matching Gemini Enterprise (`/work`)'s native `schedule_task` contract:
+- `name` and human-readable `title`.
+- Standard 5-field `cron_expression` paired with `time_zone` (`"UTC"`).
+- Self-contained `instruction` prompt executed only when a user explicitly asks to schedule recurring monitoring in chat.
 
-## 7. Dual Packaging & Dual-Mode CI Evaluation
+## 7. Dual Packaging & Clean-Room CI Validation
 
 [`tools/package.py`](tools/package.py) preserves a single source of truth while generating two ready-to-upload formats:
-- `dist/bundles/<plugin-id>.zip` (20 archives): synthesizes a root router `SKILL.md`, rewrites relative workflow links into `references/workflows/<skill-id>.md`, bundles all 3 scripts, `config.json`, traps, and baselines.
+- `dist/bundles/<plugin-id>.zip` (20 archives): synthesizes a root router `SKILL.md` documenting authorized connectors, `pyrepl` payload shaping, and skill scripts, rewrites relative workflow links into `references/workflows/<skill-id>.md`, and bundles all 3 scripts, `config.json`, traps, and baselines.
 - `dist/skills/<skill-id>.zip` (60 archives): packages each individual skill verbatim with only the traps and baselines declared by its parent plugin.
 
-[`tools/validate_repo.py`](tools/validate_repo.py) and `EVAL.yaml` enforce schema validity, exact relative Markdown link bijections across all 140 `SKILL.md` contexts (60 source + 60 skill zips + 20 bundle zips), CEL grammar, AST non-stub enforcement, deterministic `dist/manifest.json` SHA-256 verification, and public clean-room hygiene across source files, packaged `.zip` internals, and `git log`.
+[`tools/validate_repo.py`](tools/validate_repo.py) and `EVAL.yaml` enforce JSON Schema compliance (`plugin.schema.json`, `config.schema.json`, `write_governance`, and `scheduled_routine`), 5-field cron validity, exact relative code/Markdown link checks across all 140 `SKILL.md` contexts (60 source + 60 skill zips + 20 bundle zips), AST non-stub enforcement, deterministic `dist/manifest.json` and `docs/catalog_data.js` zero-drift checks, and clean-room hygiene across source files, packaged `.zip` internals, and `git log`.

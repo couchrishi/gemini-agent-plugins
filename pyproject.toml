@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gemini-agent-plugins"
 version = "1.0.0"
-description = "Production-grade enterprise plugins, workflow skills, deterministic computation engines, API trap sheets, and CEL guardrails for Gemini Enterprise and Gemini Agent."
+description = "Production-grade enterprise plugins, workflow skills, deterministic computation engines, API trap sheets, and Auto-Guardian governance gates for Gemini Enterprise."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"

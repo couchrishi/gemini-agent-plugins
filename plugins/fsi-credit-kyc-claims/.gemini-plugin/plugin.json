@@ -13,6 +13,7 @@
     "claims"
   ],
   "description": "Calculates commercial borrower DSCR, net leverage, and interest coverage under multi-shock stress scenarios, resolves multi-hop UBO beneficial ownership with AML velocity/structuring checks, and evaluates insurance claims deterministically.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "commercial-credit-memo-analyst",
@@ -39,11 +40,37 @@
   "shared_baselines": [
     "fsi-credit-kyc-baseline.md"
   ],
-  "agent_templates": [
-    "agents/fsi-credit-kyc-claims-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-kyb-velocity-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Snowflake",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Gmail"
+    ],
+    "byo_mcp": [
+      "KYB / Sanctions Screening & Core Banking / Claims Clearinghouse MCP server"
+    ],
+    "connector_fetch_guidance": "Retrieve borrower financials, corporate ownership graphs, wire ledger transactions, and policy claim schedules from BigQuery, Snowflake, or customer KYB/Claims MCP servers via remote_cli mcp before Python graph and covenant checks."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Submitting commercial credit underwriting decisions or covenant waivers in core banking/LOS MCP",
+      "Filing regulatory SAR/STR narratives or freezing customer banking accounts via AML MCP",
+      "Authorizing claim settlement reserve releases or disbursement payouts via Claims MCP"
+    ],
+    "python_code_guardrails": [
+      "Transitive ownership graph multiplication catching sub-threshold pass-through structures (>=10% EDD / >=25% UBO)",
+      "Sub-$10k structuring velocity burst detection and hard base/stress DSCR & leverage covenant breaches",
+      "Per-occurrence deductible, coverage sublimit, and policy exclusion net indemnity math"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-kyb-velocity-watch",
+    "title": "Daily KYB Velocity & Structuring Watch",
+    "cron_expression": "0 5 * * *",
+    "time_zone": "UTC",
+    "instruction": "Run the daily AML transaction velocity and structuring sweep via scripts/ubo_velocity_screener.py across active corporate banking accounts and flag EDD alerts for MLRO review."
+  }
 }

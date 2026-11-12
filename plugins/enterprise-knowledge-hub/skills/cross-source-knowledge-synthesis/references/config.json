@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "stale_review_days": 180,
   "recency_half_life_days": 365,
   "duplicate_title_similarity_threshold": 0.82,

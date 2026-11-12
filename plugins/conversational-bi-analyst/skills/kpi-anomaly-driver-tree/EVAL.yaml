@@ -1,48 +1,48 @@
 skill_id: kpi-anomaly-driver-tree
 plugin_id: conversational-bi-analyst
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/mix_rate_volume_bridge.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - segments
-    - anomalies
+  - baseline_mode
+  - summary
+  - segments
+  - anomalies
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "bridge_residual"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - bridge_residual
   must_not_include_patterns:
-    - "approximated bridge math manually in text"
+  - approximated bridge math manually in text
   hitl_required_for_mutations: true
   trap_checks:
-    - "Volume + Mix + Rate effects sum strictly to total_delta with zero residual."
-    - "Flags segments below min_sample_size_guard with low_sample_caution."
+  - Volume + Mix + Rate effects sum strictly to total_delta with zero residual.
+  - Flags segments below min_sample_size_guard with low_sample_caution.
 scenarios:
-  - id: mode_a_vrm_bridge
-    mode: mode_a
-    prompt: "Decompose Veloce SuperApp Q3-to-Q4 segment revenue delta via mix_rate_volume_bridge.py."
-    expected_assertions:
-      - "Ensures abs(bridge_residual) < 0.001."
-      - "Attributes exact Volume, Mix, and Rate contributions per segment."
-  - id: mode_b_zscore_anomaly
-    mode: mode_b
-    prompt: "Inspect Revenue KPI Sheet for z-score anomalies and small sample sizes."
-    expected_assertions:
-      - "Flags z-score outliers above threshold and marks n < 30 as low_sample_caution."
-      - "Includes starter baseline banner when org_configured is false."
-  - id: mode_c_truncated_segments
-    mode: mode_c
-    prompt: "Analyze truncated kpi_segments.json export."
-    expected_assertions:
-      - "Emits TRUNCATION_WARNING and withholds full-population claims."
-      - "Formats Markdown bridge cleanly."
+- id: live_vrm_bridge
+  mode: live_connector
+  prompt: Decompose Veloce SuperApp Q3-to-Q4 segment revenue delta via mix_rate_volume_bridge.py.
+  expected_assertions:
+  - Ensures abs(bridge_residual) < 0.001.
+  - Attributes exact Volume, Mix, and Rate contributions per segment.
+- id: workspace_zscore_anomaly
+  mode: workspace_connector
+  prompt: Inspect Revenue KPI Sheet for z-score anomalies and small sample sizes.
+  expected_assertions:
+  - Flags z-score outliers above threshold and marks n < 30 as low_sample_caution.
+  - Includes starter baseline banner when org_configured is false.
+- id: local_truncated_segments
+  mode: local_file
+  prompt: Analyze truncated kpi_segments.json export.
+  expected_assertions:
+  - Emits TRUNCATION_WARNING and withholds full-population claims.
+  - Formats Markdown bridge cleanly.
 rubric:
-  - criterion: mathematical_bridge_exactness
-    weight: 0.45
-    description: Decomposes Volume, Mix, and Rate effects with zero residual.
-  - criterion: anomaly_and_sample_guard
-    weight: 0.3
-    description: Computes z-scores accurately and warns on small sample sizes.
-  - criterion: truncation_and_baseline_compliance
-    weight: 0.25
-    description: Preserves baseline banner and avoids extrapolating truncated tables.
+- criterion: mathematical_bridge_exactness
+  weight: 0.45
+  description: Decomposes Volume, Mix, and Rate effects with zero residual.
+- criterion: anomaly_and_sample_guard
+  weight: 0.3
+  description: Computes z-scores accurately and warns on small sample sizes.
+- criterion: truncation_and_baseline_compliance
+  weight: 0.25
+  description: Preserves baseline banner and avoids extrapolating truncated tables.

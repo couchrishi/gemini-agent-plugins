@@ -3,8 +3,16 @@
   "name": "SDLC Modernization, Security PR & SRE Ops",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "engineering", "sre", "github", "gitlab", "security"],
+  "segment_tags": [
+    "cross-industry",
+    "engineering",
+    "sre",
+    "github",
+    "gitlab",
+    "security"
+  ],
   "description": "Reverse-engineers legacy codebases into PRD traceability matrices, computes exact SLO error-budget burn and TTD/TTM/TTR postmortem timelines, and gates PR diffs for secrets, removed authz checks, and unsafe DB migrations.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "legacy-code-to-prd",
@@ -30,11 +38,36 @@
   "shared_baselines": [
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/sdlc-modernization-sre-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-slo-burn-review.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "GitHub",
+      "Jira",
+      "Confluence",
+      "BigQuery",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Slack"
+    ],
+    "connector_fetch_guidance": "Pull PR diffs, CI test manifests, incident timeline logs, and Jira postmortem action queues from GitHub, Jira, Confluence, and BigQuery via remote_cli mcp before running Python traceability, SLO interval, and diff-risk checks."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Submitting GitHub PR reviews, merge approvals, or protected-branch status updates",
+      "Bulk-creating or updating Jira postmortem remediation tickets and owners",
+      "Executing or scheduling database DDL/schema migrations flagged as blocking"
+    ],
+    "python_code_guardrails": [
+      "Hardcoded secret, removed auth decorator, and unsafe/blocking DDL migration merge blocker",
+      "Outage interval union-merge deduplication preventing overlapping windows from overstating TTR/SLO burn",
+      "Strict legacy requirement-to-test traceability matrix coverage check"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-slo-burn-review",
+    "title": "Weekly SRE SLO & Postmortem Review",
+    "cron_expression": "0 9 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly SRE reliability and postmortem action-item SLA audit via scripts/slo_timeline_calculator.py. Compute 30-day error-budget consumption across P1/P2 incidents, report TTD/TTM/TTR trends, and flag overdue postmortem corrective actions without mutating Jira issues autonomously."
+  }
 }

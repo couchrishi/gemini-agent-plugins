@@ -12,6 +12,7 @@
     "hipaa"
   ],
   "description": "Validates clinical Schedule of Assessments schedules vs endpoints and enrollment capacity, checks E2B ICSR 4 minimum criteria and 7/15-day statutory clocks with PHI redaction alerts, and audits prior authorization packets against payer criteria.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "clinical-protocol-feasibility",
@@ -37,11 +38,34 @@
   "shared_baselines": [
     "commercial-contract-baseline.md"
   ],
-  "agent_templates": [
-    "agents/healthcare-clinical-regulatory-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-icsr-sla-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets"
+    ],
+    "byo_mcp": [
+      "Claims / EHR Clearinghouse & CTMS Safety Gateway MCP server"
+    ],
+    "connector_fetch_guidance": "Fetch de-identified clinical protocol Schedules of Assessments, ICSR adverse-event safety intakes, and prior-auth medical policy criteria from BigQuery or customer CTMS/Clearinghouse MCP servers via remote_cli mcp before Python validation."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Submitting E2B regulatory safety reports to FDA/EMA/PMDA via customer Safety MCP",
+      "Finalizing clinical prior-authorization medical necessity approvals or denials via Clearinghouse MCP"
+    ],
+    "python_code_guardrails": [
+      "Unredacted SSN, email, or phone PHI detection and masking inside narrative outputs",
+      "Fatal/life-threatening 7-day SUSAR vs 15-day statutory reporting deadline and 4-criteria check",
+      "Step-therapy completion verification (never conflating active ongoing therapy with completed prerequisites)"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-icsr-sla-watch",
+    "title": "Daily Pharmacovigilance ICSR SLA Watch",
+    "cron_expression": "0 7 * * *",
+    "time_zone": "UTC",
+    "instruction": "Run the daily pharmacovigilance intake check via scripts/icsr_completeness_checker.py to watch 7-day fatal SUSAR clocks, incomplete 4-criteria cases, and raw PHI alerts."
+  }
 }

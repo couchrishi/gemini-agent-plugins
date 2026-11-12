@@ -1,8 +1,9 @@
-"""Tests for SKILL.md validation, repository-wide validation, CEL parser, hygiene scan, and zip packaging."""
+"""Tests for SKILL.md validation, repository-wide validation, cron validation, schema mapping, hygiene scan, and zip packaging."""
 
 from __future__ import annotations
 
 import base64
+import importlib
 import json
 from pathlib import Path
 import sys
@@ -23,35 +24,39 @@ import validate_repo  # noqa: E402
 VALID_SKILL_BODY = """
 # Sample Skill
 
-Handles deterministic domain analysis.
+Handles deterministic domain analysis in Gemini Enterprise (`/work`).
 
-## Three-Mode Connector Degradation
+## Connector Fetching & Attached Files
 
-- **Mode A** -> Live connector
-- **Mode B** -> Workspace fallback
-- **Mode C** -> File upload via `view_file`
+Discover and fetch live records via `remote_cli` (`remote_cli mcp <connector>`) or read attached workbooks via `view_file`.
+
+## Schema Inspection & Python Shaping
+
+Inspect uploaded tabs, headers, and JSON keys directly in `pyrepl` using `scripts/enterprise_io.py`, and shape messy custom fields into a canonical `payload` dict in 5-10 lines of Python before calling `analyze(payload, config=...)`.
+Call `ask_question` only when two customer columns remain genuinely ambiguous.
 
 ## Config & Baseline
 
 Inspect `references/config.json` for `org_configured`. When false, stamp:
 `[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]`
 
-## Execution
+## Execution & Governance
 
-Run `scripts/engine.py` via `pyrepl` or `python3` CLI, and persist drafts with `write_to_file`.
-Always require HITL explicit user confirmation before external mutations.
+Run `scripts/engine.py` via `pyrepl` (`analyze(payload, config=...)`) or `python3` CLI, and persist drafts with `write_to_file`.
+External writes require Agent Gateway (`Auto-Guardian`) approval and explicit user confirmation.
+Recurring runs can be configured in chat via `schedule_task`.
 """
 
 
 def test_full_repository_validation_passes_zero_errors() -> None:
     errors, stats = validate_repo.validate_repository(ROOT)
-    assert errors == [], f"Repository validation errors:\n" + "\n".join(errors)
+    assert errors == [], "Repository validation errors:\n" + "\n".join(errors)
     assert stats["plugins"] == 20
     assert stats["skills"] == 60
     assert stats["bundle_zips"] == 20
     assert stats["skill_zips"] == 60
     assert stats["skill_md_validations"] == 140
-    assert stats["cel_expressions"] >= 40
+    assert stats["scheduled_routines"] == 20
 
 
 def test_catalog_matches_plugins_exactly() -> None:
@@ -69,7 +74,7 @@ def test_packaging_check_no_drift() -> None:
 
 
 def test_skill_validator_positive_and_negative_cases() -> None:
-    inventory = ["SKILL.md", "scripts/engine.py", "references/config.json"]
+    inventory = ["SKILL.md", "scripts/engine.py", "scripts/enterprise_io.py", "references/config.json"]
 
     # Valid manifest
     ok_md = (
@@ -106,6 +111,27 @@ def test_skill_validator_positive_and_negative_cases() -> None:
     assert any("Broken skill path reference" in i.message for i in issues)
     assert any("Unreferenced resource" in i.message for i in issues)
 
+    # Reject missing /work Python shaping/entry markers
+    bad_norm = ok_md.replace("ask_question", "ask_user")
+    issues = skill_validator.validate_skill_content(bad_norm, inventory, expected_name="valid-sample-skill")
+    assert any("ask_question" in i.message for i in issues)
+
+    # Reject legacy phrasing or fake hardcoded tool names (decoded only in test RAM)
+    legacy_mode = base64.b64decode("TW9kZSBB").decode("utf-8")
+    fake_sap_tool = base64.b64decode("c2FwX3Bvc3RfaW52b2ljZV9wYXltZW50").decode("utf-8")
+    issues_legacy = skill_validator.validate_skill_content(
+        ok_md + f"\nLegacy phrase: {legacy_mode}\n",
+        inventory,
+        expected_name="valid-sample-skill",
+    )
+    assert any("forbidden legacy" in i.message for i in issues_legacy)
+    issues_fake = skill_validator.validate_skill_content(
+        ok_md + f"\nFake tool: `{fake_sap_tool}`\n",
+        inventory,
+        expected_name="valid-sample-skill",
+    )
+    assert any("forbidden legacy" in i.message for i in issues_fake)
+
     # Reject non-web markdown link while allowing https:// links
     non_web_md = ok_md.replace("`scripts/engine.py`", "[engine.py](scripts/engine.py)")
     issues = skill_validator.validate_skill_content(non_web_md, inventory, expected_name="valid-sample-skill")
@@ -118,24 +144,32 @@ def test_skill_validator_positive_and_negative_cases() -> None:
     )
 
 
-def test_cel_syntax_validator() -> None:
-    validate_repo.validate_cel_expression('credit.base_breach_count == 0 && !(ehs.stop_work_blocked_count > 0)')
-    validate_repo.validate_cel_expression('request.severity in ["P1", "P2"] ? request.arr > 10000 : false')
-    with pytest.raises(validate_repo.CelSyntaxError):
-        validate_repo.validate_cel_expression("credit.base_breach_count == ")
-    with pytest.raises(validate_repo.CelSyntaxError):
-        validate_repo.validate_cel_expression("(unclosed + 1")
+def test_cron_expression_validator() -> None:
+    assert validate_repo.validate_cron_expression("0 6 * * 1-5") == []
+    assert validate_repo.validate_cron_expression("*/15 8-18 * * *") == []
+    assert validate_repo.validate_cron_expression("0 6 * *") != []
+    assert validate_repo.validate_cron_expression("0 6 * * * 2026") != []
+    assert validate_repo.validate_cron_expression("every weekday morning") != []
 
 
 def test_hygiene_scanner_flags_encoded_internal_terms_and_passes_clean_text() -> None:
-    clean = "Cymbal Financial validated SAP S/4HANA and ServiceNow connectors with Gemini Enterprise."
+    clean = "Cymbal Financial validated SAP S/4HANA and ServiceNow connectors with Gemini Enterprise (/work)."
     assert validate_repo.scan_text_hygiene(clean, "synthetic.md") == []
 
     # Decode forbidden tokens only inside test RAM so static repo remains 100% clean
-    sample_internal = base64.b64decode("c29iaQ==").decode("utf-8")
-    sample_bug_ref = base64.b64decode("Yi8xMjM0NTY=").decode("utf-8")
-    assert len(validate_repo.scan_text_hygiene(f"Internal test {sample_internal}", "leak.md")) == 1
-    assert len(validate_repo.scan_text_hygiene(f"Track in {sample_bug_ref}", "leak2.md")) == 1
+    for b64_val, label in [
+        ("c29iaQ==", "internal product"),
+        ("Yi8xMjM0NTY=", "bug shortlink"),
+        ("TW9kZSBB", "legacy mode label"),
+        ("cG9saWN5LmNlbA==", "legacy policy file"),
+        ("c2FwX3Bvc3RfaW52b2ljZV9wYXltZW50", "fake hardcoded SAP action"),
+        ("Q0VM", "legacy rule acronym"),
+        ("c2NoZWR1bGVzLw==", "legacy schedules dir"),
+        ("YmlncXVlcnlfc3FsX2FwaQ==", "fake api token"),
+    ]:
+        decoded = base64.b64decode(b64_val).decode("utf-8")
+        findings = validate_repo.scan_text_hygiene(f"Test {label}: {decoded}", "leak.md")
+        assert findings, f"Expected hygiene finding for {label}"
 
 
 def test_org_config_stamping_builds_valid_zips_and_suppresses_baseline_banner(tmp_path: Path) -> None:
@@ -162,6 +196,8 @@ def test_org_config_stamping_builds_valid_zips_and_suppresses_baseline_banner(tm
         assert cfg_inside["organization_name"] == "Cymbal Financial"
         assert cfg_inside["min_dscr"] == 1.35
         assert cfg_inside["max_net_leverage"] == 3.25
+        assert cfg_inside["sheet_map"] == {}
+        assert cfg_inside["column_map"] == {}
 
         # Extract script + config and verify baseline banner is suppressed when org_configured=True
         script_path = tmp_path / "credit_covenant_stress.py"
@@ -171,7 +207,6 @@ def test_org_config_stamping_builds_valid_zips_and_suppresses_baseline_banner(tm
 
     sys.path.insert(0, str(tmp_path))
     try:
-        import importlib
         mod = importlib.import_module("credit_covenant_stress")
         res = mod.analyze(
             {
@@ -191,6 +226,37 @@ def test_org_config_stamping_builds_valid_zips_and_suppresses_baseline_banner(tm
         assert "[EVALUATED AGAINST STANDARD BASELINE" not in md
     finally:
         sys.path.pop(0)
+
+
+def test_org_config_binds_sheet_map_and_column_map_and_rejects_invalid_entries(tmp_path: Path) -> None:
+    custom_cfg = {
+        "organization_name": "Meridian Manufacturing",
+        "plugins": {
+            "finance-variance-recon": {
+                "sheet_map": {"invoices": "Vendor_Bills"},
+                "column_map": {"Bill Ref": "invoice_id", "Purchasing Doc #": "po_number"},
+            }
+        },
+    }
+    out_dir = tmp_path / "meridian-dist"
+    pkg_tool.sync_and_build(org_payload=custom_cfg, output_dir=out_dir, check_only=False)
+
+    ap_zip = out_dir / "skills" / "ap-three-way-match.zip"
+    with zipfile.ZipFile(ap_zip, "r") as zf:
+        cfg_inside = json.loads(zf.read("references/config.json").decode("utf-8"))
+        assert cfg_inside["org_configured"] is True
+        assert cfg_inside["sheet_map"] == {"invoices": "Vendor_Bills"}
+        assert cfg_inside["column_map"] == {"Bill Ref": "invoice_id", "Purchasing Doc #": "po_number"}
+
+    bad_map = {
+        "plugins": {
+            "finance-variance-recon": {
+                "column_map": {"Bill Ref": 123},
+            }
+        }
+    }
+    with pytest.raises(ValueError, match="string mapping value"):
+        pkg_tool.sync_and_build(org_payload=bad_map, output_dir=tmp_path / "out_bad_map")
 
 
 def test_org_config_rejects_out_of_range_or_unknown_properties(tmp_path: Path) -> None:

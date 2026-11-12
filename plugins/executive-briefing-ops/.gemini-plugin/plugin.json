@@ -3,8 +3,14 @@
   "name": "Executive Briefing & Chief of Staff Ops",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "leadership", "chief-of-staff", "account-ops"],
+  "segment_tags": [
+    "cross-industry",
+    "leadership",
+    "chief-of-staff",
+    "account-ops"
+  ],
   "description": "Prepares daily executive briefings with calendar conflict and commitment tracking, extracts structured action/decision packs from meeting transcripts, and synthesizes multi-signal stakeholder account dossiers.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "daily-executive-briefing",
@@ -32,11 +38,36 @@
     "deal-desk-approval-baseline.md",
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/executive-briefing-ops-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekday-exec-briefing.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Calendar",
+      "Gmail",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+      "Salesforce",
+      "Slack"
+    ],
+    "connector_fetch_guidance": "Collect day calendar events, Gmail/Outlook threads, Meet transcripts, and Salesforce account snapshots via remote_cli mcp before building overlap checks, action tables, and stakeholder briefs in Python."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Sending executive follow-up emails or stakeholder outreach via Gmail or Outlook",
+      "Modifying, rescheduling, or declining multi-attendee Calendar events",
+      "Posting meeting action summaries to shared Slack or Microsoft Teams channels"
+    ],
+    "python_code_guardrails": [
+      "Untrusted external email/transcript instruction quarantine before action extraction",
+      "Strict pagination/truncation propagation preventing silent omission of afternoon events",
+      "Time-zone normalization and double-booked conflict interval overlap math"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekday-exec-briefing",
+    "title": "Weekday Executive Morning Briefing",
+    "cron_expression": "30 6 * * 1-5",
+    "time_zone": "UTC",
+    "instruction": "Build the weekday morning executive briefing using scripts/agenda_commitment_tracker.py. Detect overlapping meetings, missing pre-read documents, back-to-back fatigue stretches, and overdue action commitments, and save a private Google Doc brief without sending any external emails."
+  }
 }

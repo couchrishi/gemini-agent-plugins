@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - asset_audits
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - publish_gate
   must_not_include_patterns:
   - published copy with unverified guarantee
@@ -17,21 +17,20 @@ deterministic_checks:
   - Blocks prohibited superlatives and missing claim disclaimers.
   - Checks channel-specific headline character caps.
 scenarios:
-- id: mode_a_prohibited_claim
-  mode: mode_a
-  prompt: Lint Northstar Retail's seasonal Google Docs ad copy claiming 'Save up to
-    40% with zero risk'.
+- id: live_prohibited_claim
+  mode: live_connector
+  prompt: Lint Northstar Retail's seasonal Google Docs ad copy claiming 'Save up to 40% with zero risk'.
   expected_assertions:
   - Flags both prohibited claim ('zero risk') and missing disclaimer -> BLOCKED_COMPLIANCE_VIOLATION.
   - Computes compliance_score accurately.
-- id: mode_b_char_limit_warning
-  mode: mode_b
+- id: workspace_char_limit_warning
+  mode: workspace_connector
   prompt: Check Search Ad headlines in Marketing Drive Sheet exceeding 30 characters.
   expected_assertions:
   - Flags character limit warning and lowers compliance_score.
   - Applies baseline banner when org_configured is false.
-- id: mode_c_local_lint_clean
-  mode: mode_c
+- id: local_local_lint_clean
+  mode: local_file
   prompt: Lint copy_assets.json locally and verify HITL gate before CMS publish.
   expected_assertions:
   - Distinguishes APPROVED_FOR_LOCALIZATION vs BLOCKED assets clearly.

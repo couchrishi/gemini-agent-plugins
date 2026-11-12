@@ -12,6 +12,7 @@
     "knowledge-ops"
   ],
   "description": "Scores VIP account escalations by ARR exposure and Sev1 outages, mines CSAT/NPS verbatims into ARR-weighted driver paretos with null-rating hygiene, and validates support troubleshooting decision trees for graph defects.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "critical-escalation-warroom",
@@ -38,11 +39,33 @@
   "shared_baselines": [
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/customer-operations-escalation-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/hourly-vip-escalation-radar.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Salesforce",
+      "ServiceNow",
+      "Google Docs",
+      "Google Sheets",
+      "Google Drive",
+      "Slack"
+    ],
+    "connector_fetch_guidance": "Pull active customer account ARR/renewal windows from Salesforce and open CSM escalation cases, SLA timers, and CSAT verbatims from ServiceNow or Google Sheets via remote_cli mcp before scoring exposure in Python."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Creating executive customer war-rooms or paging VP sponsors via ServiceNow or Slack",
+      "Publishing interactive troubleshooting decision trees to customer-facing portals"
+    ],
+    "python_code_guardrails": [
+      "Decision-tree DAG cycle, unreachable node, and broken transition reference blocker",
+      "Simpson's paradox separation preventing aggregate CSAT averages from hiding enterprise churn signals",
+      "Absent ARR/renewal date null preservation (never coercing unknown ARR to zero)"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "hourly-vip-escalation-radar",
+    "title": "Hourly VIP Escalation Radar",
+    "cron_expression": "0 * * * *",
+    "time_zone": "UTC",
+    "instruction": "Run the hourly VIP escalation exposure check via scripts/escalation_exposure_scorer.py across open Sev1/Sev2 accounts and renewal windows."
+  }
 }

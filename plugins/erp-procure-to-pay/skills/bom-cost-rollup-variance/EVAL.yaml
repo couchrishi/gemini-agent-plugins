@@ -9,7 +9,7 @@ deterministic_checks:
   - assembly_rollups
   - component_ppv_drivers
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - total_extended_ppv_usd
   must_not_include_patterns:
   - ignored BOM scrap yield loss
@@ -18,22 +18,20 @@ deterministic_checks:
   - Detects circular parent-child BOM edges in bom_cycles_detected.
   - Multiplies scrap factor cleanly across nested sub-assemblies.
 scenarios:
-- id: mode_a_multilevel_scrap_ppv
-  mode: mode_a
-  prompt: Roll up 3-level pump assembly BOM standard vs actual PPV with 4% scrap on
-    sub-assemblies.
+- id: live_multilevel_scrap_ppv
+  mode: live_connector
+  prompt: Roll up 3-level pump assembly BOM standard vs actual PPV with 4% scrap on sub-assemblies.
   expected_assertions:
   - Compounds scrap multipliers cleanly across BOM levels.
   - Ranks top component PPV drivers descending by dollar impact.
-- id: mode_b_sheets_cycle_guard
-  mode: mode_b
-  prompt: Validate our Drive BOM Workbook containing an accidental sub-assembly circular
-    edge.
+- id: workspace_sheets_cycle_guard
+  mode: workspace_connector
+  prompt: Validate our Drive BOM Workbook containing an accidental sub-assembly circular edge.
   expected_assertions:
   - Captures cycle path in bom_cycles_detected without infinite recursion.
   - Stamps baseline banner when org_configured is false.
-- id: mode_c_local_bom_variance
-  mode: mode_c
+- id: local_local_bom_variance
+  mode: local_file
   prompt: Run bom_ppv_rollup.py on bom_costs.json and list PPV alert components (>5%).
   expected_assertions:
   - Flags alert components >5% PPV and preserves HITL CK24 cost-update gate.

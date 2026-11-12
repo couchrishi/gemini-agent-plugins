@@ -1,49 +1,49 @@
 skill_id: schema-grounded-sql-analyst
 plugin_id: conversational-bi-analyst
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/sql_safety_and_fanout_checker.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - missing_partition_filters
-    - fanout_risks
+  - baseline_mode
+  - summary
+  - missing_partition_filters
+  - fanout_risks
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "fanout_risk_count"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - fanout_risk_count
   must_not_include_patterns:
-    - "executed destructive DDL without confirmation"
-    - "ignored M:N join multiplication"
+  - executed destructive DDL without confirmation
+  - ignored M:N join multiplication
   hitl_required_for_mutations: true
   trap_checks:
-    - "Blocks queries missing WHERE filters on required partition_column."
-    - "Catches M:N join fanout risk when primary keys are omitted from JOIN ON."
+  - Blocks queries missing WHERE filters on required partition_column.
+  - Catches M:N join fanout risk when primary keys are omitted from JOIN ON.
 scenarios:
-  - id: mode_a_partition_and_fanout
-    mode: mode_a
-    prompt: "Check BigQuery SQL joining purchase_orders and goods_receipts without posting_date filter."
-    expected_assertions:
-      - "Reports missing partition filter on posting_date."
-      - "Reports JOIN_FANOUT_RISK on missing po_item join key."
-  - id: mode_b_scan_budget
-    mode: mode_b
-    prompt: "Validate Connected Sheets SQL query scanning 950 GB."
-    expected_assertions:
-      - "Sets scan_over_budget=true and requests HITL confirmation."
-      - "Includes baseline banner when org_configured is false."
-  - id: mode_c_ddl_block
-    mode: mode_c
-    prompt: "Validate uploaded SQL script containing TRUNCATE TABLE."
-    expected_assertions:
-      - "Sets is_read_only_safe=false and sql_gate_passed=false."
-      - "Refuses execution pending explicit user confirmation."
+- id: live_partition_and_fanout
+  mode: live_connector
+  prompt: Check BigQuery SQL joining purchase_orders and goods_receipts without posting_date filter.
+  expected_assertions:
+  - Reports missing partition filter on posting_date.
+  - Reports JOIN_FANOUT_RISK on missing po_item join key.
+- id: workspace_scan_budget
+  mode: workspace_connector
+  prompt: Validate Connected Sheets SQL query scanning 950 GB.
+  expected_assertions:
+  - Sets scan_over_budget=true and requests HITL confirmation.
+  - Includes baseline banner when org_configured is false.
+- id: local_ddl_block
+  mode: local_file
+  prompt: Validate uploaded SQL script containing TRUNCATE TABLE.
+  expected_assertions:
+  - Sets is_read_only_safe=false and sql_gate_passed=false.
+  - Refuses execution pending explicit user confirmation.
 rubric:
-  - criterion: sql_safety_and_partition_guard
-    weight: 0.4
-    description: Detects DDL/DML statements, missing partition predicates, and scan budget overages.
-  - criterion: join_fanout_prevention
-    weight: 0.35
-    description: Identifies ungrouped M:N joins missing primary key columns.
-  - criterion: baseline_and_hitl_gates
-    weight: 0.25
-    description: Enforces starter baseline banner and explicit confirmation before expensive/mutating SQL.
+- criterion: sql_safety_and_partition_guard
+  weight: 0.4
+  description: Detects DDL/DML statements, missing partition predicates, and scan budget overages.
+- criterion: join_fanout_prevention
+  weight: 0.35
+  description: Identifies ungrouped M:N joins missing primary key columns.
+- criterion: baseline_and_hitl_gates
+  weight: 0.25
+  description: Enforces starter baseline banner and explicit confirmation before expensive/mutating SQL.

@@ -37,7 +37,7 @@
 
 1. **Snapshot Deduplication (`TRAP-WD-01`):** Collapse multi-row effective-dated exports keeping strictly `max(effective_date <= as_of_date)` per `worker_id` and isolating `future_dated` promos.
 2. **Cohort Separation (`TRAP-WD-02`):** Isolate `Contingent_Worker` (`CWK`) and `Pre_Hire` rows completely from `FTE` active headcount, attrition, and compa-ratio calculations.
-3. **Zero Autonomous HR Mutations:** Drafting interview debrief packets or private onboarding checklists runs cleanly; sending candidate offers/rejections or changing Workday comp requires `explicit_per_call` confirmation per `.gemini-plugin/policy.cel`.
+3. **Zero Autonomous HR Mutations:** Drafting interview debrief packets or private onboarding checklists runs cleanly; sending candidate offers/rejections or updating compensation in a connected Workday HRIS / ATS MCP server requires Agent Gateway (`Auto-Guardian`) approval and explicit HRBP/Lead confirmation.
 
 ## 5. Customizing via `config.json` & `--org-config`
 
@@ -74,10 +74,10 @@ Packaging via `tools/package.py --org-config org.json` activates `org_configured
 3. Audit every interview rubric output for `< 40` char rationales (`min_evidence_chars`) and prohibited bias terminology.
 4. Keep all offer approvals, merit adjustments, and Workday status writes gated behind explicit HR Partner confirmation.
 
-## 8. Privacy & Talent CEL Guardrails
+## 8. Privacy & Talent Write Governance (`Auto-Guardian` & Python Guards)
 
-- `enforce_small_cell_privacy`: `comp.min_privacy_cell_size >= 5`
-- `block_autonomous_offer_or_comp_write`: `hr.auto_comp_mutation == false`
-- `require_hiring_calibration_on_dispersion`: `rubric.dispersion_alert_count == 0`
+- **Mandatory `n < 5` Privacy Floor:** Python engines enforce `min_privacy_cell_size >= 5` before serialization, redacting small-cohort salaries and attrition rates structurally.
+- **Compensation & Offer Release Gate:** Agent Gateway (`Auto-Guardian`) and explicit HRBP / Hiring Manager confirmation block autonomous Workday pay changes or ATS offer advances.
+- **Calibration Dispersion Invariant:** Interview debrief outputs flag any panel spread above `max_score_spread` or short rationales before final consensus.
 
-Scheduled People Ops sweeps (`weekly-onboarding-sla-nudge.yaml`) draft manager reminders safely and never release automated employee termination or compensation changes.
+Scheduled People Ops `schedule_task` sweeps (such as `Weekly Onboarding SLA Nudge`) draft manager reminders safely and never release automated employee termination or compensation changes.

@@ -9,7 +9,7 @@ deterministic_checks:
   - bucket_rollup
   - fallout_orders
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - NUMBER_PORT_LNP_FREEZE
   must_not_include_patterns:
   - averaged order MRC across unpolled backlog
@@ -18,22 +18,20 @@ deterministic_checks:
   - Routes LNP, OSP capacity, credit, address, and CPE errors accurately.
   - Computes both monthly MRC and annualized ARR blocked.
 scenarios:
-- id: mode_a_lnp_osp_priority
-  mode: mode_a
-  prompt: Triage Stratos Telecom B2B fallout queue with aged $4,200/mo DIA circuit
-    hitting OLT port capacity and $1,100/mo SIP LNP freeze.
+- id: live_lnp_osp_priority
+  mode: live_connector
+  prompt: Triage Stratos Telecom B2B fallout queue with aged $4,200/mo DIA circuit hitting OLT port capacity and $1,100/mo SIP LNP freeze.
   expected_assertions:
   - Escalates aged $4,200/mo order as P1_EXEC_ESCALATE under FIBER_FACILITY_CAPACITY_SHORTAGE.
   - Computes annualized_arr_blocked_usd accurately.
-- id: mode_b_sheets_fallout_buckets
-  mode: mode_b
-  prompt: Classify B2B Fallout Sheet in Drive across credit holds, demarc address
-    failures, and CPE backorders.
+- id: workspace_sheets_fallout_buckets
+  mode: workspace_connector
+  prompt: Classify B2B Fallout Sheet in Drive across credit holds, demarc address failures, and CPE backorders.
   expected_assertions:
   - Assigns deterministic owner queues per bucket.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_fallout_json
-  mode: mode_c
+- id: local_local_fallout_json
+  mode: local_file
   prompt: Run order_fallout_classifier.py on fallout.json.
   expected_assertions:
   - Produces sorted bucket_rollup and order priorities.

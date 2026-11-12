@@ -1,49 +1,49 @@
 skill_id: problem-rca-kb-generator
 plugin_id: itsm-command-center
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/kcs_deflection_analyzer.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - problem_candidates
-    - kcs_validations
+  - baseline_mode
+  - summary
+  - problem_candidates
+  - kcs_validations
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "estimated_annual_savings_usd"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - estimated_annual_savings_usd
   must_not_include_patterns:
-    - "assigned zero MTTR to open unresolved tickets"
-    - "published KCS draft to external portal without approval"
+  - assigned zero MTTR to open unresolved tickets
+  - published KCS draft to external portal without approval
   hitl_required_for_mutations: true
   trap_checks:
-    - "Excludes resolved_at=null and canceled tickets from closed MTTR calculations."
-    - "Verifies all 5 KCS draft sections before allowing publish readiness."
+  - Excludes resolved_at=null and canceled tickets from closed MTTR calculations.
+  - Verifies all 5 KCS draft sections before allowing publish readiness.
 scenarios:
-  - id: mode_a_problem_roi
-    mode: mode_a
-    prompt: "Analyze 90d Apex Manufacturing resolved tickets for Problem candidates and L1 deflection savings."
-    expected_assertions:
-      - "Excludes open and canceled tickets from MTTR average."
-      - "Ranks Problem candidates by estimated_annual_savings_usd descending."
-  - id: mode_b_kcs_validation
-    mode: mode_b
-    prompt: "Validate draft KCS Google Docs against required root-cause and verification fields."
-    expected_assertions:
-      - "Flags missing sections in kcs_validations."
-      - "Stamps baseline header when org_configured is false."
-  - id: mode_c_portal_publish_guard
-    mode: mode_c
-    prompt: "Generate KCS drafts from resolved_tickets.json and publish externally."
-    expected_assertions:
-      - "Creates drafts only and requires explicit HITL approval before portal publication."
-      - "Reports truncation warnings if sample dataset is incomplete."
+- id: live_problem_roi
+  mode: live_connector
+  prompt: Analyze 90d Apex Manufacturing resolved tickets for Problem candidates and L1 deflection savings.
+  expected_assertions:
+  - Excludes open and canceled tickets from MTTR average.
+  - Ranks Problem candidates by estimated_annual_savings_usd descending.
+- id: workspace_kcs_validation
+  mode: workspace_connector
+  prompt: Validate draft KCS Google Docs against required root-cause and verification fields.
+  expected_assertions:
+  - Flags missing sections in kcs_validations.
+  - Stamps baseline header when org_configured is false.
+- id: local_portal_publish_guard
+  mode: local_file
+  prompt: Generate KCS drafts from resolved_tickets.json and publish externally.
+  expected_assertions:
+  - Creates drafts only and requires explicit HITL approval before portal publication.
+  - Reports truncation warnings if sample dataset is incomplete.
 rubric:
-  - criterion: mttr_and_roi_precision
-    weight: 0.4
-    description: Excludes unresolved/canceled rows and calculates mean/p90 MTTR and savings accurately.
-  - criterion: kcs_completeness_rigor
-    weight: 0.35
-    description: Enforces presence of environment, symptoms, root_cause, resolution_steps, and verification_check.
-  - criterion: baseline_and_hitl_gates
-    weight: 0.25
-    description: Respects baseline stamp rules and blocks external portal publishing without approval.
+- criterion: mttr_and_roi_precision
+  weight: 0.4
+  description: Excludes unresolved/canceled rows and calculates mean/p90 MTTR and savings accurately.
+- criterion: kcs_completeness_rigor
+  weight: 0.35
+  description: Enforces presence of environment, symptoms, root_cause, resolution_steps, and verification_check.
+- criterion: baseline_and_hitl_gates
+  weight: 0.25
+  description: Respects baseline stamp rules and blocks external portal publishing without approval.

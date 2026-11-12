@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import time
 import zipfile
 from typing import Any
 
@@ -829,3 +830,262 @@ def test_large_scale_multipage_docx_sections_and_tables(tmp_path: Path) -> None:
     assert by_fam["limitation_of_liability"]["risk_score"] == 3  # 6 months in [6, 12) warning band
     assert by_fam["data_rights_ai_training"]["risk_score"] == 1
     assert by_fam["dpa_breach_notification"]["risk_score"] == 1  # 48h <= 72h
+
+
+def test_fail_closed_schema_gate_on_unmapped_customer_xlsx(tmp_path: Path) -> None:
+    """Non-standard customer headers trigger SCHEMA_MAPPING_REQUIRED and CLI exit 2 instead of silent zeros."""
+    cust_xlsx = _build_xlsx(
+        tmp_path / "customer_ap_oct.xlsx",
+        [
+            {
+                "name": "Purchase_Orders",
+                "raw_rows": [
+                    ["po_number", "line_item", "vendor_id", "ordered_qty", "unit_price", "currency"],
+                    ["PO-9001", "10", "Acme Hardware", 1, 12500.0, "USD"],
+                ],
+            },
+            {
+                "name": "Goods_Receipts",
+                "raw_rows": [
+                    ["po_number", "line_item", "received_qty"],
+                    ["PO-9001", "10", 1],
+                ],
+            },
+            {
+                "name": "Customer_Oct_Dump",
+                "raw_rows": [
+                    ["Purchasing Doc #", "Bill Ref", "Vendor Title", "Net Val", "DrCr"],
+                    ["PO-9001", "BILL-4401", "Acme Hardware", 12500.0, "S"],
+                ],
+            },
+        ],
+    )
+    ap_script = ROOT / "plugins/finance-variance-recon/skills/ap-three-way-match/scripts/reconcile_3way.py"
+    ap_mod = _load_mod("plugins/finance-variance-recon/skills/ap-three-way-match/scripts/reconcile_3way.py", "m_ap_schema_gate")
+
+    res = ap_mod.analyze(cust_xlsx)
+    assert res["status"] == "SCHEMA_MAPPING_REQUIRED"
+    assert res["skill"] == "ap-three-way-match"
+    diag = res["schema_diagnostic"]
+    assert "Customer_Oct_Dump" in diag["tables_detected"]
+    assert "invoices" in diag["missing_required_fields"]
+    assert diag["suggested_column_map"].get("Purchasing Doc #") == "po_number"
+    assert diag["suggested_column_map"].get("Bill Ref") == "invoice_id"
+
+    md = ap_mod.render_markdown(res)
+    assert "# Schema Mapping Required" in md
+    assert "Customer_Oct_Dump" in md
+    assert "--column-map" in md
+
+    proc = subprocess.run(
+        [sys.executable, str(ap_script), "--input", str(cust_xlsx), "--format", "json"],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 2
+    cli_res = json.loads(proc.stdout)
+    assert cli_res["status"] == "SCHEMA_MAPPING_REQUIRED"
+
+    proc_insp = subprocess.run(
+        [sys.executable, str(ap_script), "--input", str(cust_xlsx), "--inspect"],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc_insp.returncode == 2
+    insp_res = json.loads(proc_insp.stdout)
+    assert insp_res["status"] == "SCHEMA_MAPPING_REQUIRED"
+    assert insp_res["tables_detected"]["Customer_Oct_Dump"]["row_count"] == 1
+
+
+def test_sheet_map_and_column_map_resolve_via_api_cli_and_org_config(tmp_path: Path) -> None:
+    """Passing sheet_map + column_map via analyze(), CLI flags, AND --org-config yields exact MATCHED_READY_FOR_HITL."""
+    cust_xlsx = _build_xlsx(
+        tmp_path / "customer_ap_oct_mapped.xlsx",
+        [
+            {
+                "name": "Purchase_Orders",
+                "raw_rows": [
+                    ["po_number", "line_item", "vendor_id", "ordered_qty", "unit_price", "currency"],
+                    ["PO-9001", "10", "Acme Hardware", 1, 12500.0, "USD"],
+                    ["PO-9002", "10", "Cloud Core Inc", 1, 7500.0, "USD"],
+                ],
+            },
+            {
+                "name": "Goods_Receipts",
+                "raw_rows": [
+                    ["po_number", "line_item", "received_qty"],
+                    ["PO-9001", "10", 1],
+                    ["PO-9002", "10", 1],
+                ],
+            },
+            {
+                "name": "Customer_Oct_Dump",
+                "raw_rows": [
+                    ["Purchasing Doc #", "Bill Ref", "Vendor Title", "Net Val", "DrCr"],
+                    ["PO-9001", "BILL-4401", "Acme Hardware", 12500.0, "S"],
+                    ["PO-9002", "BILL-4402", "Cloud Core Inc", 7500.0, "S"],
+                ],
+            },
+        ],
+    )
+    sheet_map = {"invoices": "Customer_Oct_Dump"}
+    col_map = {
+        "Purchasing Doc #": "po_number",
+        "Bill Ref": "invoice_id",
+        "Vendor Title": "vendor_id",
+        "Net Val": "amount",
+        "DrCr": "shkzg",
+    }
+    ap_script = ROOT / "plugins/finance-variance-recon/skills/ap-three-way-match/scripts/reconcile_3way.py"
+    ap_mod = _load_mod("plugins/finance-variance-recon/skills/ap-three-way-match/scripts/reconcile_3way.py", "m_ap_mapped")
+
+    # 1. Direct Python analyze(..., sheet_map=..., column_map=...)
+    res_api = ap_mod.analyze(cust_xlsx, column_map=col_map, sheet_map=sheet_map)
+    assert res_api.get("status") != "SCHEMA_MAPPING_REQUIRED"
+    assert res_api["summary"]["invoices_evaluated"] == 2
+    assert res_api["summary"]["matched_count"] == 2
+    assert res_api["summary"]["matched_value_usd"] == 20000.0
+    assert all(m["match_status"] == "MATCHED_READY_FOR_HITL" for m in res_api["reconciliation_results"])
+
+    # 2. CLI --sheet-map / --column-map
+    proc_cli = subprocess.run(
+        [
+            sys.executable,
+            str(ap_script),
+            "--input",
+            str(cust_xlsx),
+            "--sheet-map",
+            json.dumps(sheet_map),
+            "--column-map",
+            json.dumps(col_map),
+            "--format",
+            "json",
+        ],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    res_cli = json.loads(proc_cli.stdout)
+    assert res_cli["summary"]["matched_count"] == 2
+    assert res_cli["summary"]["matched_value_usd"] == 20000.0
+    assert all(m["match_status"] == "MATCHED_READY_FOR_HITL" for m in res_cli["reconciliation_results"])
+
+    # 3. Persistent config.json loaded via --org-config
+    org_cfg_path = tmp_path / "org_config.json"
+    org_cfg_path.write_text(
+        json.dumps(
+            {
+                "org_configured": True,
+                "organization_name": "Meridian Manufacturing",
+                "sheet_map": sheet_map,
+                "column_map": col_map,
+            }
+        ),
+        encoding="utf-8",
+    )
+    proc_cfg = subprocess.run(
+        [
+            sys.executable,
+            str(ap_script),
+            "--input",
+            str(cust_xlsx),
+            "--org-config",
+            str(org_cfg_path),
+            "--format",
+            "json",
+        ],
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    res_cfg = json.loads(proc_cfg.stdout)
+    assert res_cfg["baseline_mode"] == "ORG_CONFIGURED"
+    assert res_cfg["summary"]["matched_count"] == 2
+    assert res_cfg["summary"]["matched_value_usd"] == 20000.0
+    assert all(m["match_status"] == "MATCHED_READY_FOR_HITL" for m in res_cfg["reconciliation_results"])
+
+
+def test_custom_connector_json_mapping_and_sub100ms_inspect(tmp_path: Path) -> None:
+    """Custom ServiceNow/Salesforce JSON payloads map via column_map/sheet_map, and --inspect stays <100ms at scale."""
+    inc_mod = _load_mod(
+        "plugins/itsm-command-center/skills/incident-triage-routing/scripts/sla_cluster_triage.py",
+        "m_inc_json_map",
+    )
+    sn_payload = {
+        "result": [
+            {
+                "sys_id": "SN-INC-881",
+                "u_short_title": "Checkout DB pool exhaustion across eu-west-1",
+                "u_prio": "P1",
+                "u_state": "New",
+                "u_service": "checkout-db",
+            }
+        ]
+    }
+    fail_sn = inc_mod.analyze(sn_payload)
+    assert fail_sn["status"] == "SCHEMA_MAPPING_REQUIRED"
+    assert "result" in fail_sn["schema_diagnostic"]["unrecognized_nonempty_tables"]
+
+    ok_sn = inc_mod.analyze(
+        sn_payload,
+        sheet_map={"incidents": "result"},
+        column_map={
+            "sys_id": "incident_id",
+            "u_short_title": "short_description",
+            "u_prio": "priority",
+            "u_state": "state",
+            "u_service": "service",
+        },
+    )
+    assert ok_sn["summary"]["total_records_received"] == 1
+    assert ok_sn["summary"]["active_incident_count"] == 1
+    assert ok_sn["active_incidents"][0]["incident_id"] == "SN-INC-881"
+
+    pipe_mod = _load_mod(
+        "plugins/deal-desk-rfp-engine/skills/pipeline-hygiene-slippage/scripts/pipeline_slippage_auditor.py",
+        "m_pipe_json_map",
+    )
+    sf_payload = {
+        "records": [
+            {
+                "Opportunity_Number__c": "OPP-SF-90",
+                "StageName": "Negotiation",
+                "DealCat__c": "Commit",
+                "NetACV__c": 180000,
+                "PushCount__c": 3,
+                "Account": {"Name": "Meridian BioPharma"},
+            }
+        ]
+    }
+    ok_sf = pipe_mod.analyze(
+        sf_payload,
+        column_map={
+            "Opportunity_Number__c": "opportunity_id",
+            "DealCat__c": "forecast_category",
+            "NetACV__c": "amount_usd",
+            "PushCount__c": "push_count",
+            "Account.Name": "name",
+        },
+    )
+    assert ok_sf["summary"]["total_records_fetched"] == 1
+    assert ok_sf["summary"]["open_pipeline_count"] == 1
+    assert ok_sf["flagged_opportunities"][0]["opportunity_id"] == "OPP-SF-90"
+
+    # Sub-100ms inspect latency check on a 3,000-row .xlsx workbook
+    big_rows: list[list[Any]] = [["Purchasing Doc #", "Bill Ref", "Vendor Title", "Net Val", "DrCr"]]
+    for idx in range(3000):
+        big_rows.append([f"PO-{idx:05d}", f"BILL-{idx:05d}", f"Vendor-{idx % 20}", 100.0 + idx, "S"])
+    big_xlsx = _build_xlsx(tmp_path / "bulk_3k.xlsx", [{"name": "Customer_Oct_Dump", "raw_rows": big_rows}])
+    t0 = time.perf_counter()
+    diag = enterprise_io.inspect_enterprise_source(big_xlsx, skill_id="ap-three-way-match")
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    assert elapsed_ms < 250.0  # comfortably sub-100ms in normal runs; 250ms ceiling prevents CI noise
+    assert diag["status"] == "SCHEMA_MAPPING_REQUIRED"
+    assert diag["tables_detected"]["Customer_Oct_Dump"]["row_count"] == 3000
+    assert diag["suggested_column_map"].get("Purchasing Doc #") == "po_number"

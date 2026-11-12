@@ -3,8 +3,14 @@
   "name": "Enterprise Knowledge Hub",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "knowledge-management", "intranet", "policy-ops"],
+  "segment_tags": [
+    "cross-industry",
+    "knowledge-management",
+    "intranet",
+    "policy-ops"
+  ],
   "description": "Synthesizes cross-source enterprise knowledge with strict citation conflict detection, jurisdiction-scoped SOP/policy answering with abstention gates, and corpus freshness/duplication auditing across Google Workspace, SharePoint, and Confluence.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "cross-source-knowledge-synthesis",
@@ -32,11 +38,35 @@
     "itsm-sla-severity-baseline.md",
     "commercial-contract-baseline.md"
   ],
-  "agent_templates": [
-    "agents/enterprise-knowledge-hub-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-corpus-hygiene-audit.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+      "Confluence",
+      "ServiceNow",
+      "Slack"
+    ],
+    "connector_fetch_guidance": "Retrieve authoritative policy docs, multi-tab Google Docs (includeTabsContent=true), SharePoint libraries, Confluence pages, and ServiceNow KB articles via remote_cli mcp before ranking authority and freshness in Python."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Publishing or overwriting authoritative SOP pages in Confluence or ServiceNow KB",
+      "Archiving or deleting stale documents in SharePoint or Google Drive",
+      "Broadcasting corpus hygiene audit digests to Slack channels or email distribution lists"
+    ],
+    "python_code_guardrails": [
+      "Strict fail-closed abstention on 403 permission errors or zero jurisdiction matches (UNVERIFIED_INSUFFICIENT_SCOPE)",
+      "Published vs superseded/draft version authority precedence and departed-owner flagging",
+      "Contradictory cross-source numeric/SLA threshold surfacing rather than silent averaging"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-corpus-hygiene-audit",
+    "title": "Weekly Corpus Hygiene Audit",
+    "cron_expression": "0 7 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly enterprise knowledge hygiene scan across Drive, SharePoint, and Confluence metadata exports. Execute scripts/corpus_hygiene_scanner.py against the latest corpus inventory and ticket-topic gap feed, highlight stale/unreviewed SOPs, departed owners, unpublished minor versions, and top unindexed support topics, and draft a remediation sheet for owner confirmation without archiving any file automatically."
+  }
 }

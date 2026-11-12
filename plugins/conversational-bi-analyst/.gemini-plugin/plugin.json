@@ -3,8 +3,16 @@
   "name": "Conversational BI & Variance Analyst",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "analytics", "bigquery", "snowflake", "looker", "bi"],
+  "segment_tags": [
+    "cross-industry",
+    "analytics",
+    "bigquery",
+    "snowflake",
+    "looker",
+    "bi"
+  ],
   "description": "Guards SQL generation against missing partition filters and join fanout explosions, computes exact Volume-Mix-Rate KPI bridges with z-score anomaly detection, and profiles datasets in RAM to emit verified A2UI chart payloads.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "schema-grounded-sql-analyst",
@@ -31,11 +39,36 @@
   "shared_baselines": [
     "finance-materiality-baseline.md"
   ],
-  "agent_templates": [
-    "agents/conversational-bi-analyst-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-kpi-anomaly-digest.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Snowflake",
+      "Postgres",
+      "Google Sheets",
+      "Google Drive",
+      "Google Slides"
+    ],
+    "byo_mcp": [
+      "Semantic BI Layer / Looker MCP server"
+    ],
+    "connector_fetch_guidance": "Fetch dataset metadata, INFORMATION_SCHEMA definitions, dry-run byte estimates, and KPI extract tables from BigQuery, Snowflake, Postgres, or Google Sheets via remote_cli mcp before running Python fanout and mix/rate/volume checks."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Executing DDL/DML statements or unpartitioned warehouse queries exceeding max_query_scan_gb",
+      "Sharing executive KPI briefings or Slides decks to external leadership distribution lists"
+    ],
+    "python_code_guardrails": [
+      "SQL AST DDL/DML block, missing partition filter flag, and 1:N join fanout double-count guard",
+      "Volume + Mix + Rate additive bridge identity check with min_sample_size_guard warnings",
+      "Strict BigQuery/Sheets UNFORMATTED_VALUE coercion without string display rounding"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-kpi-anomaly-digest",
+    "title": "Daily KPI Anomaly Digest",
+    "cron_expression": "0 7 * * 1-5",
+    "time_zone": "UTC",
+    "instruction": "Run the daily KPI variance and z-score anomaly check using scripts/mix_rate_volume_bridge.py. Decompose revenue/margin changes into exact Volume, Mix, and Rate effects, flag segments exceeding zscore_anomaly_threshold, and save an internal Canvas digest without emailing distribution lists."
+  }
 }

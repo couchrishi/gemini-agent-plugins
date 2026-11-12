@@ -13,7 +13,7 @@
 | **Current Liquidity Ratio** | `>= 1.15x` (`Current Assets / Current Liab`) | `1.00x <= CR < 1.15x` | `< 1.00x` or Watch `< 1.15x` | Working-capital stress check (`min_current_ratio`) |
 
 - **Negative / Zero EBITDA Guard:** Whenever `ebitda_usd <= 0`, `Net Leverage` returns `INF` / `None` (`BREACH_NEGATIVE_EBITDA`) rather than misleadingly looking like negative leverage (`-3.0x`)!
-- **Audit Gate (`policy.cel`):** Credit committee release requires `credit.base_breach_count == 0` unless explicitly approved via Credit Committee override HITL.
+- **Python Covenant Gate (`credit_covenant_stress.py`):** Credit committee release flags any `base_breach_count > 0` or stress breach for explicit Credit Committee override confirmation.
 
 ## 2. KYB Beneficial Ownership (UBO) & AML Transaction Monitoring Matrix (`kyc-aml-screening-dossier`)
 
@@ -37,7 +37,7 @@
 
 ## 4. FSI Compliance & HITL Governance Guardrails
 
-1. **Zero Autonomous SAR / Adverse-Action / Payout Submissions:** Filing SAR/STR reports (`fin_file_sar_draft`), issuing formal credit denials (`lms_submit_credit_decision`), or releasing claim checks (`claims_issue_settlement_payment`) require `explicit_per_call` human confirmation under `.gemini-plugin/policy.cel`.
+1. **Zero Autonomous SAR / Adverse-Action / Payout Submissions:** Filing SAR/STR reports, issuing formal credit decisions, or releasing claim settlements through connected Core Banking, AML, or Claims MCP servers requires Agent Gateway (`Auto-Guardian`) approval and explicit human confirmation.
 2. **Evidence & Provenance Attribution:** Keep full corporate UBO traversal paths (`HoldCo 60% -> MidCo 30% = 18%` + `ParentCo 40% -> SiblingCo 25% = 10%` -> `28%`) visible in deliverables so AML investigators verify every summation.
 
 ## 5. Customizing via `config.json` & `--org-config`
@@ -72,12 +72,12 @@ Stamping tenant rules via `python3 tools/package.py --org-config org.json` flips
 1. Run simultaneous `-10%` / `-20%` revenue and `+200 bps` floating-rate stress tests on every commercial credit underwriting file (`commercial_credit_memo_analyst`).
 2. Flatten multi-hop corporate ownership trees cleanly while normalizing joint/trust structures and preventing circular graph loops (`kyc_aml_screening_dossier`).
 3. Verify `loss_date` falls strictly inside policy bounds and deductibles/sublimits/coinsurance apply in exact contractual sequence (`insurance_claims_triage_pack`).
-4. Enforce `explicit_per_call` human confirmation before filing any SAR/STR draft, submitting adverse credit action, or releasing claim reserves.
+4. Require Agent Gateway (`Auto-Guardian`) and explicit human confirmation before filing any SAR/STR report, submitting adverse credit actions, or releasing claim reserves.
 
-## 8. CEL Guardrails & Scheduled Compliance Cadence
+## 8. FSI Write Governance (`Auto-Guardian` & Python Guards)
 
-- `require_credit_committee_on_covenant_breach`: `credit.base_breach_count == 0`
-- `halt_autonomous_sar_filing`: `aml.sar_auto_submit == false`
-- `high_value_claim_hold`: `claim.net_payable_usd < config.high_value_claim_threshold`
+- **Covenant Breach Escalation:** Whenever `credit.base_breach_count > 0`, hold credit approval summaries for Risk Committee review before posting externally.
+- **AML / SAR Filing & Claim Release Gate:** Agent Gateway (`Auto-Guardian`) and explicit compliance/adjuster confirmation block autonomous SAR submissions or high-value settlement releases.
+- **Python code invariants (`scripts/*.py`):** Enforce transitive UBO graph cycle protection, structuring anomaly flags, and contractual deductible/sublimit ordering deterministically.
 
-Recurring FSI schedules (`daily-aml-kyb-velocity-watch.yaml`) execute `analyze()` against live transactions every cycle, emit alerts via `emit_a2ui`, and hold outbound SAR/settlement filings behind human sign-off.
+Recurring FSI `schedule_task` routines (such as `Daily AML & KYB Velocity Watch`) execute `analyze()` against live transactions when scheduled, emit alerts via `emit_a2ui`, and hold outbound SAR/settlement filings behind human sign-off.

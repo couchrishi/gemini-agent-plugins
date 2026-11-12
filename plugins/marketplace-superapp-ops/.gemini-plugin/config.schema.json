@@ -14,6 +14,22 @@
       "default": "Standard Baseline Tenant",
       "description": "Tenant legal entity or department name."
     },
+    "sheet_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "description": "Optional mapping from canonical table key (e.g. invoices) to customer worksheet tab name."
+    },
+    "column_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "description": "Optional mapping from customer column header or connector JSON field name to canonical engine field name."
+    },
     "min_images": {
       "type": "integer",
       "minimum": 1,

@@ -1,49 +1,49 @@
 skill_id: executive-data-story-pack
 plugin_id: conversational-bi-analyst
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/dataset_profiler_guard.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - column_profiles
-    - a2ui_chart_payload
+  - baseline_mode
+  - summary
+  - column_profiles
+  - a2ui_chart_payload
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "formula_error_cells"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - formula_error_cells
   must_not_include_patterns:
-    - "extrapolated truncated row ceiling to full population"
-    - "dumped thousands of raw CSV rows into prompt"
+  - extrapolated truncated row ceiling to full population
+  - dumped thousands of raw CSV rows into prompt
   hitl_required_for_mutations: true
   trap_checks:
-    - "Detects row_limit_ceiling truncation and spreadsheet #REF!/#N/A errors."
-    - "Profiles dataset in RAM and outputs verified A2UI chart payload."
+  - 'Detects row_limit_ceiling truncation and spreadsheet #REF!/#N/A errors.'
+  - Profiles dataset in RAM and outputs verified A2UI chart payload.
 scenarios:
-  - id: mode_a_bigquery_profile
-    mode: mode_a
-    prompt: "Profile regional orders export and generate Canvas chart payload."
-    expected_assertions:
-      - "Produces column quantiles, IQR outlier count, and a2ui_chart_payload."
-      - "Emits truncation warning if row_limit_ceiling reached."
-  - id: mode_b_sheets_formula_errors
-    mode: mode_b
-    prompt: "Profile Northstar Retail Store Scorecard Google Sheet containing #REF! cells."
-    expected_assertions:
-      - "Counts formula_error_cells accurately and excludes error tokens from numeric stats."
-      - "Applies baseline banner when org_configured is false."
-  - id: mode_c_ram_csv_profiling
-    mode: mode_c
-    prompt: "Profile uploaded dataset.csv in Python RAM."
-    expected_assertions:
-      - "Flags high_null_columns exceeding max_null_rate_warn_pct."
-      - "Returns compact Markdown summary without flooding chat with raw rows."
+- id: live_bigquery_profile
+  mode: live_connector
+  prompt: Profile regional orders export and generate Canvas chart payload.
+  expected_assertions:
+  - Produces column quantiles, IQR outlier count, and a2ui_chart_payload.
+  - Emits truncation warning if row_limit_ceiling reached.
+- id: workspace_sheets_formula_errors
+  mode: workspace_connector
+  prompt: 'Profile Northstar Retail Store Scorecard Google Sheet containing #REF! cells.'
+  expected_assertions:
+  - Counts formula_error_cells accurately and excludes error tokens from numeric stats.
+  - Applies baseline banner when org_configured is false.
+- id: local_ram_csv_profiling
+  mode: local_file
+  prompt: Profile uploaded dataset.csv in Python RAM.
+  expected_assertions:
+  - Flags high_null_columns exceeding max_null_rate_warn_pct.
+  - Returns compact Markdown summary without flooding chat with raw rows.
 rubric:
-  - criterion: statistical_profiling_accuracy
-    weight: 0.4
-    description: Computes exact null rates, quantiles, and IQR outliers across columns.
-  - criterion: data_quality_and_truncation_guards
-    weight: 0.35
-    description: Catches spreadsheet formula errors and dataset row ceilings cleanly.
-  - criterion: canvas_payload_and_baseline
-    weight: 0.25
-    description: Emits grounded A2UI chart structure and respects baseline stamping.
+- criterion: statistical_profiling_accuracy
+  weight: 0.4
+  description: Computes exact null rates, quantiles, and IQR outliers across columns.
+- criterion: data_quality_and_truncation_guards
+  weight: 0.35
+  description: Catches spreadsheet formula errors and dataset row ceilings cleanly.
+- criterion: canvas_payload_and_baseline
+  weight: 0.25
+  description: Emits grounded A2UI chart structure and respects baseline stamping.

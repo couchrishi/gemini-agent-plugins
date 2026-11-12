@@ -8,31 +8,29 @@ deterministic_checks:
   - summary
   - root_incidents
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - symptom_alarms_suppressed
   must_not_include_patterns:
   - triggered truck rolls for downstream symptom alarms
   hitl_required_for_mutations: true
   trap_checks:
-  - Suppresses downstream OLT/cell alarms when upstream metro aggregation node is
-    alarming.
+  - Suppresses downstream OLT/cell alarms when upstream metro aggregation node is alarming.
   - Computes full downstream subscriber and VIP circuit cone accurately.
 scenarios:
-- id: mode_a_metro_ring_cut
-  mode: mode_a
-  prompt: Correlate Stratos Telecom alarm flood with 1 metro agg router alarm feeding
-    18 alarming 5G gNodeBs serving 12,400 subscribers.
+- id: live_metro_ring_cut
+  mode: live_connector
+  prompt: Correlate Stratos Telecom alarm flood with 1 metro agg router alarm feeding 18 alarming 5G gNodeBs serving 12,400 subscribers.
   expected_assertions:
   - Collapses 19 raw alarms into 1 P1_CRITICAL root incident with ~94.7% noise reduction.
   - Rolls up impacted_subscribers and enterprise_vip_circuits cleanly.
-- id: mode_b_sheets_cycle_safe
-  mode: mode_b
+- id: workspace_sheets_cycle_safe
+  mode: workspace_connector
   prompt: Analyze Drive Topology & Alarm Export Sheet containing redundant ring links.
   expected_assertions:
   - Terminates cleanly without cycle recursion.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_noc_json
-  mode: mode_c
+- id: local_local_noc_json
+  mode: local_file
   prompt: Run alarm_topology_correlator.py on noc_alarms.json.
   expected_assertions:
   - Groups suppressed_child_nodes under each root_node_id.

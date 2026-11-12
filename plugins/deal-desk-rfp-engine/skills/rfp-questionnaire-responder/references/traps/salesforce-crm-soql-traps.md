@@ -59,7 +59,7 @@ def convert_to_target_currency(amount: float, currency: str, fx_rates: dict[str,
     return amount * float(rate), []
 ```
 
-- **HITL Policy Enforcement:** Never execute `sf_update_opportunity_stage`, `sf_approve_quote`, or `gmail_send_quote` autonomously — enforce `task_sticky` or `explicit_per_call` confirmation per `.gemini-plugin/policy.cel`.
+- **HITL Policy Enforcement:** Never update Salesforce opportunity stages, approve Deal Desk quotes, or send external customer quotes via Gmail/Outlook autonomously — require Agent Gateway (`Auto-Guardian`) approval and explicit user confirmation.
 
 ## 5. Salesforce Object & Field Pitfall Reference Table
 

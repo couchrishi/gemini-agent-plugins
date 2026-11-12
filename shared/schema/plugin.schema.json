@@ -11,12 +11,13 @@
     "category",
     "segment_tags",
     "description",
+    "license",
     "skills",
     "shared_traps",
     "shared_baselines",
-    "agent_templates",
-    "schedules",
-    "license"
+    "connectors",
+    "write_governance",
+    "scheduled_routine"
   ],
   "properties": {
     "id": {
@@ -35,7 +36,11 @@
     },
     "category": {
       "type": "string",
-      "enum": ["horizontal", "enterprise-ops", "vertical"]
+      "enum": [
+        "horizontal",
+        "enterprise-ops",
+        "vertical"
+      ]
     },
     "segment_tags": {
       "type": "array",
@@ -50,6 +55,10 @@
       "minLength": 20,
       "maxLength": 600
     },
+    "license": {
+      "type": "string",
+      "const": "Apache-2.0"
+    },
     "skills": {
       "type": "array",
       "minItems": 3,
@@ -57,7 +66,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "script", "summary"],
+        "required": [
+          "id",
+          "script",
+          "summary"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -92,25 +105,121 @@
         "pattern": "^[a-z0-9-]+\\.md$"
       }
     },
-    "agent_templates": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^agents/[a-z0-9-]+\\.yaml$"
+    "connectors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "managed_1p",
+        "connector_fetch_guidance"
+      ],
+      "properties": {
+        "managed_1p": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "Google Drive",
+              "Google Sheets",
+              "Google Docs",
+              "Google Slides",
+              "Gmail",
+              "Google Calendar",
+              "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+              "BigQuery",
+              "Salesforce",
+              "ServiceNow",
+              "Jira",
+              "Confluence",
+              "Slack",
+              "GitHub",
+              "Box",
+              "Snowflake",
+              "Postgres"
+            ]
+          }
+        },
+        "byo_mcp": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 160
+          }
+        },
+        "connector_fetch_guidance": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 500
+        }
       }
     },
-    "schedules": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^schedules/[a-z0-9-]+\\.yaml$"
+    "write_governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateway_approval_actions",
+        "python_code_guardrails"
+      ],
+      "properties": {
+        "gateway_approval_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 260
+          }
+        },
+        "python_code_guardrails": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 260
+          }
+        }
       }
     },
-    "license": {
-      "type": "string",
-      "const": "Apache-2.0"
+    "scheduled_routine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "cron_expression",
+        "time_zone",
+        "instruction"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "maxLength": 64
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "cron_expression": {
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 64
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "instruction": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 1200
+        }
+      }
     }
   }
 }

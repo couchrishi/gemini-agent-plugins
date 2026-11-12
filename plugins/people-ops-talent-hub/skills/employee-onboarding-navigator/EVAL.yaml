@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - onboarding_plans
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - missing_mandatory_gates
   must_not_include_patterns:
   - treated missing Day-1 SSO gate as complete
@@ -17,22 +17,20 @@ deterministic_checks:
   - Flags missing mandatory Day-1 gates explicitly.
   - Detects overdue items relative to start_date + due_day_offset.
 scenarios:
-- id: mode_a_day1_gate_gap
-  mode: mode_a
-  prompt: Check upcoming Stratos Telecom hires in Workday/ServiceNow HRSD for missing
-    laptop or SSO gates.
+- id: live_day1_gate_gap
+  mode: live_connector
+  prompt: Check upcoming Stratos Telecom hires in Workday/ServiceNow HRSD for missing laptop or SSO gates.
   expected_assertions:
   - Flags AT_RISK_MISSING_DAY1_GATES whenever identity_sso_provisioning is omitted.
   - Computes exact overdue_tasks and blocked dependencies.
-- id: mode_b_sheets_stalled_30d
-  mode: mode_b
-  prompt: Audit our Drive Onboarding Sheet for hires > 30 days past start with incomplete
-    compliance tasks.
+- id: workspace_sheets_stalled_30d
+  mode: workspace_connector
+  prompt: Audit our Drive Onboarding Sheet for hires > 30 days past start with incomplete compliance tasks.
   expected_assertions:
   - Calculates days_since_start and overdue task counts accurately.
   - Applies baseline banner when org_configured is false.
-- id: mode_c_local_plan_gen
-  mode: mode_c
+- id: local_local_plan_gen
+  mode: local_file
   prompt: Run onboarding_plan_builder.py on hires.json as of 2026-11-10.
   expected_assertions:
   - Breaks down phase completion across day_1/day_30/day_60/day_90.

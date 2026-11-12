@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "zero_scan_days_threshold": 5,
   "min_book_qty_for_phantom": 4,
   "high_shrink_usd_threshold": 250.0,

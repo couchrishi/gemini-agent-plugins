@@ -13,6 +13,7 @@
     "supply-chain"
   ],
   "description": "Ranks store shrink loss and phantom inventory (zero-scan anomalies) while skipping unpolled POS stores, attributes promotional unit/margin lift net of cannibalization and basket halo, and audits supplier OTIF scorecards, chargebacks, and carrier detention.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "store-ops-shrink-copilot",
@@ -40,11 +41,35 @@
     "finance-materiality-baseline.md",
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/retail-store-merchandising-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-store-shrink-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Snowflake",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs"
+    ],
+    "byo_mcp": [
+      "SAP Retail ERP & POS Store Telemetry MCP server"
+    ],
+    "connector_fetch_guidance": "Pull store perpetual inventory, POS terminal polling health, promo elasticity tables, and ASN/POD Dock timestamps from BigQuery/Snowflake or customer SAP Retail / POS MCP servers via remote_cli mcp before Python shrink and OTIF math."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Posting perpetual inventory shrink write-offs impacting store COGS via SAP Retail MCP",
+      "Issuing supplier OTIF chargeback or detention debit memos via ERP AP MCP"
+    ],
+    "python_code_guardrails": [
+      "Mandatory exclusion of unpolled POS stores (pos_poll_status == MISSING) before shrink/write-off attribution",
+      "Baseline-adjusted promo net margin ROI guard preventing margin-destructive promotions from passing on gross unit lift",
+      "Strict contractual OTIF window and dock-wait grace-minute detention math"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-store-shrink-watch",
+    "title": "Daily Store Shrink & Zero-Scan Watch",
+    "cron_expression": "30 6 * * *",
+    "time_zone": "UTC",
+    "instruction": "Run the morning store shrink and zero-scan phantom inventory sweep via scripts/store_shrink_task_ranker.py and produce prioritized cycle-count lists per store manager."
+  }
 }

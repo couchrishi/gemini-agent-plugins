@@ -28,7 +28,7 @@ jobs:
       - name: Verify dist/ archives and references are synced
         run: python3 tools/package.py --check
 
-      - name: Run repository, SKILL.md, schema, CEL, and clean-room validation
+      - name: Run repository, SKILL.md, schema, governance, and clean-room validation
         run: python3 tools/validate_repo.py
 
       - name: Run full test suite (all 60 engines + packaging)

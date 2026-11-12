@@ -12,6 +12,7 @@
     "payouts"
   ],
   "description": "Screens merchant catalog listings for prohibited terms, prompt-injection payloads, and price outliers, attributes on-demand delivery SLA breaches across merchant prep vs courier transit with force-majeure waivers, and reconciles merchant GMV, commission fees, FX, and PSP settlements.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "merchant-catalog-trust-gate",
@@ -39,11 +40,36 @@
     "itsm-sla-severity-baseline.md",
     "finance-materiality-baseline.md"
   ],
-  "agent_templates": [
-    "agents/marketplace-superapp-ops-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-payout-settlement-recon.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Postgres",
+      "Snowflake",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs"
+    ],
+    "byo_mcp": [
+      "PSP Settlement Ledger & Marketplace Catalog MCP server"
+    ],
+    "connector_fetch_guidance": "Pull pending merchant catalog SKU feeds, delivery leg timestamps, and PSP payout settlement batches from BigQuery/Postgres or customer Marketplace/PSP MCP servers via remote_cli mcp before running Python trust and ledger reconciliation."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Suspending merchants, delisting SKUs, or issuing SLA penalties via Marketplace Catalog MCP",
+      "Releasing merchant payout bank batches or SLA refund transfers via PSP Settlement MCP"
+    ],
+    "python_code_guardrails": [
+      "Prompt-injection quarantine and price-sanity outlier / forbidden-keyword listing block inside catalog descriptions",
+      "Merchant-prep vs courier-transit delay fault attribution preventing false SLA penalties",
+      "Clawback negative-balance hold and multi-currency FX payout tie-out within tolerance"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-payout-settlement-recon",
+    "title": "Daily Payout Settlement Reconciliation",
+    "cron_expression": "15 4 * * *",
+    "time_zone": "UTC",
+    "instruction": "Run daily merchant payout vs PSP bank settlement reconciliation via scripts/payout_ledger_reconciler.py and escalate negative clawback balances before bank cutoff."
+  }
 }

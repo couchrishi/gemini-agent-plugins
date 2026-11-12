@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "war_room_score_threshold": 70.0,
   "vip_arr_threshold_usd": 250000.0,
   "imminent_renewal_days": 90,

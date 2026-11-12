@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - merchant_reconciliations
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - NEGATIVE_CLAWBACK_RISK
   must_not_include_patterns:
   - released payout batch ignoring settlement variance
@@ -17,21 +17,20 @@ deterministic_checks:
   - Applies FX conversion cleanly after local fee and promo netting.
   - Flags negative settlement clawbacks ahead of normal reconciled accounts.
 scenarios:
-- id: mode_a_fx_and_clawback
-  mode: mode_a
-  prompt: Reconcile Veloce SuperApp payouts where Merchant A has high refunds causing
-    -$420 balance and Merchant B has $180 FX wire mismatch.
+- id: live_fx_and_clawback
+  mode: live_connector
+  prompt: Reconcile Veloce SuperApp payouts where Merchant A has high refunds causing -$420 balance and Merchant B has $180 FX wire mismatch.
   expected_assertions:
   - Flags Merchant A as NEGATIVE_CLAWBACK_RISK and Merchant B as SETTLEMENT_VARIANCE_EXCEPTION.
   - Computes net_settlement_variance accurately.
-- id: mode_b_sheets_payout_recon
-  mode: mode_b
+- id: workspace_sheets_payout_recon
+  mode: workspace_connector
   prompt: Audit Weekly Merchant Payout Sheet in Drive for commission/promo split discrepancies.
   expected_assertions:
   - Separates platform-funded promo credits from merchant-funded promo deductions.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_payout_json
-  mode: mode_c
+- id: local_local_payout_json
+  mode: local_file
   prompt: Run payout_ledger_reconciler.py on payouts.json.
   expected_assertions:
   - Verifies reconciliations deterministically with hitl_hold_required on exceptions.
@@ -39,8 +38,7 @@ scenarios:
 rubric:
 - criterion: commission_and_fx_math
   weight: 0.45
-  description: Computes fees, promo credits/deductions, refunds, and FX conversion
-    accurately.
+  description: Computes fees, promo credits/deductions, refunds, and FX conversion accurately.
 - criterion: exception_and_clawback_flags
   weight: 0.3
   description: Separates variance exceptions and negative clawback exposure clearly.

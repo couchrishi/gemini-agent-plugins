@@ -39,7 +39,7 @@
 
 1. **Zero Tolerance on Safety/Permits:** Confined-space O2 outside `[19.5%, 23.5%]`, `LEL > 0%`, stale gas tests (`> 60 min`), missing LOTO locks, or expired technician tower-climb certs trigger immediate `STOP_WORK_BLOCKED` regardless of schedule pressure.
 2. **State Separation (`TRAP-ITSM-01` & `TRAP-ITSM-03`):** Exclude `Canceled` (`state=8`) and open tickets (`resolved_at=null`) from closed MTTR; honor `8x5` schedules for `P3`/`P4`.
-3. **Human-in-the-Loop Dispatch:** Automated ticket reassignment, PagerDuty executive paging, emergency CAB releases, or field crew dispatches stay strictly behind `explicit_per_call` confirmation.
+3. **Human-in-the-Loop Dispatch:** Ticket reassignments, executive escalations, emergency CAB approvals, and field crew dispatches stay gated behind Agent Gateway (`Auto-Guardian`) and explicit engineer/commander confirmation.
 
 ## 5. Customizing via `config.json` & `--org-config`
 
@@ -70,13 +70,12 @@ Packaged org configs set `org_configured: true`, enforce corporate SLAs determin
 1. Separate open tickets (`resolved_at = None`), closed resolutions (`state 6/7`), and canceled duplicates (`state 8`) prior to reporting MTTR or SLA % metrics.
 2. Use `8x5` business-elapsed budgets (net of `On Hold` pauses) on `P3`/`P4` SLAs while alerting early at `>= 75%` (`sla_at_risk_pct`).
 3. Verify graph-traversal cycle guards remain active across CMDB and Telco NOC outage trees.
-4. Keep PagerDuty executive escalations, emergency CAB approvals, field crew dispatches, and GitHub/Jira status mutations gated behind `explicit_per_call` confirmation.
+4. Keep executive incident escalations, emergency CAB approvals, field crew dispatches, and GitHub/Jira status updates gated behind Agent Gateway (`Auto-Guardian`) and explicit owner confirmation.
 
-## 8. ITSM / Safety CEL Policy Enforcements & Clock Rules
+## 8. ITSM / Safety Write Governance (`Auto-Guardian` & Python Guards)
 
-- `block_untested_freeze_cab`: `cab.freeze_collision == false && cab.rollback_validated == true`
-- `enforce_stop_work_on_gas_or_loto`: `ehs.stop_work_blocked_count == 0`
-- `block_expired_field_cert_dispatch`: `dispatch.expired_cert_assigned_count == 0`
-- `require_human_on_p1_paging`: `request.severity in ["P1", "P2"]` requires `explicit_per_call` confirmation before external notification.
+- **CAB Freeze & Rollback Checks:** Python scoring blocks CAB approval readiness when `freeze_collision` is true or a tested rollback plan is missing.
+- **EHS Stop-Work & Field Cert Invariants:** Python dispatch/permit engines fail-closed (`STOP_WORK_BLOCKED` / `CERT_EXPIRED_BLOCK`) on unsafe gas/LOTO readings or expired tower certifications.
+- **P1/P2 Executive Notification Gate:** Any external escalation or broadcast on `P1`/`P2` incidents requires Agent Gateway (`Auto-Guardian`) approval and explicit Incident Commander confirmation.
 
-Scheduled monitors (`hourly-vip-escalation-radar.yaml`, `weekly-slo-burn-review.yaml`, `hourly-b2b-fallout-watch.yaml`) evaluate open backlogs deterministically against `24x7` vs `8x5` schedules, emit executive alerts via `emit_a2ui`, and hold outbound paging behind HITL approval.
+Scheduled `schedule_task` monitors (such as `Hourly SLA Breach Watch`, `Weekly SLO Burn Review`, and `Hourly B2B Fallout Watch`) evaluate open backlogs deterministically against `24x7` vs `8x5` schedules, emit executive alerts via `emit_a2ui`, and hold outbound paging behind HITL approval.

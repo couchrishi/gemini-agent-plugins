@@ -1,6 +1,6 @@
 # Trap Guide: Google Workspace API & Export Traps (`google-workspace-traps`)
 
-> **Applies to:** Mode B Google Workspace fallback across Drive, Docs, Sheets, Slides, Gmail, Calendar, and Meet (`enterprise-knowledge-hub`, `executive-briefing-ops`, `legal-contract-desk`, `finance-variance-recon`, `people-ops-talent-hub`, `brand-campaign-studio`, `gsi-proposal-ip-factory`, `healthcare-clinical-regulatory`).
+> **Applies to:** Google Workspace 1P connectors and exported Workspace files across Drive, Docs, Sheets, Slides, Gmail, Calendar, and Meet (`enterprise-knowledge-hub`, `executive-briefing-ops`, `legal-contract-desk`, `finance-variance-recon`, `people-ops-talent-hub`, `brand-campaign-studio`, `gsi-proposal-ip-factory`, `healthcare-clinical-regulatory`).
 
 ## 1. Executive Summary Matrix
 
@@ -11,7 +11,7 @@
 | `TRAP-GWS-03` | Google Sheets | `"$1.5M"` display rounding, `"###"` truncation, hidden rows | Read `valueRenderOption=UNFORMATTED_VALUE` (+ `FORMULA` check); coerce `"12,500.00"` safely; filter status columns explicitly |
 | `TRAP-GWS-04` | Google Slides | Speaker notes & grouped diagrams omitted | Inspect both `pageElements` text runs AND `notesPage` speaker notes for action commitments |
 | `TRAP-GWS-05` | Gmail | Thread snippets hide latest attachments or mix `DRAFT`/`SENT` | Read chronological `messages[]` sorted by `internalDate`; verify `From` vs `Reply-To` spoofing |
-| `TRAP-GWS-06` | Drive / Gmail / Cal | Unauthorized external emails, calendar invites, or ACL grants | Restrict autonomous execution to private drafts; halt behind `explicit_per_call` HITL before external mutations |
+| `TRAP-GWS-06` | Drive / Gmail / Cal | Unauthorized external emails, calendar invites, or ACL grants | Restrict autonomous execution to private drafts; require Agent Gateway (`Auto-Guardian`) and explicit user confirmation before external mutations |
 
 ## 2. Detailed Workspace API Traps & Walkthroughs
 
@@ -43,11 +43,11 @@
 - Fetching `threads.list` surfaces a single summary snippet from older messages and hides attached revised invoices, counter-redlines, or unapproved `DRAFT` replies sitting inside the thread.
 - Inspect every message sorted by `internalDate` ascending, verify `labelIds` (`SENT` vs `DRAFT`), and validate raw `From` vs `Reply-To` headers before accepting vendor remittance changes (`FRAUD_HOLD_BANK_CHANGE`).
 
-## 3. Mode B Execution & HITL Boundary Rules
+## 3. Workspace Execution & HITL Boundary Rules
 
 1. **Read-Only Discovery First:** Pull Workspace Sheets/Docs/Gmail records into Python RAM (`pyrepl` or CLI `--input`) rather than pasting multi-hundred-row CSV text directly into prompt tokens.
-2. **Draft-Only Autonomy:** Creating private Google Docs (`docs_create_*`), private Sheet exception tabs, or Gmail drafts (`gmail_create_draft`) operates under `draft_only_tools`.
-3. **Mandatory External Mutation Hold:** Any action visible outside the user's private sandbox — sending emails (`gmail_send`), modifying external Calendar invites, or changing Drive sharing (`anyoneWithLink`) — requires `explicit_per_call` human confirmation with full recipient and diff preview.
+2. **Private Drafts vs. External Sends:** Creating private working Google Docs or local Markdown summaries avoids external side effects; creating or sending external messages stays governed by Workspace connector scopes.
+3. **Mandatory External Mutation Hold:** Any action visible outside the user's private sandbox — sending Gmail/Outlook messages, modifying external Calendar invites, or changing Drive sharing (`anyoneWithLink`) — requires Agent Gateway (`Auto-Guardian`) approval and explicit human confirmation with full recipient and diff preview.
 
 ## 4. Programmatic Sheet / CSV Coercion Template
 
@@ -80,7 +80,7 @@ def parse_workspace_number(val: object, default: float = 0.0) -> float:
 1. Cite sources accurately using `[Doc Title > Tab Name]` or `[Sheet Title > Tab Name!Range]` rather than ambiguous filenames.
 2. Forward-fill merged dimension columns and strip `"VOID"` / `"Draft"` / `"Archived"` rows before aggregating Sheet exports.
 3. Redact sensitive customer/employee PII extracted from Docs/Gmail/Forms per [untrusted-content-and-pii.md](untrusted-content-and-pii.md).
-4. Hold every external Gmail send, external Calendar update, or Drive permission share behind `explicit_per_call` HITL confirmation with exact diff/recipient preview.
+4. Hold every external email send, external Calendar update, or Drive permission share behind Agent Gateway (`Auto-Guardian`) and explicit human confirmation with exact diff/recipient preview.
 5. Propagate `incompleteSearch` or `nextPageToken` truncation telemetry into `truncation_warnings` rather than implying full-corpus scan coverage.
 
 ## 7. Multi-Tab & Shortcut Inspection Pseudo-Flow

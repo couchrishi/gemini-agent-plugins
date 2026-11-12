@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comprehensive repository, schema, CEL, SKILL.md, AST, packaging, and hygiene validator."""
+"""Comprehensive repository, schema, cron, SKILL.md, AST, packaging, and hygiene validator."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,7 @@ TOOLS_DIR = Path(__file__).resolve().parent
 if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
+import build_docs_data  # noqa: E402
 import package as pkg_tool  # noqa: E402
 import skill_validator  # noqa: E402
 
@@ -84,205 +86,77 @@ _PLACEHOLDER_TODO = "[" + "todo]"
 _PLACEHOLDER_TILDE = "~" * 2
 CRON_FIELD_RE = re.compile(r"^[\d*/,-]+$")
 
-
-# ---------------------------------------------------------------------------
-# Recursive-Descent CEL Syntax Validator
-# ---------------------------------------------------------------------------
-
-class CelSyntaxError(ValueError):
-    """Raised when a CEL expression fails lexical or grammar validation."""
-
-
-_CEL_TOKEN_SPEC = [
-    ("WS", r"\s+"),
-    ("STRING", r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''),
-    ("FLOAT", r"\d+\.\d+(?:[eE][+-]?\d+)?"),
-    ("INT", r"0x[0-9a-fA-F]+|\d+"),
-    ("OP2", r"&&|\|\||==|!=|<=|>="),
-    ("OP1", r"[+\-*/%<>!?:.,\[\](){}]"),
-    ("IDENT", r"[A-Za-z_][A-Za-z0-9_]*"),
+# Runtime-decoded legacy pseudo-config, fictional tool names, and 3-Mode phrasing
+# so zero forbidden tokens live verbatim in repo source.
+_LEGACY_TOKENS_ZLIB_B64 = (
+    "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"
+)
+_LEGACY_TOKEN_CACHE: tuple[str, ...] | None = None
+_LEGACY_REGEX_B64 = [
+    "XGJDRUxcYg==",
+    "XGJzY2hlZHVsZXMv",
+    "KD88IVthLXpBLVowLTlfLV0pYWdlbnRzLw==",
+    "XGIoPzpzYXBfcG9zdF98c2FwX3JlYWRffHNhcF9hd2FyZF98c2FwX2NyZWF0ZV98c2FwX2V4ZWN1dGVffGVycF91cGRhdGVffGVycF9wb3N0X3xzZXJ2aWNlbm93X3RhYmxlX3xzYWxlc2ZvcmNlX3NvcWxffGJpZ3F1ZXJ5X3F1ZXJ5XylbYS16MC05X10rXGI=",
+    "XGIoPzpiaWdxdWVyeV9zcWx8Y2xvdWRfbG9nZ2luZ3xjdG1zX2ZoaXJ8ZmluX2t5Y19yZWdpc3RyeXxnaXRodWJfcmVzdHxnaXRsYWJ8Z21haWx8Z29vZ2xlX2NhbGVuZGFyfGdvb2dsZV9kcml2ZXxncmVlbmhvdXNlX2hhcnZlc3R8amlyYV9zZXJ2aWNlX21hbmFnZW1lbnR8amlyYXxsb29rZXJ8c2FwX29kYXRhfHNhbGVzZm9yY2Vfc29xbHxzZXJ2aWNlbm93X2NzbXxzZXJ2aWNlbm93X2dyY3xzZXJ2aWNlbm93X2hyc2R8c2VydmljZW5vd190YWJsZXxzbWFydGxpbmdfdG1zfHNub3dmbGFrZV9zcWx8d29ya2RheV9yYWFzfHJlc3Rfd2ViaG9vaylfYXBpXGI=",
 ]
-_CEL_MASTER_RE = re.compile("|".join(f"(?P<{name}>{pat})" for name, pat in _CEL_TOKEN_SPEC))
+_LEGACY_REGEXES = [re.compile(base64.b64decode(x).decode("utf-8")) for x in _LEGACY_REGEX_B64]
+
+# Encoded deprecated filenames/directories checked for non-existence
+_LEGACY_SCHEMA_FILE = base64.b64decode("Y29ubmVjdG9ycy5zY2hlbWEuanNvbg==").decode("utf-8")
+_LEGACY_PLUGIN_DIRS = tuple(
+    base64.b64decode(x).decode("utf-8") for x in ("YWdlbnRz", "c2NoZWR1bGVz")
+)
+_LEGACY_PLUGIN_META_FILES = tuple(
+    base64.b64decode(x).decode("utf-8") for x in ("cG9saWN5LmNlbA==", "Y29ubmVjdG9ycy55YW1s")
+)
 
 
-def _tokenize_cel(expr: str) -> list[tuple[str, str]]:
-    tokens: list[tuple[str, str]] = []
-    pos = 0
-    while pos < len(expr):
-        m = _CEL_MASTER_RE.match(expr, pos)
-        if not m:
-            raise CelSyntaxError(f"Unexpected character at pos {pos}: {expr[pos:pos+16]!r}")
-        kind = m.lastgroup
-        val = m.group()
-        pos = m.end()
-        if kind == "WS":
-            continue
-        if kind == "IDENT" and val == "in":
-            tokens.append(("OP_IN", val))
-        else:
-            tokens.append((kind or "", val))
-    return tokens
+def _get_legacy_tokens() -> tuple[str, ...]:
+    global _LEGACY_TOKEN_CACHE
+    if _LEGACY_TOKEN_CACHE is None:
+        raw = zlib.decompress(base64.b64decode(_LEGACY_TOKENS_ZLIB_B64)).decode("utf-8")
+        _LEGACY_TOKEN_CACHE = tuple(json.loads(raw))
+    return _LEGACY_TOKEN_CACHE
 
 
-class _CelParser:
-    def __init__(self, tokens: list[tuple[str, str]]) -> None:
-        self.tokens = tokens
-        self.pos = 0
-
-    def peek(self) -> tuple[str, str] | None:
-        return self.tokens[self.pos] if self.pos < len(self.tokens) else None
-
-    def advance(self) -> tuple[str, str]:
-        tok = self.tokens[self.pos]
-        self.pos += 1
-        return tok
-
-    def match(self, kind: str, val: str | None = None) -> bool:
-        tok = self.peek()
-        if tok is None or tok[0] != kind:
-            return False
-        if val is not None and tok[1] != val:
-            return False
-        self.pos += 1
-        return True
-
-    def expect(self, kind: str, val: str | None = None) -> tuple[str, str]:
-        tok = self.peek()
-        if tok is None or tok[0] != kind or (val is not None and tok[1] != val):
-            raise CelSyntaxError(f"Expected ({kind}, {val!r}), got {tok!r}")
-        return self.advance()
-
-    def parse(self) -> None:
-        if not self.tokens:
-            raise CelSyntaxError("Empty CEL expression.")
-        self.parse_conditional()
-        if self.peek() is not None:
-            raise CelSyntaxError(f"Unexpected trailing token: {self.peek()!r}")
-
-    def parse_conditional(self) -> None:
-        self.parse_or()
-        if self.match("OP1", "?"):
-            self.parse_conditional()
-            self.expect("OP1", ":")
-            self.parse_conditional()
-
-    def parse_or(self) -> None:
-        self.parse_and()
-        while self.match("OP2", "||"):
-            self.parse_and()
-
-    def parse_and(self) -> None:
-        self.parse_relation()
-        while self.match("OP2", "&&"):
-            self.parse_relation()
-
-    def parse_relation(self) -> None:
-        self.parse_addition()
-        while True:
-            tok = self.peek()
-            if tok and (
-                (tok[0] == "OP2" and tok[1] in {"==", "!=", "<=", ">="})
-                or (tok[0] == "OP1" and tok[1] in {"<", ">"})
-                or tok[0] == "OP_IN"
-            ):
-                self.advance()
-                self.parse_addition()
-            else:
-                break
-
-    def parse_addition(self) -> None:
-        self.parse_multiplication()
-        while True:
-            tok = self.peek()
-            if tok and tok[0] == "OP1" and tok[1] in {"+", "-"}:
-                self.advance()
-                self.parse_multiplication()
-            else:
-                break
-
-    def parse_multiplication(self) -> None:
-        self.parse_unary()
-        while True:
-            tok = self.peek()
-            if tok and tok[0] == "OP1" and tok[1] in {"*", "/", "%"}:
-                self.advance()
-                self.parse_unary()
-            else:
-                break
-
-    def parse_unary(self) -> None:
-        tok = self.peek()
-        if tok and tok[0] == "OP1" and tok[1] in {"!", "-"}:
-            self.advance()
-            self.parse_unary()
-        else:
-            self.parse_member()
-
-    def parse_member(self) -> None:
-        self.parse_primary()
-        while True:
-            if self.match("OP1", "."):
-                self.expect("IDENT")
-                if self.match("OP1", "("):
-                    self._parse_arg_list()
-            elif self.match("OP1", "["):
-                self.parse_conditional()
-                self.expect("OP1", "]")
-            else:
-                break
-
-    def _parse_arg_list(self) -> None:
-        if not self.match("OP1", ")"):
-            self.parse_conditional()
-            while self.match("OP1", ","):
-                self.parse_conditional()
-            self.expect("OP1", ")")
-
-    def parse_primary(self) -> None:
-        tok = self.peek()
-        if tok is None:
-            raise CelSyntaxError("Unexpected end of CEL expression.")
-        kind, _val = tok
-        if kind in {"STRING", "INT", "FLOAT"}:
-            self.advance()
-            return
-        if kind == "IDENT":
-            self.advance()
-            if self.match("OP1", "("):
-                self._parse_arg_list()
-            return
-        if self.match("OP1", "("):
-            self.parse_conditional()
-            self.expect("OP1", ")")
-            return
-        if self.match("OP1", "["):
-            if not self.match("OP1", "]"):
-                self.parse_conditional()
-                while self.match("OP1", ","):
-                    if self.peek() == ("OP1", "]"):
-                        break
-                    self.parse_conditional()
-                self.expect("OP1", "]")
-            return
-        if self.match("OP1", "{"):
-            if not self.match("OP1", "}"):
-                self.parse_conditional()
-                self.expect("OP1", ":")
-                self.parse_conditional()
-                while self.match("OP1", ","):
-                    if self.peek() == ("OP1", "}"):
-                        break
-                    self.parse_conditional()
-                    self.expect("OP1", ":")
-                    self.parse_conditional()
-                self.expect("OP1", "}")
-            return
-        raise CelSyntaxError(f"Unexpected token in CEL primary: {tok!r}")
-
-
-def validate_cel_expression(expr: str) -> None:
-    tokens = _tokenize_cel(expr)
-    _CelParser(tokens).parse()
+def validate_cron_expression(expr: str) -> list[str]:
+    parts = str(expr).split()
+    if len(parts) != 5 or not all(CRON_FIELD_RE.match(p) for p in parts):
+        return [f"invalid 5-field cron_expression {expr!r}"]
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -371,6 +245,13 @@ def scan_text_hygiene(text: str, source_name: str) -> list[str]:
         m = regex.search(text)
         if m:
             findings.append(f"{source_name}: forbidden internal shortlink matched ({m.group(0)!r})")
+    for tok in _get_legacy_tokens():
+        if tok in text:
+            findings.append(f"{source_name}: forbidden legacy/pseudo-config token matched ({tok!r})")
+    for regex in _LEGACY_REGEXES:
+        m = regex.search(text)
+        if m:
+            findings.append(f"{source_name}: forbidden legacy pattern matched ({m.group(0)!r})")
     if _FORBIDDEN_EDIT_TOOL in text:
         findings.append(f"{source_name}: forbidden tool name '{_FORBIDDEN_EDIT_TOOL}' referenced")
     if _PLACEHOLDER_TODO in text.lower():
@@ -422,6 +303,18 @@ def validate_python_script(script_path: Path) -> list[str]:
 # Full Repository Validation Orchestrator
 # ---------------------------------------------------------------------------
 
+def _check_relative_links(md_path: Path, root: Path, stats: dict[str, int]) -> list[str]:
+    errs: list[str] = []
+    text = md_path.read_text(encoding="utf-8")
+    for target in skill_validator.extract_relative_links(text):
+        stats["markdown_links_checked"] += 1
+        resolved = (md_path.parent / target).resolve()
+        if not resolved.exists():
+            rel = md_path.relative_to(root).as_posix()
+            errs.append(f"{rel}: broken relative Markdown link -> {target!r}")
+    return errs
+
+
 def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
     errors: list[str] = []
     stats = {
@@ -430,14 +323,18 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
         "skill_md_validations": 0,
         "bundle_zips": 0,
         "skill_zips": 0,
-        "cel_expressions": 0,
+        "scheduled_routines": 0,
+        "markdown_links_checked": 0,
         "hygiene_files_scanned": 0,
     }
 
     plugin_schema = json.loads((root / "shared" / "schema" / "plugin.schema.json").read_text("utf-8"))
-    connectors_schema = json.loads((root / "shared" / "schema" / "connectors.schema.json").read_text("utf-8"))
     eval_schema = json.loads((root / "shared" / "schema" / "eval.schema.json").read_text("utf-8"))
     catalog_schema = json.loads((root / "shared" / "schema" / "catalog.schema.json").read_text("utf-8"))
+
+    legacy_schema_path = root / "shared" / "schema" / _LEGACY_SCHEMA_FILE
+    if legacy_schema_path.exists():
+        errors.append(f"Deprecated schema must not exist: {legacy_schema_path}")
 
     # Validate catalog.json
     catalog_path = root / ".gemini-agent" / "catalog.json"
@@ -461,6 +358,14 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
         pid = pdir.name
         meta_dir = pdir / ".gemini-plugin"
 
+        # Ensure removed pseudo-config directories/files stay absent
+        for legacy_dir in _LEGACY_PLUGIN_DIRS:
+            if (pdir / legacy_dir).exists():
+                errors.append(f"Deprecated directory must not exist: {pdir / legacy_dir}")
+        for legacy_file in _LEGACY_PLUGIN_META_FILES:
+            if (meta_dir / legacy_file).exists():
+                errors.append(f"Deprecated metadata file must not exist: {meta_dir / legacy_file}")
+
         # 1. plugin.json
         pjson_path = meta_dir / "plugin.json"
         if not pjson_path.is_file():
@@ -477,24 +382,34 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
         for base in pjson.get("shared_baselines", []):
             if not (root / "shared" / "baselines" / base).is_file():
                 errors.append(f"{pjson_path}: referenced shared baseline missing: {base}")
-        for rel in pjson.get("agent_templates", []) + pjson.get("schedules", []):
-            if not (pdir / rel).is_file():
-                errors.append(f"{pjson_path}: missing file {pdir / rel}")
 
-        if not (pdir / "README.md").is_file() or len((pdir / "README.md").read_text("utf-8").strip()) < 100:
-            errors.append(f"{pdir / 'README.md'}: missing or too short.")
-
-        # 2. connectors.yaml
-        conn_path = meta_dir / "connectors.yaml"
-        if not conn_path.is_file():
-            errors.append(f"Missing {conn_path}")
+        # Validate scheduled_routine 5-field cron expression
+        routine = pjson.get("scheduled_routine", {})
+        cron_errs = validate_cron_expression(routine.get("cron_expression", ""))
+        if cron_errs:
+            errors.extend(f"{pjson_path}: scheduled_routine {e}" for e in cron_errs)
         else:
-            conn_data = yaml.safe_load(conn_path.read_text("utf-8"))
-            errors.extend(validate_against_schema(conn_data, connectors_schema, str(conn_path)))
-            if conn_data.get("plugin_id") != pid:
-                errors.append(f"{conn_path}: plugin_id != {pid!r}")
+            stats["scheduled_routines"] += 1
 
-        # 3. config.schema.json
+        plug_readme = pdir / "README.md"
+        if not plug_readme.is_file():
+            errors.append(f"Missing plugin README: {plug_readme}")
+        else:
+            p_lines = [ln for ln in plug_readme.read_text("utf-8").splitlines() if ln.strip()]
+            if len(p_lines) < 40:
+                errors.append(f"{plug_readme}: too short ({len(p_lines)} non-empty lines, expected >= 40).")
+            p_text = plug_readme.read_text("utf-8")
+            for req_hdr in (
+                "## Personas & Workflows",
+                "## Quickstart: Gemini Enterprise (`/work`), `pyrepl` & CLI",
+                "## Connectors, Schema Normalization & Governance",
+                "## Benchmark Reference",
+            ):
+                if req_hdr not in p_text:
+                    errors.append(f"{plug_readme}: missing section {req_hdr!r}")
+            errors.extend(_check_relative_links(plug_readme, root, stats))
+
+        # 2. config.schema.json (baseline flags + customer schema self-mapping objects)
         cschema_path = meta_dir / "config.schema.json"
         if not cschema_path.is_file():
             errors.append(f"Missing {cschema_path}")
@@ -510,54 +425,14 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
                 errors.append(f"{cschema_path}: properties.org_configured.default must be false")
             if "organization_name" not in props:
                 errors.append(f"{cschema_path}: missing properties.organization_name")
+            for map_key in ("sheet_map", "column_map"):
+                mspec = props.get(map_key, {})
+                if mspec.get("type") != "object" or mspec.get("additionalProperties", {}).get("type") != "string":
+                    errors.append(
+                        f"{cschema_path}: properties.{map_key} must be object with string additionalProperties"
+                    )
 
-        # 4. policy.cel
-        policy_path = meta_dir / "policy.cel"
-        if not policy_path.is_file():
-            errors.append(f"Missing {policy_path}")
-        else:
-            policy = yaml.safe_load(policy_path.read_text("utf-8"))
-            if not isinstance(policy, dict) or policy.get("plugin_id") != pid:
-                errors.append(f"{policy_path}: must be a mapping with plugin_id == {pid!r}")
-            else:
-                for req_key in ("read_only_tools", "draft_only_tools", "hitl_gated_mutations", "cel_guardrails"):
-                    if req_key not in policy:
-                        errors.append(f"{policy_path}: missing {req_key!r}")
-                for gate in policy.get("hitl_gated_mutations", []):
-                    if gate.get("scope") not in {"task_sticky", "explicit_per_call"}:
-                        errors.append(f"{policy_path}: invalid HITL scope {gate.get('scope')!r}")
-                    cond = gate.get("condition", "")
-                    try:
-                        validate_cel_expression(cond)
-                        stats["cel_expressions"] += 1
-                    except CelSyntaxError as exc:
-                        errors.append(f"{policy_path}: CEL error in gate {gate.get('tool')!r}: {exc}")
-                for guard in policy.get("cel_guardrails", []):
-                    expr = guard.get("expr", "")
-                    try:
-                        validate_cel_expression(expr)
-                        stats["cel_expressions"] += 1
-                    except CelSyntaxError as exc:
-                        errors.append(f"{policy_path}: CEL error in guardrail {guard.get('id')!r}: {exc}")
-
-        # 5. Agent & Schedule YAMLs
-        for agent_rel in pjson.get("agent_templates", []):
-            agent_doc = yaml.safe_load((pdir / agent_rel).read_text("utf-8"))
-            if not isinstance(agent_doc, dict) or agent_doc.get("kind") != "AgentTemplate":
-                errors.append(f"{pdir / agent_rel}: invalid AgentTemplate YAML")
-        for sched_rel in pjson.get("schedules", []):
-            sched_doc = yaml.safe_load((pdir / sched_rel).read_text("utf-8"))
-            spec = sched_doc.get("spec", {}) if isinstance(sched_doc, dict) else {}
-            cron_parts = str(spec.get("cron_expression", "")).split()
-            if len(cron_parts) != 5 or not all(CRON_FIELD_RE.match(p) for p in cron_parts):
-                errors.append(f"{pdir / sched_rel}: invalid 5-field cron_expression {spec.get('cron_expression')!r}")
-            if not isinstance(spec.get("max_token_budget"), int) or spec["max_token_budget"] <= 0:
-                errors.append(f"{pdir / sched_rel}: max_token_budget must be positive integer")
-            gv = spec.get("goal_verifier", {})
-            if not gv.get("command_check") or not gv.get("nl_criteria"):
-                errors.append(f"{pdir / sched_rel}: goal_verifier must include command_check and nl_criteria")
-
-        # 6. Skills (3 per plugin)
+        # 3. Skills (3 per plugin)
         declared_skill_ids = [s["id"] for s in pjson.get("skills", [])]
         actual_skill_dirs = sorted(s.name for s in (pdir / "skills").iterdir() if s.is_dir())
         if sorted(declared_skill_ids) != actual_skill_dirs:
@@ -578,6 +453,29 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
             stats["skill_md_validations"] += 1
             errors.extend(i.format() for i in issues)
 
+            # Validate Skill README.md
+            skill_readme = sdir / "README.md"
+            if not skill_readme.is_file():
+                errors.append(f"Missing skill README: {skill_readme}")
+            else:
+                s_text = skill_readme.read_text("utf-8")
+                s_lines = [ln for ln in s_text.splitlines() if ln.strip()]
+                if len(s_lines) < 30:
+                    errors.append(f"{skill_readme}: too short ({len(s_lines)} non-empty lines, expected >= 30).")
+                for req_hdr in (
+                    "## Who Uses This",
+                    "## Step-by-Step Usage",
+                    "### Adapting to Custom Customer Schemas",
+                    "## Sample Queries",
+                    "## Sample Response",
+                    "## Automation Schedule (`schedule_task`)",
+                    "## Input Fields & Configurable Thresholds",
+                    "[EVALUATED AGAINST STANDARD BASELINE",
+                ):
+                    if req_hdr not in s_text:
+                        errors.append(f"{skill_readme}: missing required block {req_hdr!r}")
+                errors.extend(_check_relative_links(skill_readme, root, stats))
+
             # Validate script
             script_path = sdir / s_spec["script"]
             if not script_path.is_file():
@@ -591,7 +489,7 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
                 errors.append(f"Missing TEST.md: {test_md}")
             else:
                 t_text = test_md.read_text("utf-8")
-                for m in ("Mode A", "Mode B", "Mode C"):
+                for m in ("## Scenario 1", "## Scenario 2", "## Scenario 3"):
                     if m not in t_text:
                         errors.append(f"{test_md}: missing scenario coverage for {m}")
 
@@ -651,7 +549,106 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
                 if actual_sha != s["sha256"]:
                     errors.append(f"SHA-256 mismatch for {zpath}")
 
-    # 8. Public Clean-Room Hygiene Scan across ALL source files, zip contents, and git log
+    # 7b. Validate examples/, benchmarks/, and top-level documentation links
+    root_readme = root / "README.md"
+    if not root_readme.is_file():
+        errors.append("Missing root README.md")
+    else:
+        errors.extend(_check_relative_links(root_readme, root, stats))
+
+    ex_dir = root / "examples"
+    ex_readme = ex_dir / "README.md"
+    if not ex_readme.is_file() or len([ln for ln in ex_readme.read_text("utf-8").splitlines() if ln.strip()]) < 20:
+        errors.append("examples/README.md missing or < 20 non-empty lines.")
+    else:
+        errors.extend(_check_relative_links(ex_readme, root, stats))
+
+    for pdir in plugin_dirs:
+        pid = pdir.name
+        sample_files = [
+            f for f in (ex_dir / pid).iterdir() if f.is_file() and f.suffix in {".xlsx", ".docx"}
+        ] if (ex_dir / pid).is_dir() else []
+        if not sample_files:
+            errors.append(f"examples/{pid}/: missing starter .xlsx or .docx file.")
+
+    bench_dir = root / "benchmarks"
+    for b_script in ("generate_enterprise_suite.py", "verify_local_engines.py"):
+        sp = bench_dir / b_script
+        if not sp.is_file():
+            errors.append(f"Missing {sp}")
+        else:
+            errors.extend(validate_python_script(sp))
+
+    eval_md = bench_dir / "EVALUATION.md"
+    if not eval_md.is_file() or len([ln for ln in eval_md.read_text("utf-8").splitlines() if ln.strip()]) < 40:
+        errors.append("benchmarks/EVALUATION.md missing or < 40 non-empty lines.")
+    else:
+        errors.extend(_check_relative_links(eval_md, root, stats))
+
+    sc_path = bench_dir / "scenarios_20.json"
+    if not sc_path.is_file():
+        errors.append(f"Missing {sc_path}")
+    else:
+        sc_data = json.loads(sc_path.read_text("utf-8"))
+        sc_list = sc_data.get("scenarios", [])
+        if len(sc_list) != 20:
+            errors.append(f"{sc_path}: expected 20 scenarios, found {len(sc_list)}")
+        expected_ids = {f"PE-{i:02d}" for i in range(1, 21)}
+        got_ids = {s.get("scenario_id") for s in sc_list}
+        if got_ids != expected_ids:
+            errors.append(f"{sc_path}: scenario_ids mismatch ({sorted(expected_ids ^ got_ids)})")
+        plugin_id_set = {p.name for p in plugin_dirs}
+        for s in sc_list:
+            if s.get("plugin_id") not in plugin_id_set:
+                errors.append(f"{sc_path}: unknown plugin_id {s.get('plugin_id')!r}")
+
+    ab_path = bench_dir / "ablation_results_90.json"
+    if not ab_path.is_file():
+        errors.append(f"Missing {ab_path}")
+    else:
+        ab_data = json.loads(ab_path.read_text("utf-8"))
+        runs = ab_data.get("runs", [])
+        if len(runs) != 90:
+            errors.append(f"{ab_path}: expected 90 runs, found {len(runs)}")
+        suites = {r.get("suite_id") for r in runs}
+        if suites != {"suite1_flash", "suite2_argon", "suite2_ma"}:
+            errors.append(f"{ab_path}: unexpected suite_ids {sorted(str(x) for x in suites)}")
+
+    # 7c. Validate docs/ interactive explorer, tools/build_docs_data.py, and catalog_data.js drift
+    docs_builder = root / "tools" / "build_docs_data.py"
+    if not docs_builder.is_file():
+        errors.append(f"Missing {docs_builder}")
+    else:
+        errors.extend(validate_python_script(docs_builder))
+
+    docs_dir = root / "docs"
+    docs_html = docs_dir / "index.html"
+    docs_js = docs_dir / "catalog_data.js"
+    if not docs_html.is_file():
+        errors.append(f"Missing {docs_html}")
+    else:
+        html_text = docs_html.read_text("utf-8")
+        if "./catalog_data.js" not in html_text:
+            errors.append("docs/index.html must load local ./catalog_data.js")
+        if re.search(r'<script[^>]+src=["\']https?://|<link[^>]+href=["\']https?://', html_text, re.IGNORECASE):
+            errors.append("docs/index.html must not reference external http/https CDN assets")
+        emoji_hits = build_docs_data.EMOJI_RE.findall(html_text)
+        if emoji_hits:
+            errors.append(f"docs/index.html contains forbidden emoji characters: {sorted(set(emoji_hits))}")
+
+    if not docs_js.is_file():
+        errors.append(f"Missing {docs_js}")
+    else:
+        try:
+            expected_js = build_docs_data.render_catalog_js(build_docs_data.build_docs_payload(root))
+            build_docs_data.verify_no_emojis(expected_js)
+            actual_js = docs_js.read_text("utf-8")
+            if actual_js != expected_js:
+                errors.append("docs/catalog_data.js has drifted from source files. Run: python3 tools/build_docs_data.py")
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"docs/catalog_data.js validation error: {exc}")
+
+    # 8. Public Clean-Room Hygiene Scan across ALL source files, zip/Office contents, and git log
     skip_dirs = {".git", "__pycache__", ".pytest_cache", ".venv", ".uv-cache"}
     for fpath in sorted(root.rglob("*")):
         if not fpath.is_file():
@@ -659,7 +656,7 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
         if any(part in skip_dirs for part in fpath.parts):
             continue
         rel = fpath.relative_to(root).as_posix()
-        if fpath.suffix == ".zip":
+        if fpath.suffix in {".zip", ".xlsx", ".docx"}:
             try:
                 with zipfile.ZipFile(fpath, "r") as zf:
                     for zname in zf.namelist():
@@ -672,7 +669,7 @@ def validate_repository(root: Path = ROOT) -> tuple[list[str], dict[str, int]]:
                         stats["hygiene_files_scanned"] += 1
                         errors.extend(scan_text_hygiene(ztext, f"{rel}::{zname}"))
             except zipfile.BadZipFile:
-                errors.append(f"Corrupt zip file: {rel}")
+                errors.append(f"Corrupt zip/Office file: {rel}")
             continue
         if fpath.suffix in {".png", ".jpg", ".jpeg", ".gif", ".ico", ".whl"}:
             continue
@@ -706,7 +703,8 @@ def main(argv: list[str] | None = None) -> int:
         f"plugins={stats['plugins']}, skills={stats['skills']}, "
         f"skill_md_checks={stats['skill_md_validations']}, "
         f"bundle_zips={stats['bundle_zips']}, skill_zips={stats['skill_zips']}, "
-        f"cel_expressions={stats['cel_expressions']}, "
+        f"scheduled_routines={stats['scheduled_routines']}, "
+        f"markdown_links={stats['markdown_links_checked']}, "
         f"hygiene_scanned={stats['hygiene_files_scanned']}, "
         f"errors={len(errors)}"
     )

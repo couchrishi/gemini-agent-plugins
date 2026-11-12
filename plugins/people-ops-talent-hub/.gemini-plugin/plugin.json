@@ -12,6 +12,7 @@
     "onboarding"
   ],
   "description": "Calibrates structured interview scorecards for score dispersion and bias signals, orchestrates 30/60/90 onboarding plans with mandatory Day-1 gate checks, and audits effective-dated Workday compensation bands with FTE/CWK separation and small-cell privacy redaction.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "structured-hiring-rubric",
@@ -39,11 +40,36 @@
   "shared_baselines": [
     "hr-hiring-comp-baseline.md"
   ],
-  "agent_templates": [
-    "agents/people-ops-talent-hub-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-onboarding-stall-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Gmail",
+      "ServiceNow",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)"
+    ],
+    "byo_mcp": [
+      "Workday HRIS & ATS Scorecard MCP server"
+    ],
+    "connector_fetch_guidance": "Retrieve effective-dated employee compensation rosters, contingent-worker flags, interview scorecards, and onboarding task gates from Google Sheets/ServiceNow or customer Workday/ATS MCP servers via remote_cli mcp before Python HR analytics."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Proposing or committing compensation adjustments in customer Workday HRIS MCP",
+      "Advancing candidate offer stages or dispatching hiring letters via customer ATS MCP / Gmail"
+    ],
+    "python_code_guardrails": [
+      "Strict small-cohort n < min_privacy_group_size (n < 5) k-anonymity salary & attrition redaction",
+      "Effective-date deduplication, Contingent Worker (CWK) isolation from FTE totals, and EUR/GBP monthly FX normalization",
+      "Scorecard bias/halo variance alert preventing autonomous hiring recommendations"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-onboarding-stall-watch",
+    "title": "Weekly Onboarding Stall Watch",
+    "cron_expression": "0 8 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly onboarding gate check via scripts/onboarding_plan_builder.py to detect missing Day-1 IT/security gates and stalled 30/60/90 milestones."
+  }
 }

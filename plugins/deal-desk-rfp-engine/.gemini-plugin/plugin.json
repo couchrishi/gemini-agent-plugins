@@ -3,8 +3,15 @@
   "name": "Deal Desk, RFP & Pipeline Hygiene Engine",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "sales-ops", "deal-desk", "salesforce", "rfp"],
+  "segment_tags": [
+    "cross-industry",
+    "sales-ops",
+    "deal-desk",
+    "salesforce",
+    "rfp"
+  ],
   "description": "Accelerates RFP security/compliance questionnaires with TF-IDF answer matching, validates multi-year SaaS quote discounts and gross margins against Deal Desk approval tiers, and audits CRM pipeline for slippage and multi-currency traps.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "rfp-questionnaire-responder",
@@ -32,11 +39,34 @@
     "deal-desk-approval-baseline.md",
     "commercial-contract-baseline.md"
   ],
-  "agent_templates": [
-    "agents/deal-desk-rfp-engine-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-pipeline-hygiene-audit.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Salesforce",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+      "Gmail"
+    ],
+    "connector_fetch_guidance": "Query Salesforce opportunities, DatedConversionRate FX tables, and quote line items via remote_cli mcp salesforce, plus RFP questionnaires and Deal Desk approvals from Google Drive or SharePoint before Python validation."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Updating Salesforce opportunity forecast categories, close dates, or approved quote statuses",
+      "Submitting Deal Desk discount/non-standard term exceptions for CFO or VP Sales approval",
+      "Sending completed customer RFP responses or commercial quote emails externally via Gmail/Outlook"
+    ],
+    "python_code_guardrails": [
+      "Mandatory DatedConversionRate FX normalization across mixed-currency CRM rollups",
+      "Zero-guess abstention when approved RFP answer library contains no verified match",
+      "Indirect prompt-injection directive quarantine inside external customer RFP rows"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-pipeline-hygiene-audit",
+    "title": "Weekly Pipeline Hygiene Audit",
+    "cron_expression": "0 8 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly Salesforce pipeline hygiene and slippage audit using scripts/pipeline_slippage_auditor.py. Normalize multi-currency opportunities, identify stale stages, >=2 push-count deals, single-threaded Commit opportunities, and StageName/IsClosed inconsistencies without modifying CRM records autonomously."
+  }
 }

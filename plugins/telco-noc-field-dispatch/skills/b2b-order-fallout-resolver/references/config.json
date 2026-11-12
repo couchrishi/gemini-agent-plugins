@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "p1_subscriber_threshold": 5000,
   "p2_subscriber_threshold": 500,
   "enforce_safety_cert_expiry": true,

@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Agent Plugins — Catalog &amp; Benchmark Explorer</title>
+  <style>
+    :root {
+      --bg-canvas: #F8F9FA;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F1F3F4;
+      --text-primary: #202124;
+      --text-secondary: #5F6368;
+      --text-muted: #70757A;
+      --border: #DADCE0;
+      --border-soft: #E8EAED;
+      --accent: #1A73E8;
+      --accent-hover: #1557B0;
+      --accent-tint: #E8F0FE;
+      --pass-text: #137333;
+      --pass-bg: #E6F4EA;
+      --pass-border: #CEEAD6;
+      --fail-text: #C5221F;
+      --fail-bg: #FCE8E6;
+      --fail-border: #FAD2CF;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* Sticky Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 56px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .topbar-inner {
+      max-width: 1200px;
+      height: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .brand-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .nav-tabs {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: 7px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-tab.active {
+      background: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: 0 1px 2px rgba(32, 33, 36, 0.08);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Main Container */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Info Popover Button */
+    .info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      padding: 0;
+      margin-left: 4px;
+      border: 1px solid #BDC1C6;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 10.5px;
+      font-style: italic;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      vertical-align: middle;
+      flex-shrink: 0;
+      transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+    }
+
+    .info-btn:hover,
+    .info-btn:focus-visible,
+    .info-btn.open {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-tint);
+      outline: none;
+    }
+
+    .info-popover {
+      position: fixed;
+      z-index: 120;
+      width: 280px;
+      max-width: calc(100vw - 24px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.48;
+      color: var(--text-primary);
+      box-shadow: 0 4px 14px rgba(32, 33, 36, 0.14);
+      pointer-events: auto;
+    }
+
+    .info-popover[hidden] {
+      display: none;
+    }
+
+    .info-popover-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .info-popover-body {
+      color: var(--text-secondary);
+    }
+
+    /* Catalog Filter Bar */
+    .filter-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .search-wrap {
+      flex: 1 1 240px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--bg-canvas);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--bg-surface);
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .seg-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .seg-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: 0 1px 2px rgba(32, 33, 36, 0.08);
+    }
+
+    .persona-select {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+
+    .persona-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .catalog-subbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .catalog-hints {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hint-item {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Catalog 3-Column Card Grid */
+    .plugin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .plugin-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.14s ease;
+    }
+
+    .plugin-card:hover {
+      border-color: #BDC1C6;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .bench-chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-canvas);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .bench-chip.pass {
+      color: var(--pass-text);
+      background: var(--pass-bg);
+      border-color: var(--pass-border);
+    }
+
+    .bench-chip.fail {
+      color: var(--fail-text);
+      background: var(--fail-bg);
+      border-color: var(--fail-border);
+    }
+
+    .card-title {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    .card-desc {
+      margin: 0 0 12px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 36px;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .skill-row {
+      width: 100%;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-canvas);
+      border-radius: 5px;
+      padding: 6px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .skill-row:hover {
+      background: var(--accent-tint);
+      border-color: #D2E3FC;
+    }
+
+    .skill-row-name {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .skill-row:hover .skill-row-name {
+      color: var(--accent);
+    }
+
+    .skill-row-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 11px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .btn-link {
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: var(--accent);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+
+    .card-downloads {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiet-dl {
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .quiet-dl:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    /* Slide-Over Drawer (Playbook + Scenario Detail) */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(32, 33, 36, 0.32);
+    }
+
+    .drawer-backdrop[hidden] {
+      display: none;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 90;
+      width: 580px;
+      max-width: 100vw;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 24px rgba(32, 33, 36, 0.12);
+    }
+
+    .drawer[hidden] {
+      display: none;
+    }
+
+    .drawer-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--bg-surface);
+    }
+
+    .drawer-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .drawer-kicker {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .drawer-close {
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      border-radius: 5px;
+      width: 26px;
+      height: 26px;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .drawer-close:hover {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .drawer-title {
+      margin: 0 0 4px;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .drawer-subtitle {
+      margin: 0 0 12px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .skill-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .skill-pill {
+      border: 1px solid var(--border);
+      background: var(--bg-canvas);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .skill-pill:hover {
+      border-color: #BDC1C6;
+      color: var(--text-primary);
+    }
+
+    .skill-pill.active {
+      background: var(--accent-tint);
+      border-color: #AECBFA;
+      color: var(--accent);
+    }
+
+    .dl-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dl-btn {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    .dl-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .dl-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .dl-btn.primary:hover {
+      background: var(--accent-hover);
+      color: #FFFFFF;
+    }
+
+    .drawer-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      padding: 0 20px;
+      gap: 18px;
+      background: var(--bg-surface);
+    }
+
+    .drawer-tab {
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 2px;
+      cursor: pointer;
+    }
+
+    .drawer-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .drawer-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px 28px;
+      background: var(--bg-surface);
+    }
+
+    .sec-title {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+
+    .sec-block {
+      margin-bottom: 18px;
+    }
+
+    .prompt-card {
+      border: 1px solid var(--border-soft);
+      background: var(--bg-canvas);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .prompt-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .prompt-mode {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .prompt-text {
+      font-size: 12.5px;
+      line-height: 1.48;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .clean-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .clean-list li {
+      margin-bottom: 5px;
+    }
+
+    .chat-box {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .chat-intro {
+      margin: 0 0 10px;
+      color: var(--text-primary);
+    }
+
+    .hitl-callout {
+      margin-top: 10px;
+      padding: 9px 11px;
+      background: var(--accent-tint);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 5px 5px 0;
+      font-size: 12.5px;
+      color: var(--text-primary);
+    }
+
+    .engine-pre {
+      margin: 8px 0 0;
+      padding: 12px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--text-primary);
+      overflow-x: auto;
+      max-height: 320px;
+      white-space: pre;
+    }
+
+    .code-pre {
+      margin: 6px 0 0;
+      padding: 10px 12px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--text-primary);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Tables */
+    .table-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    table.data-table th {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-canvas);
+      padding: 7px 11px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    table.data-table td {
+      padding: 7px 11px;
+      border-bottom: 1px solid var(--border-soft);
+      color: var(--text-primary);
+      vertical-align: top;
+    }
+
+    td.nowrap {
+      white-space: nowrap;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table th.num,
+    table.data-table td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    tr.clickable-row {
+      cursor: pointer;
+    }
+
+    tr.clickable-row:hover td {
+      background: var(--bg-canvas);
+    }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-canvas);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .status-pill.pass {
+      color: var(--pass-text);
+      background: var(--pass-bg);
+      border-color: var(--pass-border);
+    }
+
+    .status-pill.fail {
+      color: var(--fail-text);
+      background: var(--fail-bg);
+      border-color: var(--fail-border);
+    }
+
+    /* Benchmarks View */
+    .metric-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .metric-cell {
+      padding: 14px 16px;
+      border-right: 1px solid var(--border-soft);
+    }
+
+    .metric-cell:last-child {
+      border-right: none;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 2px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+
+    .metric-sub {
+      margin-top: 3px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 22px 0 10px;
+    }
+
+    .section-h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Collapsible Case Studies */
+    .case-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .case-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .case-summary {
+      width: 100%;
+      border: none;
+      background: var(--bg-surface);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .case-summary:hover {
+      background: var(--bg-canvas);
+    }
+
+    .case-sum-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .case-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .case-line {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .case-toggle {
+      font-size: 12px;
+      color: var(--accent);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .case-detail {
+      border-top: 1px solid var(--border-soft);
+      padding: 14px;
+      background: var(--bg-canvas);
+    }
+
+    .case-detail[hidden] {
+      display: none;
+    }
+
+    .case-artifact {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .case-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .case-arm {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 11px 12px;
+    }
+
+    .case-arm-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .case-arm-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .case-arm-meta {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
+    }
+
+    .case-arm-text {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-primary);
+    }
+
+    /* Limitations Accordion */
+    .accordion {
+      margin-top: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .accordion summary {
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .accordion-body {
+      border-top: 1px solid var(--border-soft);
+      padding: 12px 14px;
+    }
+
+    .lim-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .lim-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .lim-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .lim-detail {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .repro-strip {
+      margin-top: 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .repro-cmd {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    /* Quickstart View */
+    .qs-shell {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .qs-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      padding: 0 18px;
+      gap: 18px;
+      background: var(--bg-canvas);
+    }
+
+    .qs-tab {
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 2px;
+      cursor: pointer;
+    }
+
+    .qs-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .qs-panel {
+      display: none;
+      padding: 20px 22px;
+    }
+
+    .qs-panel.active {
+      display: block;
+    }
+
+    .qs-panel h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    .qs-lead {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .cmd-box {
+      border: 1px solid var(--border-soft);
+      background: var(--bg-canvas);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+
+    .cmd-box-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .sub-muted {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .overview-skill-card {
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: var(--bg-canvas);
+    }
+
+    .overview-skill-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 1024px) {
+      .plugin-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .metric-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .metric-cell {
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .case-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar-inner {
+        padding: 0 12px;
+      }
+      .brand-meta,
+      .topbar-right {
+        display: none;
+      }
+      .main {
+        padding: 14px 12px 36px;
+      }
+      .plugin-grid {
+        grid-template-columns: 1fr;
+      }
+      .metric-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-title">Gemini Agent Plugins</span>
+        <span class="brand-meta" id="repo-meta">20 plugins · 60 skills · Apache 2.0</span>
+      </div>
+      <nav class="nav-tabs" aria-label="Primary sections">
+        <button type="button" class="nav-tab active" data-view="catalog">Catalog (20)</button>
+        <button type="button" class="nav-tab" data-view="benchmarks">Benchmarks (90 Runs)</button>
+        <button type="button" class="nav-tab" data-view="quickstart">Quickstart</button>
+      </nav>
+      <div class="topbar-right">
+        <span>gemini-3.8-flash &amp; gemini-4-argon</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- VIEW 1: CATALOG -->
+    <section id="view-catalog" class="view active" aria-label="Plugin Catalog">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input id="catalog-search" class="search-input" type="search" placeholder="Search plugins, skills, SAP/Workday/ITSM traps...">
+        </div>
+        <div class="seg-group" role="group" aria-label="Category filter">
+          <button type="button" class="seg-btn active" data-cat="all">All (20)</button>
+          <button type="button" class="seg-btn" data-cat="horizontal">Horizontal (10)</button>
+          <button type="button" class="seg-btn" data-cat="enterprise-ops">Enterprise Ops (3)</button>
+          <button type="button" class="seg-btn" data-cat="vertical">Verticals (7)</button>
+        </div>
+        <select id="persona-filter" class="persona-select" aria-label="Filter by persona">
+          <option value="all">All Personas</option>
+        </select>
+      </div>
+
+      <div class="catalog-subbar">
+        <span id="catalog-count">Showing 20 of 20 plugins (60 deterministic Python skills)</span>
+        <div class="catalog-hints">
+          <span class="hint-item">
+            Connectors + Python Engines
+            <button type="button" class="info-btn" data-tip-key="two_layer" data-tip-title="Two-Layer /work Architecture" aria-label="About Two-Layer /work Architecture">i</button>
+          </span>
+          <span class="hint-item">
+            Python Header Shaping (pyrepl)
+            <button type="button" class="info-btn" data-tip-key="schema_mapping" data-tip-title="Python Payload Shaping in pyrepl" aria-label="About Python header inspection and payload shaping">i</button>
+          </span>
+          <span class="hint-item">
+            Auto-Guardian + Code Guards
+            <button type="button" class="info-btn" data-tip-key="auto_guardian" data-tip-title="Agent Gateway & Code Guards" aria-label="About Auto-Guardian and Python invariants">i</button>
+          </span>
+          <span class="hint-item">
+            Bundle vs. Skill .zip
+            <button type="button" class="info-btn" data-tip-key="bundle_vs_skill" data-tip-title="Bundle vs. Individual Skill .zip" aria-label="About Bundle vs. Skill zip archives">i</button>
+          </span>
+        </div>
+      </div>
+
+      <div id="plugin-grid" class="plugin-grid"></div>
+      <div id="catalog-empty" class="empty-state" hidden>No plugins match the current search and filters.</div>
+    </section>
+
+    <!-- VIEW 2: BENCHMARKS -->
+    <section id="view-benchmarks" class="view" aria-label="Benchmarks">
+      <div class="metric-bar">
+        <div class="metric-cell">
+          <div class="metric-value">85.0% (17/20)</div>
+          <div class="metric-label">
+            Composite Pass
+            <button type="button" class="info-btn" data-tip-key="composite_pass" data-tip-title="Composite Pass Threshold" aria-label="Composite Pass definition">i</button>
+          </div>
+          <div class="metric-sub">vs 65.0% Base / 45.0% Prose-Only (gemini-3.8-flash)</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-value">100% (8/8)</div>
+          <div class="metric-label">
+            Shared Horizontal Pass
+            <button type="button" class="info-btn" data-tip="8/8 (100.0%) Composite Pass and 1.000 Weighted Factuality across all shared horizontal workflows (PE-01..PE-05, PE-10, PE-11, PE-14) on Standard Fast Tier (gemini-3.8-flash), vs 87.5% Base and 50.0% Prose-Only Baseline." data-tip-title="Shared Horizontal Cohort (n=8)" aria-label="Shared Horizontal Pass details">i</button>
+          </div>
+          <div class="metric-sub">1.000 avg WF across PE-01..05, 10, 11, 14</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-value">+41.7 pp (33.3% -&gt; 75.0%)</div>
+          <div class="metric-label">
+            Vertical Factuality Lift
+            <button type="button" class="info-btn" data-tip-key="vertical_lift" data-tip-title="Regulated Vertical &amp; Ops Lift" aria-label="Vertical Factuality Lift statistics">i</button>
+          </div>
+          <div class="metric-sub">McNemar exact p = 0.0117 vs Prose-Only (n=20)</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-value">0 Violations (20/20)</div>
+          <div class="metric-label">
+            Privacy &amp; Injection Safety
+            <button type="button" class="info-btn" data-tip-key="safety_stat" data-tip-title="Code-Enforced Privacy &amp; Injection Safety" aria-label="Privacy and Injection Safety details">i</button>
+          </div>
+          <div class="metric-sub">Both baseline arms leaked PE-08 salary PII</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h2 class="section-h2">
+          Cross-Tier Live Scorecard (90 Isolated Runs)
+          <button type="button" class="info-btn" data-tip-key="weighted_factuality" data-tip-title="Weighted Factuality (WF) Metric" aria-label="Weighted Factuality definition">i</button>
+        </h2>
+        <span class="section-note">130 Apex Global synthetic artifacts (60,089 spreadsheet rows, 219 document pages)</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tier &amp; Model</th>
+              <th>Evaluation Arm</th>
+              <th class="num">n</th>
+              <th class="num">Composite Pass</th>
+              <th class="num">Factuality (&gt;=0.80)</th>
+              <th class="num">Perfect WF = 1.0</th>
+              <th class="num">Violations</th>
+              <th class="num">Avg Latency</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-head">
+        <h2 class="section-h2">Flagship Ablation Case Studies</h2>
+        <span class="section-note">Click any row to compare Arm 1, Arm 2, and Arm 3 outcomes</span>
+      </div>
+      <div id="case-studies-list" class="case-list"></div>
+
+      <div class="section-head">
+        <h2 class="section-h2">20-Scenario Results Matrix</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <div class="seg-group" role="group" aria-label="Scenario status filter">
+            <button type="button" class="seg-btn active" data-sc-status="all">All (20)</button>
+            <button type="button" class="seg-btn" data-sc-status="pass">Plugin Pass (17)</button>
+            <button type="button" class="seg-btn" data-sc-status="fail">Flagged / Fail (3)</button>
+          </div>
+          <select id="sc-cat-filter" class="persona-select" aria-label="Filter scenarios by category">
+            <option value="all">All Categories</option>
+            <option value="Horizontal Workflow">Horizontal Workflow (8)</option>
+            <option value="Enterprise Operations">Enterprise Operations (5)</option>
+            <option value="Regulated & Domain Vertical">Regulated &amp; Domain Vertical (7)</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Plugin &amp; Scenario</th>
+              <th>Corpus Scale</th>
+              <th>Base Agent (No Plugin)</th>
+              <th>With Plugin (Python Engine)</th>
+              <th>Prose-Only Baseline</th>
+            </tr>
+          </thead>
+          <tbody id="scenarios-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="repro-strip">
+        <span class="repro-cmd">Reproduce locally: <code>make check &amp;&amp; make validate &amp;&amp; make test &amp;&amp; make benchmark</code></span>
+        <button type="button" class="copy-btn" data-copy="make check && make validate && make test && make benchmark">Copy command</button>
+      </div>
+
+      <details class="accordion">
+        <summary>Known Limitations &amp; Rubric Audit Notes (5 documented items)</summary>
+        <div class="accordion-body" id="limitations-list"></div>
+      </details>
+    </section>
+
+    <!-- VIEW 3: QUICKSTART -->
+    <section id="view-quickstart" class="view" aria-label="Quickstart Guides">
+      <div class="qs-shell">
+        <div class="qs-tabs" role="tablist">
+          <button type="button" class="qs-tab active" data-qs="business">Business User / Field FDE</button>
+          <button type="button" class="qs-tab" data-qs="admin">Platform Admin (--org-config)</button>
+          <button type="button" class="qs-tab" data-qs="dev">Developer / Local Benchmark</button>
+        </div>
+
+        <div id="qs-business" class="qs-panel active">
+          <h3>Upload a Skill Archive and Run in Gemini Enterprise (/work)</h3>
+          <p class="qs-lead">
+            Skills run natively on live <code>/work</code> 1P connectors (<code>remote_cli mcp</code>) and customer <code>BYO-MCP</code> servers, and support optional zero-connector <code>.xlsx</code> / <code>.docx</code> sandbox files from <code>examples/</code> for 2-minute offline workshops.
+          </p>
+          <ol class="clean-list">
+            <li>Open the <strong>Catalog</strong> view, filter by your persona, and download either <code>dist/bundles/&lt;plugin-id&gt;.zip</code> (all 3 skills + shared trap guides) or a focused single-hop <code>dist/skills/&lt;skill-id&gt;.zip</code>.</li>
+            <li>Open <strong>Gemini Enterprise web app (<code>/work</code>) &rarr; left navigation <code>Skills</code> &rarr; <code>+</code> &rarr; <code>Upload skill</code> &rarr; select <code>.zip</code> &rarr; <code>Import</code></strong> (Standard, Plus, or Pay-as-you-go edition).</li>
+            <li>Prompt naturally in chat or invoke <code>/&lt;skill-id&gt;</code> or <code>@&lt;skill-id&gt;</code> against your authorized enterprise connectors, or attach the matching starter workbook/doc from <code>examples/&lt;plugin-id&gt;/</code> when testing offline.</li>
+            <li>For custom customer exports or non-standard columns, inspect headers and tabs directly in <code>pyrepl</code> via <code>scripts/enterprise_io.py</code>, shape fields in Python into a canonical <code>payload</code> dict (calling <code>ask_question</code> only if ambiguous), call <code>analyze(payload, config=...)</code>, and confirm any <code>Auto-Guardian</code> write prompt before execution.</li>
+          </ol>
+          <div class="cmd-box">
+            <div class="cmd-box-head">
+              <span>Example Live Connector Prompt (AP 3-Way Match)</span>
+              <button type="button" class="copy-btn" data-copy="Run AP 3-way match on Apex Manufacturing's JPY and USD invoices from SAP OData.">Copy</button>
+            </div>
+            <p class="prompt-text">Run AP 3-way match on Apex Manufacturing's JPY and USD invoices from SAP OData.</p>
+          </div>
+          <div class="cmd-box">
+            <div class="cmd-box-head">
+              <span>Example Optional Zero-Connector Sandbox Prompt (Attach Starter Workbook)</span>
+              <button type="button" class="copy-btn" data-copy="Using the attached Apex_Finance_3Way_PnL_and_AR_Sample.xlsx workbook, run a 3-way match across purchase orders, goods receipts, and vendor invoices, normalize SAP TCURX zero-decimal currencies and SHKZG credit memos, and separate invoices ready to pay from fraud, duplicate, or quantity holds.">Copy</button>
+            </div>
+            <p class="prompt-text">Using the attached <code>Apex_Finance_3Way_PnL_and_AR_Sample.xlsx</code> workbook, run a 3-way match across purchase orders, goods receipts, and vendor invoices, normalize SAP <code>TCURX</code> zero-decimal currencies and <code>SHKZG</code> credit memos, and separate invoices ready to pay from fraud, duplicate, or quantity holds.</p>
+          </div>
+        </div>
+
+        <div id="qs-admin" class="qs-panel">
+          <h3>Bind Tenant Thresholds Without Editing Source Code</h3>
+          <p class="qs-lead">
+            Default packages ship with <code>org_configured: false</code> and stamp reports with <code>[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]</code>. Binding an organization config validates materiality caps, SLA targets, and covenant overrides against <code>.gemini-plugin/config.schema.json</code>.
+          </p>
+          <ol class="clean-list">
+            <li>Create an organization JSON file overriding <code>global</code> defaults or plugin-specific numeric/policy thresholds.</li>
+            <li>Run <code>tools/package.py --org-config</code> to validate every override and stamp tenant-ready <code>.zip</code> archives into an isolated output directory.</li>
+            <li>Import the stamped archives via <code>/work</code> &rarr; <code>Skills</code> &rarr; <code>+</code> &rarr; <code>Upload skill</code>; <code>org_configured: true</code> automatically suppresses the standard baseline banner.</li>
+            <li>Inspect each plugin's <strong>Schema &amp; Governance</strong> tab to review required canonical fields, <code>Auto-Guardian</code> write confirmations, Python invariants, and <code>schedule_task</code> crons.</li>
+          </ol>
+          <div class="cmd-box">
+            <div class="cmd-box-head">
+              <span>Build Tenant-Configured Archives</span>
+              <button type="button" class="copy-btn" data-copy="python3 tools/package.py --org-config tests/fixtures/sample_org_config.json --output-dir /tmp/tenant-dist">Copy</button>
+            </div>
+            <pre class="code-pre">python3 tools/package.py --org-config tests/fixtures/sample_org_config.json --output-dir /tmp/tenant-dist</pre>
+          </div>
+        </div>
+
+        <div id="qs-dev" class="qs-panel">
+          <h3>Validate Schemas, Compile Explorer Data, and Run Full-Scale Benchmarks</h3>
+          <p class="qs-lead">
+            All 60 Python engines and the benchmark corpus generator run on Python 3.11+ standard library with zero third-party runtime dependencies inside skill archives.
+          </p>
+          <ol class="clean-list">
+            <li><code>make validate</code> validates <code>plugin.json</code> and <code>config.schema.json</code> Draft 2020-12 schemas, 5-field crons, 140 <code>SKILL.md</code> manifests, SHA-256 checksums, relative links, and clean-room hygiene.</li>
+            <li><code>make check</code> ensures zero drift across materialized <code>references/</code>, <code>dist/</code> zips, and <code>docs/catalog_data.js</code>.</li>
+            <li><code>make test</code> runs the full <code>pytest</code> suite covering all 60 deterministic engines, <code>enterprise_io.py</code> readers/schema checks, and packaging validation.</li>
+            <li><code>make benchmark</code> regenerates the full 60,089-row suite (12 <code>.xlsx</code>, 3 <code>.docx</code>, 5 <code>.pdf</code>) in under 15 seconds and exercises every engine locally.</li>
+          </ol>
+          <div class="cmd-box">
+            <div class="cmd-box-head">
+              <span>Full Local Verification Pipeline</span>
+              <button type="button" class="copy-btn" data-copy="make package && make check && make validate && make test && make benchmark">Copy</button>
+            </div>
+            <pre class="code-pre">make package &amp;&amp; make check &amp;&amp; make validate &amp;&amp; make test &amp;&amp; make benchmark</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SLIDE-OVER DRAWER (Shared by Plugin Playbooks and Scenario Details) -->
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+  <aside id="drawer" class="drawer" hidden aria-modal="true" role="dialog" aria-labelledby="drawer-title">
+    <div class="drawer-header">
+      <div class="drawer-top-row">
+        <span class="drawer-kicker" id="drawer-kicker"></span>
+        <button type="button" class="drawer-close" id="drawer-close" aria-label="Close drawer">&times;</button>
+      </div>
+      <h2 class="drawer-title" id="drawer-title"></h2>
+      <p class="drawer-subtitle" id="drawer-subtitle"></p>
+      <div class="skill-pills" id="drawer-pills"></div>
+      <div class="dl-bar" id="drawer-dl-bar"></div>
+    </div>
+    <div class="drawer-tabs" id="drawer-tabs"></div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+
+  <!-- SHARED VIEWPORT-CLAMPED INFO POPOVER -->
+  <div id="info-popover" class="info-popover" role="tooltip" hidden>
+    <div class="info-popover-title" id="info-popover-title"></div>
+    <div class="info-popover-body" id="info-popover-body"></div>
+  </div>
+
+  <script src="./catalog_data.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const DATA = window.GAP_DATA || { repo: {}, personas: [], info_tips: {}, plugins: [], benchmarks: { scenarios: [], summary_by_tier_arm: [], case_studies: [], known_limitations: [] } };
+      const PLUGINS = DATA.plugins || [];
+      const BENCH = DATA.benchmarks || {};
+      const TIPS = DATA.info_tips || {};
+
+      const pluginById = Object.fromEntries(PLUGINS.map(p => [p.id, p]));
+      const scenarioById = Object.fromEntries((BENCH.scenarios || []).map(s => [s.scenario_id, s]));
+
+      const state = {
+        view: "catalog",
+        catFilter: "all",
+        personaFilter: "all",
+        search: "",
+        scStatus: "all",
+        scCat: "all",
+        expandedCases: new Set(),
+        drawer: {
+          mode: null, // "plugin" | "scenario"
+          pluginId: null,
+          skillIdx: null, // null for overview, 0|1|2 for skill
+          subTab: "usage", // "usage" | "sample" | "policy"
+          scenarioId: null,
+        },
+        popover: {
+          btn: null,
+          pinned: false,
+        },
+      };
+
+      function esc(str) {
+        return String(str == null ? "" : str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function renderInlineMd(str) {
+        let s = esc(str);
+        s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+        s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        return s;
+      }
+
+      function formatBytes(bytes) {
+        if (!bytes) return "";
+        if (bytes < 1024) return bytes + " B";
+        return Math.round(bytes / 1024) + " KB";
+      }
+
+      function copyText(text, btn) {
+        const done = () => {
+          if (!btn) return;
+          const prev = btn.textContent;
+          btn.textContent = "Copied";
+          setTimeout(() => { btn.textContent = prev; }, 1200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+        } else {
+          fallbackCopy(text, done);
+        }
+      }
+
+      function fallbackCopy(text, done) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (_) {}
+        document.body.removeChild(ta);
+        done();
+      }
+
+      function infoBtnHtml(title, tipText, tipKey) {
+        const attrKey = tipKey ? ` data-tip-key="${esc(tipKey)}"` : "";
+        const attrTip = tipText ? ` data-tip="${esc(tipText)}"` : "";
+        return `<button type="button" class="info-btn" data-tip-title="${esc(title)}"${attrKey}${attrTip} aria-label="${esc(title)}">i</button>`;
+      }
+
+      // ---------------------------------------------------------------------
+      // Popover Logic (viewport-clamped, supports hover + click pin + Esc)
+      // ---------------------------------------------------------------------
+      const popEl = document.getElementById("info-popover");
+      const popTitle = document.getElementById("info-popover-title");
+      const popBody = document.getElementById("info-popover-body");
+
+      function positionPopover(btn) {
+        const rect = btn.getBoundingClientRect();
+        popEl.hidden = false;
+        const popRect = popEl.getBoundingClientRect();
+        const pad = 10;
+        let top = rect.bottom + 8;
+        if (top + popRect.height > window.innerHeight - pad) {
+          top = Math.max(pad, rect.top - popRect.height - 8);
+        }
+        let left = rect.left + rect.width / 2 - popRect.width / 2;
+        if (left < pad) left = pad;
+        if (left + popRect.width > window.innerWidth - pad) {
+          left = Math.max(pad, window.innerWidth - pad - popRect.width);
+        }
+        popEl.style.top = Math.round(top) + "px";
+        popEl.style.left = Math.round(left) + "px";
+      }
+
+      function openPopover(btn, pin) {
+        if (state.popover.btn && state.popover.btn !== btn) {
+          state.popover.btn.classList.remove("open");
+        }
+        const key = btn.getAttribute("data-tip-key");
+        const bodyText = key && TIPS[key] ? TIPS[key] : (btn.getAttribute("data-tip") || "");
+        const titleText = btn.getAttribute("data-tip-title") || "Details";
+        popTitle.textContent = titleText;
+        popBody.textContent = bodyText;
+        btn.classList.add("open");
+        state.popover.btn = btn;
+        state.popover.pinned = Boolean(pin);
+        positionPopover(btn);
+      }
+
+      function closePopover() {
+        if (state.popover.btn) {
+          state.popover.btn.classList.remove("open");
+        }
+        popEl.hidden = true;
+        state.popover.btn = null;
+        state.popover.pinned = false;
+      }
+
+      document.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".info-btn");
+        if (btn) {
+          ev.stopPropagation();
+          ev.preventDefault();
+          if (state.popover.btn === btn && state.popover.pinned) {
+            closePopover();
+          } else {
+            openPopover(btn, true);
+          }
+          return;
+        }
+        if (state.popover.btn && !ev.target.closest("#info-popover")) {
+          closePopover();
+        }
+      });
+
+      document.addEventListener("mouseover", (ev) => {
+        const btn = ev.target.closest(".info-btn");
+        if (btn && !state.popover.pinned) {
+          openPopover(btn, false);
+        }
+      });
+
+      document.addEventListener("mouseout", (ev) => {
+        const btn = ev.target.closest(".info-btn");
+        if (btn && !state.popover.pinned && !ev.relatedTarget?.closest?.("#info-popover")) {
+          closePopover();
+        }
+      });
+
+      document.addEventListener("focusin", (ev) => {
+        const btn = ev.target.closest(".info-btn");
+        if (btn && !state.popover.pinned) {
+          openPopover(btn, false);
+        }
+      });
+
+      window.addEventListener("scroll", () => {
+        if (state.popover.btn && !popEl.hidden) positionPopover(state.popover.btn);
+      }, true);
+
+      // ---------------------------------------------------------------------
+      // Navigation & Top-Level Views
+      // ---------------------------------------------------------------------
+      function switchView(viewName) {
+        state.view = viewName;
+        closePopover();
+        document.querySelectorAll(".nav-tab").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.view === viewName);
+        });
+        document.querySelectorAll(".view").forEach(sec => {
+          sec.classList.toggle("active", sec.id === "view-" + viewName);
+        });
+      }
+
+      document.querySelectorAll(".nav-tab").forEach(btn => {
+        btn.addEventListener("click", () => switchView(btn.dataset.view));
+      });
+
+      // ---------------------------------------------------------------------
+      // View 1: Catalog Rendering & Filtering
+      // ---------------------------------------------------------------------
+      function initPersonaFilter() {
+        const sel = document.getElementById("persona-filter");
+        (DATA.personas || []).forEach(persona => {
+          const opt = document.createElement("option");
+          opt.value = persona;
+          opt.textContent = persona;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener("change", () => {
+          state.personaFilter = sel.value;
+          renderCatalog();
+        });
+      }
+
+      function renderCatalog() {
+        const q = state.search.trim().toLowerCase();
+        const filtered = PLUGINS.filter(p => {
+          if (state.catFilter !== "all" && p.category !== state.catFilter) return false;
+          if (state.personaFilter !== "all" && !(p.persona_groups || []).includes(state.personaFilter)) return false;
+          if (q) {
+            const hay = [
+              p.id,
+              p.name,
+              p.description,
+              ...(p.segment_tags || []),
+              ...(p.benchmark?.domain_traps || []),
+              ...(p.skills || []).flatMap(s => [s.id, s.title, s.summary]),
+            ].join(" ").toLowerCase();
+            if (!hay.includes(q)) return false;
+          }
+          return true;
+        });
+
+        const totalSkills = filtered.reduce((acc, p) => acc + (p.skills || []).length, 0);
+        document.getElementById("catalog-count").textContent =
+          `Showing ${filtered.length} of ${PLUGINS.length} plugins (${totalSkills} deterministic Python skills)`;
+
+        const grid = document.getElementById("plugin-grid");
+        const empty = document.getElementById("catalog-empty");
+        if (!filtered.length) {
+          grid.innerHTML = "";
+          empty.hidden = false;
+          return;
+        }
+        empty.hidden = true;
+
+        grid.innerHTML = filtered.map(p => {
+          const bm = p.benchmark || {};
+          const arm2 = bm.flash_arm2 || {};
+          const arm1 = bm.flash_arm1 || {};
+          const wf = typeof arm2.wf === "number" ? arm2.wf.toFixed(2) : "—";
+          const passed = arm2.verdict === "PASS";
+          const chipClass = passed ? "pass" : (typeof arm2.wf === "number" && arm2.wf < 0.8 ? "fail" : "");
+          const sc = scenarioById[bm.scenario_id] || {};
+          const trapTip = `${bm.title || p.name} (${bm.corpus_scale || ""}). ` +
+            `Base Agent: ${typeof arm1.wf === "number" ? arm1.wf.toFixed(2) : "—"} WF (${arm1.verdict || ""}) -> ` +
+            `With Plugin: ${wf} WF (${arm2.verdict || ""}). ` +
+            `Traps: ${(bm.domain_traps || []).join("; ")}.${sc.rubric_audit_note ? " Audit note: " + sc.rubric_audit_note : ""}`;
+
+          const skillRows = (p.skills || []).map((s, idx) => `
+            <button type="button" class="skill-row" data-open-plugin="${esc(p.id)}" data-skill-idx="${idx}" title="${esc(s.title)}">
+              <span class="skill-row-name">${esc(s.id)}</span>
+              <span class="skill-row-arrow">&rarr;</span>
+            </button>
+          `).join("");
+
+          const starterHref = p.starter_file?.rel_path || "#";
+          return `
+            <article class="plugin-card" data-plugin-id="${esc(p.id)}">
+              <div class="card-top">
+                <span class="cat-label">${esc(p.category_label)}</span>
+                <span class="bench-chip ${chipClass}">
+                  ${esc(bm.scenario_id || "")} &middot; ${esc(wf)} WF
+                  ${infoBtnHtml((bm.scenario_id || "Benchmark") + " Ablation Summary", trapTip)}
+                </span>
+              </div>
+              <h3 class="card-title">${esc(p.name)}</h3>
+              <p class="card-desc">${esc(p.description)}</p>
+              <div class="skill-list">${skillRows}</div>
+              <div class="card-footer">
+                <button type="button" class="btn-link" data-open-plugin="${esc(p.id)}" data-skill-idx="">Open Playbook</button>
+                <span class="card-downloads">
+                  <a class="quiet-dl" href="${esc(p.bundle_zip)}" download>Bundle .zip</a>
+                  <a class="quiet-dl" href="${esc(starterHref)}" download>Sample .${esc(p.starter_file?.format || "xlsx")}</a>
+                </span>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      document.getElementById("catalog-search").addEventListener("input", (ev) => {
+        state.search = ev.target.value;
+        renderCatalog();
+      });
+
+      document.querySelectorAll(".seg-btn[data-cat]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.catFilter = btn.dataset.cat;
+          document.querySelectorAll(".seg-btn[data-cat]").forEach(b => b.classList.toggle("active", b === btn));
+          renderCatalog();
+        });
+      });
+
+      document.getElementById("plugin-grid").addEventListener("click", (ev) => {
+        if (ev.target.closest(".info-btn") || ev.target.closest("a.quiet-dl")) return;
+        const trigger = ev.target.closest("[data-open-plugin]");
+        if (!trigger) return;
+        const pid = trigger.getAttribute("data-open-plugin");
+        const rawIdx = trigger.getAttribute("data-skill-idx");
+        const idx = rawIdx === "" || rawIdx === null ? null : Number(rawIdx);
+        openPluginDrawer(pid, idx);
+      });
+
+      // ---------------------------------------------------------------------
+      // Drawer Controller (Shared by Playbook & Scenario Inspection)
+      // ---------------------------------------------------------------------
+      const drawerEl = document.getElementById("drawer");
+      const backdropEl = document.getElementById("drawer-backdrop");
+
+      function closeDrawer() {
+        closePopover();
+        drawerEl.hidden = true;
+        backdropEl.hidden = true;
+        state.drawer.mode = null;
+      }
+
+      document.getElementById("drawer-close").addEventListener("click", closeDrawer);
+      backdropEl.addEventListener("click", closeDrawer);
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape") {
+          if (!popEl.hidden) {
+            closePopover();
+          } else if (!drawerEl.hidden) {
+            closeDrawer();
+          }
+        }
+      });
+
+      function openPluginDrawer(pluginId, skillIdx, subTab) {
+        const p = pluginById[pluginId];
+        if (!p) return;
+        closePopover();
+        state.drawer.mode = "plugin";
+        state.drawer.pluginId = pluginId;
+        state.drawer.skillIdx = skillIdx;
+        state.drawer.subTab = subTab || "usage";
+        renderPluginDrawer();
+        backdropEl.hidden = false;
+        drawerEl.hidden = false;
+      }
+
+      function buildOrgConfigSnippet(p) {
+        const customProps = {};
+        (p.config_properties || []).forEach(prop => {
+          if (!["org_configured", "organization_name", "materiality_amount_threshold"].includes(prop.name)) {
+            customProps[prop.name] = prop.default;
+          }
+        });
+        const obj = {
+          organization_name: "Your Organization",
+          plugins: {
+            [p.id]: customProps,
+          },
+        };
+        return JSON.stringify(obj, null, 2);
+      }
+
+      function renderGovernanceSection(p) {
+        const gov = p.write_governance || {};
+        const actions = gov.gateway_approval_actions || [];
+        const guards = gov.python_code_guardrails || [];
+        const sched = p.scheduled_routine || {};
+        const schedPrompt = sched.title
+          ? `Schedule recurring job "${sched.title}" on cron \`${sched.cron_expression}\` (\`${sched.time_zone}\`) with instruction: "${sched.instruction}"`
+          : "";
+        return `
+          <div class="sec-block">
+            <h4 class="sec-title">
+              Agent Gateway (Auto-Guardian) External Writes
+              ${infoBtnHtml("Agent Gateway & Code Guards", "", "auto_guardian")}
+            </h4>
+            <ul class="clean-list">
+              ${actions.map(a => `<li>${renderInlineMd(a)}</li>`).join("") || "<li>External connector writes require explicit user confirmation.</li>"}
+            </ul>
+          </div>
+          <div class="sec-block">
+            <h4 class="sec-title">Code-Enforced Python Guardrails (scripts/*.py)</h4>
+            <ul class="clean-list">
+              ${guards.map(g => `<li>${renderInlineMd(g)}</li>`).join("") || "<li>Standard schema and domain checks applied.</li>"}
+            </ul>
+          </div>
+          ${sched.title ? `
+            <div class="sec-block">
+              <h4 class="sec-title">Scheduled Routine Contract (schedule_task)</h4>
+              <p style="margin:0 0 6px; font-size:12.5px;">
+                <strong>${esc(sched.title)}</strong> &middot; cron <code>${esc(sched.cron_expression)}</code> &middot; tz <code>${esc(sched.time_zone)}</code>
+              </p>
+              <div class="cmd-box" style="margin-top:0;">
+                <div class="cmd-box-head">
+                  <span>Conversational schedule_task Prompt</span>
+                  <button type="button" class="copy-btn" data-copy="${esc(schedPrompt)}">Copy</button>
+                </div>
+                <p class="prompt-text">${esc(schedPrompt)}</p>
+              </div>
+            </div>
+          ` : ""}
+        `;
+      }
+
+      function renderPluginDrawer() {
+        const p = pluginById[state.drawer.pluginId];
+        if (!p) return;
+        const skills = p.skills || [];
+        const activeSkill = state.drawer.skillIdx !== null ? skills[state.drawer.skillIdx] : null;
+        const sf = p.starter_file || {};
+        const conns = p.connectors || {};
+        const managed1p = conns.managed_1p || [];
+        const byoMcp = conns.byo_mcp || [];
+
+        document.getElementById("drawer-kicker").textContent =
+          `${p.category_label} · v${p.version} · ${p.benchmark?.scenario_id || ""}`;
+        document.getElementById("drawer-title").textContent =
+          activeSkill ? activeSkill.title : p.name;
+        document.getElementById("drawer-subtitle").textContent =
+          activeSkill ? activeSkill.summary : p.description;
+
+        // Skill selector pills
+        const pillsEl = document.getElementById("drawer-pills");
+        pillsEl.innerHTML = [
+          `<button type="button" class="skill-pill ${state.drawer.skillIdx === null ? "active" : ""}" data-select-skill="">Bundle Overview</button>`,
+          ...skills.map((s, idx) =>
+            `<button type="button" class="skill-pill ${state.drawer.skillIdx === idx ? "active" : ""}" data-select-skill="${idx}">${esc(s.id)}</button>`
+          ),
+        ].join("");
+
+        // Download bar
+        const dlBar = document.getElementById("drawer-dl-bar");
+        const starterMeta = sf.format === "xlsx" && sf.tabs?.length
+          ? `${sf.tabs.length} tabs`
+          : (sf.format === "docx" && sf.table_count ? `${sf.table_count} tables` : "");
+        const dlItems = [
+          `<a class="dl-btn ${!activeSkill ? "primary" : ""}" href="${esc(p.bundle_zip)}" download>Bundle .zip</a>`,
+        ];
+        if (activeSkill) {
+          dlItems.push(`<a class="dl-btn primary" href="${esc(activeSkill.skill_zip)}" download>Skill .zip</a>`);
+        }
+        dlItems.push(`<a class="dl-btn" href="${esc(sf.rel_path || "#")}" download>Sandbox .${esc(sf.format || "xlsx")} (${esc(formatBytes(sf.bytes))}${starterMeta ? ", " + esc(starterMeta) : ""})</a>`);
+        dlItems.push(`<a class="dl-btn" href="${esc(activeSkill ? activeSkill.readme_path : p.readme_path)}" target="_blank" rel="noopener">Markdown README</a>`);
+        dlBar.innerHTML = dlItems.join("");
+
+        // Drawer Sub-tabs
+        const tabsEl = document.getElementById("drawer-tabs");
+        const tabs = [
+          { id: "usage", label: "Usage & Prompts" },
+          { id: "sample", label: "Sample Output" },
+          { id: "governance", label: "Schema & Governance" },
+        ];
+        tabsEl.hidden = false;
+        tabsEl.innerHTML = tabs.map(t =>
+          `<button type="button" class="drawer-tab ${state.drawer.subTab === t.id ? "active" : ""}" data-subtab="${t.id}">${t.label}</button>`
+        ).join("");
+
+        const bodyEl = document.getElementById("drawer-body");
+        if (state.drawer.subTab === "usage") {
+          if (!activeSkill) {
+            bodyEl.innerHTML = `
+              <div class="sec-block">
+                <h4 class="sec-title">Included Skills (Pick One for Sample Prompts &amp; Output)</h4>
+                ${skills.map((s, idx) => `
+                  <div class="overview-skill-card">
+                    <div class="overview-skill-head">
+                      <strong>${esc(s.title)}</strong>
+                      <button type="button" class="btn-link" data-jump-skill="${idx}">Open Skill &rarr;</button>
+                    </div>
+                    <p class="prompt-text" style="color:var(--text-secondary);">${esc(s.summary)}</p>
+                  </div>
+                `).join("")}
+              </div>
+              <div class="sec-block">
+                <h4 class="sec-title">Upload &amp; Run in Gemini Enterprise (/work)</h4>
+                <ol class="clean-list">
+                  <li>Download <code>${esc(p.id)}.zip</code> and import it in <strong>Gemini Enterprise (<code>/work</code>) &rarr; <code>Skills</code> &rarr; <code>+</code> &rarr; <code>Upload skill</code> &rarr; <code>Import</code></strong>.</li>
+                  <li>Ensure authorized <code>/work</code> connectors are enabled, or download starter sample <code>${esc(sf.name || "")}</code> (${esc(starterMeta || formatBytes(sf.bytes))}) for an optional offline sandbox test.</li>
+                  <li>Click any skill above to copy connector prompts, <code>pyrepl</code> payload shaping snippets, or conversational <code>schedule_task</code> prompts.</li>
+                  <li>Review computed numbers and confirm any <code>Auto-Guardian</code> approval prompt before external connector writes execute.</li>
+                </ol>
+              </div>
+              <div class="sec-block">
+                <h4 class="sec-title">
+                  Authorized /work Connectors &amp; Python Shaping
+                  ${infoBtnHtml("Two-Layer /work Integration", "", "two_layer")}
+                </h4>
+                <p style="margin:0 0 6px; font-size:12.5px;"><strong>Managed 1P Connectors:</strong> ${managed1p.map(c => `<code>${esc(c)}</code>`).join(" ")}</p>
+                <p style="margin:0 0 6px; font-size:12.5px;"><strong>Customer BYO-MCP:</strong> ${byoMcp.length ? byoMcp.map(c => `<code>${esc(c)}</code>`).join(" ") : "Optional / none required"}</p>
+                <p style="margin:0 0 6px; font-size:12.5px; color:var(--text-secondary);">${esc(conns.connector_fetch_guidance || "")}</p>
+                <p style="margin:0; font-size:12.5px;"><strong>Adapting Custom Exports:</strong> Inspect real tabs, headers, and JSON keys first in <code>pyrepl</code> via <code>scripts/enterprise_io.py</code>, map mismatched fields in Python into a canonical <code>payload</code> dict, and call <code>analyze(payload, config=...)</code>.</p>
+              </div>
+              <div class="sec-block">
+                <h4 class="sec-title">Shared Trap Defenses &amp; Baselines</h4>
+                <p style="margin:0 0 6px; font-size:12.5px;"><strong>Trap Guides:</strong> ${(p.shared_traps || []).map(t => `<code>${esc(t)}</code>`).join(" ")}</p>
+                <p style="margin:0; font-size:12.5px;"><strong>Baselines:</strong> ${(p.shared_baselines || []).map(b => `<code>${esc(b)}</code>`).join(" ") || "Schema defaults only"}</p>
+              </div>
+            `;
+          } else {
+            const sq = activeSkill.sample_queries || {};
+            bodyEl.innerHTML = `
+              <div class="sec-block">
+                <h4 class="sec-title">Who Uses This</h4>
+                <ul class="clean-list">
+                  ${(activeSkill.personas || []).map(per => `<li><strong>${esc(per.role)}:</strong> ${renderInlineMd(per.detail)}</li>`).join("")}
+                </ul>
+              </div>
+              <div class="sec-block">
+                <h4 class="sec-title">Step-by-Step Usage (/work)</h4>
+                <ol class="clean-list">
+                  ${(activeSkill.steps || []).map(st => `<li>${renderInlineMd(st)}</li>`).join("")}
+                </ol>
+              </div>
+              <div class="sec-block">
+                <h4 class="sec-title">
+                  Sample Prompts (Live Connectors First, Sandbox Optional)
+                  ${infoBtnHtml("Two-Layer /work Integration", "", "two_layer")}
+                </h4>
+                <div class="prompt-card">
+                  <div class="prompt-card-head">
+                    <span class="prompt-mode">1. Primary — Live Enterprise Connectors</span>
+                    <button type="button" class="copy-btn" data-copy-id="q-connector">Copy</button>
+                  </div>
+                  <p class="prompt-text" id="q-connector">${renderInlineMd(sq.connector_prompt || "")}</p>
+                </div>
+                <div class="prompt-card">
+                  <div class="prompt-card-head">
+                    <span class="prompt-mode">2. Connected Drive / SharePoint Workbooks &amp; Docs</span>
+                    <button type="button" class="copy-btn" data-copy-id="q-workspace">Copy</button>
+                  </div>
+                  <p class="prompt-text" id="q-workspace">${renderInlineMd(sq.workspace_prompt || "")}</p>
+                </div>
+                <div class="prompt-card">
+                  <div class="prompt-card-head">
+                    <span class="prompt-mode">3. Optional Zero-Connector Sandbox (${esc(sf.name || "Sample")})</span>
+                    <button type="button" class="copy-btn" data-copy-id="q-sandbox">Copy</button>
+                  </div>
+                  <p class="prompt-text" id="q-sandbox">${renderInlineMd(sq.sandbox_prompt || "")}</p>
+                </div>
+              </div>
+              ${activeSkill.schedule_prompt ? `
+                <div class="sec-block">
+                  <h4 class="sec-title">Recurring Monitoring Prompt (schedule_task)</h4>
+                  <div class="prompt-card">
+                    <div class="prompt-card-head">
+                      <span class="prompt-mode">${esc(p.scheduled_routine?.title || "Scheduled Routine")}</span>
+                      <button type="button" class="copy-btn" data-copy-id="q-schedule">Copy</button>
+                    </div>
+                    <p class="prompt-text" id="q-schedule">${esc(activeSkill.schedule_prompt)}</p>
+                  </div>
+                </div>
+              ` : ""}
+              ${activeSkill.inspect_command ? `
+                <div class="sec-block">
+                  <h4 class="sec-title">
+                    Adapting Custom Exports (Inspect &amp; Shape in Python)
+                    ${infoBtnHtml("Python Payload Shaping in pyrepl", "", "schema_mapping")}
+                  </h4>
+                  <div class="cmd-box" style="margin-top:0;">
+                    <div class="cmd-box-head">
+                      <span>Inspect headers in pyrepl &amp; pass canonical payload to analyze()</span>
+                      <button type="button" class="copy-btn" data-copy="${esc(activeSkill.inspect_command)}">Copy</button>
+                    </div>
+                    <pre class="code-pre">${esc(activeSkill.inspect_command)}</pre>
+                  </div>
+                </div>
+              ` : ""}
+              <div class="sec-block">
+                <h4 class="sec-title">Local CLI Execution</h4>
+                <div class="cmd-box" style="margin-top:0;">
+                  <div class="cmd-box-head">
+                    <span><code>${esc(activeSkill.script)}</code></span>
+                    <button type="button" class="copy-btn" data-copy="${esc(activeSkill.cli_command || "")}">Copy</button>
+                  </div>
+                  <pre class="code-pre">${esc(activeSkill.cli_command || "")}</pre>
+                </div>
+              </div>
+            `;
+          }
+        } else if (state.drawer.subTab === "sample") {
+          const s = activeSkill || skills[0];
+          const chat = s.chat_response || {};
+          const bullets = chat.bullets || [];
+          const lastBullet = bullets.length ? bullets[bullets.length - 1] : "";
+          const hasApproval = /Approval Confirmation Prompt/i.test(lastBullet);
+          const bodyBullets = hasApproval ? bullets.slice(0, -1) : bullets;
+          const eng = s.engine_output || {};
+          bodyEl.innerHTML = `
+            ${!activeSkill ? `<p class="sub-muted" style="margin:0 0 12px;">Previewing <strong>${esc(s.title)}</strong> (1 of 3 skills). Select any skill pill above to switch outputs.</p>` : ""}
+            <div class="sec-block">
+              <h4 class="sec-title">What You See in Gemini Enterprise Chat</h4>
+              <div class="chat-box">
+                <p class="chat-intro">${renderInlineMd(chat.intro || "")}</p>
+                <ul class="clean-list">
+                  ${bodyBullets.map(b => `<li>${renderInlineMd(b)}</li>`).join("")}
+                </ul>
+                ${hasApproval ? `<div class="hitl-callout">${renderInlineMd(lastBullet)}</div>` : ""}
+              </div>
+            </div>
+            <div class="sec-block">
+              <h4 class="sec-title">
+                Verified Deterministic Engine Output
+                ${infoBtnHtml("Standard Baseline Stamp", "", "baseline_stamp")}
+              </h4>
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span class="sub-muted">${esc(eng.meta || "")}</span>
+                <button type="button" class="copy-btn" data-copy-id="eng-md-out">Copy output</button>
+              </div>
+              <pre class="engine-pre" id="eng-md-out">${esc(eng.markdown || "")}</pre>
+            </div>
+          `;
+        } else {
+          // Schema & Governance
+          const params = activeSkill && (activeSkill.parameters || []).length
+            ? activeSkill.parameters
+            : (p.config_properties || []).map(c => ({
+                name: c.name,
+                type: c.type,
+                default: c.default,
+                description: c.description,
+              }));
+          const orgSnippet = buildOrgConfigSnippet(p);
+          const cliOrg = `python3 tools/package.py --org-config /tmp/${p.id}-org.json --output-dir /tmp/${p.id}-dist`;
+          bodyEl.innerHTML = `
+            <div class="sec-block">
+              <h4 class="sec-title">
+                ${activeSkill ? "Canonical Inputs &amp; Policy Thresholds" : "Organization Threshold Defaults (config.schema.json)"}
+                ${infoBtnHtml("Python Payload Shaping in pyrepl", "", "schema_mapping")}
+              </h4>
+              ${activeSkill && activeSkill.expected_inputs ? `<p style="margin:0 0 6px; font-size:12.5px;"><strong>Data Contract Inputs:</strong> ${renderInlineMd(activeSkill.expected_inputs)}</p>` : ""}
+              ${activeSkill && activeSkill.required_fields_summary ? `<p style="margin:0 0 8px; font-size:12.5px;"><strong>Required Canonical Field Groups:</strong> ${renderInlineMd(activeSkill.required_fields_summary)}</p>` : ""}
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Type</th>
+                      <th>Default</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${params.map(par => `
+                      <tr>
+                        <td><code>${esc(par.name)}</code></td>
+                        <td>${esc(par.type)}</td>
+                        <td><code>${esc(typeof par.default === "object" ? JSON.stringify(par.default) : par.default)}</code></td>
+                        <td>${renderInlineMd(par.description || "")}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="sec-block">
+              <h4 class="sec-title">
+                Customize Organization Thresholds (--org-config)
+                ${infoBtnHtml("Standard Baseline Stamp", "", "baseline_stamp")}
+              </h4>
+              <div class="cmd-box" style="margin-top:0;">
+                <div class="cmd-box-head">
+                  <span>Tenant JSON (policy &amp; materiality overrides)</span>
+                  <button type="button" class="copy-btn" data-copy="${esc(cliOrg)}">Copy CLI</button>
+                </div>
+                <pre class="code-pre">${esc(orgSnippet)}
+
+# Build stamped zip archives:
+${esc(cliOrg)}</pre>
+              </div>
+            </div>
+            ${renderGovernanceSection(p)}
+          `;
+        }
+      }
+
+      function openScenarioDrawer(scenarioId) {
+        const sc = scenarioById[scenarioId];
+        if (!sc) return;
+        closePopover();
+        state.drawer.mode = "scenario";
+        state.drawer.scenarioId = scenarioId;
+
+        document.getElementById("drawer-kicker").textContent =
+          `${sc.scenario_id} · ${sc.category} · ${sc.corpus_scale}`;
+        document.getElementById("drawer-title").textContent = sc.title;
+        document.getElementById("drawer-subtitle").textContent =
+          `Plugin: ${sc.plugin_name} (${sc.plugin_id})`;
+
+        document.getElementById("drawer-pills").innerHTML = "";
+        document.getElementById("drawer-dl-bar").innerHTML = `
+          <button type="button" class="dl-btn primary" data-open-plugin-from-sc="${esc(sc.plugin_id)}">Open Plugin Playbook</button>
+          <a class="dl-btn" href="../plugins/${esc(sc.plugin_id)}/README.md" target="_blank" rel="noopener">Plugin README</a>
+        `;
+        document.getElementById("drawer-tabs").hidden = true;
+
+        const tiersMeta = [
+          { id: "suite1_flash", label: "Standard Fast Tier (gemini-3.8-flash)" },
+          { id: "suite2_argon", label: "Frontier Reasoning Tier (gemini-4-argon)" },
+          { id: "suite2_ma", label: "Model Armor + DLP Governance (gemini-3.8-flash)" },
+        ];
+        const armOrder = [
+          { id: "arm1_base", label: "Base Agent (No Plugin)" },
+          { id: "arm2_plugins", label: "gemini-agent-plugins" },
+          { id: "arm3_prose_only", label: "Prose-Only Baseline" },
+        ];
+
+        const tierRows = [];
+        tiersMeta.forEach(t => {
+          const armMap = (sc.runs || {})[t.id];
+          if (!armMap) return;
+          armOrder.forEach(a => {
+            const run = armMap[a.id];
+            if (!run) return;
+            const passCls = run.verdict === "PASS" ? "pass" : "fail";
+            tierRows.push(`
+              <tr>
+                <td>${esc(t.label)}</td>
+                <td>${esc(a.label)}</td>
+                <td><span class="status-pill ${passCls}">${esc(run.verdict)}</span></td>
+                <td class="num">${Number(run.composite_score).toFixed(3)}</td>
+                <td class="num">${Number(run.weighted_factuality).toFixed(3)}</td>
+                <td class="num">${Number(run.latency_s).toFixed(1)}s</td>
+                <td>${esc(run.key_differentiator || (run.veto_reasons || []).join("; ") || "")}</td>
+              </tr>
+            `);
+          });
+        });
+
+        document.getElementById("drawer-body").innerHTML = `
+          <div class="sec-block">
+            <h4 class="sec-title">Evaluation Prompt</h4>
+            <div class="prompt-card">
+              <div class="prompt-card-head">
+                <span class="prompt-mode">Surfaces: ${(sc.surfaces || []).join(" · ")}</span>
+                <button type="button" class="copy-btn" data-copy-id="sc-prompt-txt">Copy</button>
+              </div>
+              <p class="prompt-text" id="sc-prompt-txt">${renderInlineMd(sc.prompt)}</p>
+            </div>
+            <p class="sub-muted" style="margin:6px 0 0;"><strong>Files:</strong> ${(sc.corpus_files || []).map(f => `<code>${esc(f)}</code>`).join(" ")}</p>
+          </div>
+          ${sc.rubric_audit_note ? `
+            <div class="sec-block">
+              <div class="hitl-callout"><strong>Rubric Audit Note (v1.0 -&gt; v1.0.1):</strong> ${esc(sc.rubric_audit_note)}</div>
+            </div>
+          ` : ""}
+          <div class="sec-block">
+            <h4 class="sec-title">Cross-Tier Live Run Breakdown</h4>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tier &amp; Model</th>
+                    <th>Arm</th>
+                    <th>Verdict</th>
+                    <th class="num">Comp</th>
+                    <th class="num">WF</th>
+                    <th class="num">Latency</th>
+                    <th>Key Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>${tierRows.join("")}</tbody>
+              </table>
+            </div>
+          </div>
+          <div class="sec-block">
+            <h4 class="sec-title">Domain Traps Verified</h4>
+            <ul class="clean-list">
+              ${(sc.domain_traps || []).map(t => `<li>${esc(t)}</li>`).join("")}
+            </ul>
+          </div>
+          <div class="sec-block">
+            <h4 class="sec-title">Required Claims (${(sc.required_claims || []).length})</h4>
+            <ul class="clean-list">
+              ${(sc.required_claims || []).map(c => `<li>${renderInlineMd(c)}</li>`).join("")}
+            </ul>
+          </div>
+          <div class="sec-block">
+            <h4 class="sec-title">Forbidden Claims (${(sc.forbidden_claims || []).length})</h4>
+            <ul class="clean-list">
+              ${(sc.forbidden_claims || []).map(c => `<li>${renderInlineMd(c)}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+
+        backdropEl.hidden = false;
+        drawerEl.hidden = false;
+      }
+
+      drawerEl.addEventListener("click", (ev) => {
+        if (ev.target.closest(".info-btn")) return;
+
+        const skillBtn = ev.target.closest("[data-select-skill]");
+        if (skillBtn && state.drawer.mode === "plugin") {
+          const val = skillBtn.getAttribute("data-select-skill");
+          state.drawer.skillIdx = val === "" ? null : Number(val);
+          renderPluginDrawer();
+          return;
+        }
+
+        const jumpBtn = ev.target.closest("[data-jump-skill]");
+        if (jumpBtn && state.drawer.mode === "plugin") {
+          state.drawer.skillIdx = Number(jumpBtn.getAttribute("data-jump-skill"));
+          renderPluginDrawer();
+          return;
+        }
+
+        const tabBtn = ev.target.closest("[data-subtab]");
+        if (tabBtn && state.drawer.mode === "plugin") {
+          state.drawer.subTab = tabBtn.getAttribute("data-subtab");
+          renderPluginDrawer();
+          return;
+        }
+
+        const jumpPlugin = ev.target.closest("[data-open-plugin-from-sc]");
+        if (jumpPlugin) {
+          openPluginDrawer(jumpPlugin.getAttribute("data-open-plugin-from-sc"), null);
+          return;
+        }
+      });
+
+      document.addEventListener("click", (ev) => {
+        const copyBtn = ev.target.closest(".copy-btn");
+        if (!copyBtn) return;
+        const direct = copyBtn.getAttribute("data-copy");
+        if (direct !== null) {
+          copyText(direct, copyBtn);
+          return;
+        }
+        const targetId = copyBtn.getAttribute("data-copy-id");
+        if (targetId) {
+          const targetEl = document.getElementById(targetId);
+          if (targetEl) copyText(targetEl.textContent, copyBtn);
+        }
+      });
+
+      // ---------------------------------------------------------------------
+      // View 2: Benchmarks Rendering
+      // ---------------------------------------------------------------------
+      function renderScorecard() {
+        const rows = BENCH.summary_by_tier_arm || [];
+        document.getElementById("scorecard-tbody").innerHTML = rows.map(r => {
+          let tierHtml = esc(r.tier_label);
+          if (r.suite_id === "suite2_argon" && r.arm_id === "arm1_base") {
+            tierHtml += ` <span class="status-pill">Registry-Isolated ${infoBtnHtml("Skill-Registry Isolation", "", "registry_isolation")}</span>`;
+          } else if (r.suite_id === "suite2_ma" && r.arm_id === "arm1_base") {
+            tierHtml += ` ${infoBtnHtml("Model Armor + DLP Governance", "", "model_armor")}`;
+          }
+          const isBest = r.arm_id === "arm2_plugins";
+          const armStyle = isBest ? 'style="font-weight:600;"' : "";
+          return `
+            <tr>
+              <td>${tierHtml}</td>
+              <td ${armStyle}>${esc(r.arm_label)}</td>
+              <td class="num">${r.n}</td>
+              <td class="num">${r.composite_passed} / ${r.n} (${Number(r.composite_pass_rate_pct).toFixed(1)}%)</td>
+              <td class="num">${r.factuality_passed} / ${r.n} (${Number(r.factuality_pass_rate_pct).toFixed(1)}%)</td>
+              <td class="num">${r.perfect_factuality_count} / ${r.n}</td>
+              <td class="num">${r.forbidden_violations}</td>
+              <td class="num">${Number(r.avg_latency_s).toFixed(1)}s</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      function renderCaseStudies() {
+        const list = BENCH.case_studies || [];
+        document.getElementById("case-studies-list").innerHTML = list.map(cs => {
+          const isOpen = state.expandedCases.has(cs.scenario_id);
+          return `
+            <div class="case-item">
+              <button type="button" class="case-summary" data-toggle-case="${esc(cs.scenario_id)}" aria-expanded="${isOpen}">
+                <div class="case-sum-left">
+                  <span class="case-title">${esc(cs.title)}</span>
+                  <span class="case-line">${esc(cs.summary)}</span>
+                </div>
+                <span class="case-toggle">${isOpen ? "Hide details" : "Compare arms"}</span>
+              </button>
+              <div class="case-detail" ${isOpen ? "" : "hidden"}>
+                <div class="case-artifact">Artifact: <code>${esc(cs.artifact)}</code></div>
+                <div class="case-cols">
+                  ${(cs.arms || []).map(arm => {
+                    const cls = arm.verdict === "PASS" ? "pass" : "fail";
+                    return `
+                      <div class="case-arm">
+                        <div class="case-arm-head">
+                          <span class="case-arm-name">${esc(arm.name)}</span>
+                          <span class="status-pill ${cls}">${esc(arm.verdict)}</span>
+                        </div>
+                        <div class="case-arm-meta">${esc(arm.score)} &middot; ${esc(arm.latency)}</div>
+                        <p class="case-arm-text">${esc(arm.outcome)}</p>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      document.getElementById("case-studies-list").addEventListener("click", (ev) => {
+        const btn = ev.target.closest("[data-toggle-case]");
+        if (!btn) return;
+        const id = btn.getAttribute("data-toggle-case");
+        if (state.expandedCases.has(id)) {
+          state.expandedCases.delete(id);
+        } else {
+          state.expandedCases.add(id);
+        }
+        renderCaseStudies();
+      });
+
+      function renderScenariosTable() {
+        const list = (BENCH.scenarios || []).filter(sc => {
+          const flash = (sc.runs || {}).suite1_flash || {};
+          const arm2 = flash.arm2_plugins || {};
+          if (state.scStatus === "pass" && arm2.verdict !== "PASS") return false;
+          if (state.scStatus === "fail" && arm2.verdict === "PASS") return false;
+          if (state.scCat !== "all" && sc.category !== state.scCat) return false;
+          return true;
+        });
+
+        function fmtArmCell(run) {
+          if (!run) return "—";
+          const cls = run.verdict === "PASS" ? "pass" : "fail";
+          const viol = run.forbidden_violations ? " (PII)" : "";
+          return `<span class="status-pill ${cls}">${esc(run.verdict)}${viol}</span> <span class="sub-muted">${Number(run.weighted_factuality).toFixed(2)} WF</span>`;
+        }
+
+        document.getElementById("scenarios-tbody").innerHTML = list.map(sc => {
+          const flash = (sc.runs || {}).suite1_flash || {};
+          return `
+            <tr class="clickable-row" data-open-scenario="${esc(sc.scenario_id)}">
+              <td class="nowrap"><strong>${esc(sc.scenario_id)}</strong></td>
+              <td>
+                <div style="font-weight:500;">${esc(sc.plugin_id)}</div>
+                <div class="sub-muted">${esc(sc.title)}</div>
+              </td>
+              <td class="sub-muted">${esc(sc.corpus_scale)}</td>
+              <td>${fmtArmCell(flash.arm1_base)}</td>
+              <td>${fmtArmCell(flash.arm2_plugins)}</td>
+              <td>${fmtArmCell(flash.arm3_prose_only)}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      document.querySelectorAll(".seg-btn[data-sc-status]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.scStatus = btn.dataset.scStatus;
+          document.querySelectorAll(".seg-btn[data-sc-status]").forEach(b => b.classList.toggle("active", b === btn));
+          renderScenariosTable();
+        });
+      });
+
+      document.getElementById("sc-cat-filter").addEventListener("change", (ev) => {
+        state.scCat = ev.target.value;
+        renderScenariosTable();
+      });
+
+      document.getElementById("scenarios-tbody").addEventListener("click", (ev) => {
+        const row = ev.target.closest("[data-open-scenario]");
+        if (!row) return;
+        openScenarioDrawer(row.getAttribute("data-open-scenario"));
+      });
+
+      function renderLimitations() {
+        const list = BENCH.known_limitations || [];
+        document.getElementById("limitations-list").innerHTML = list.map(item => `
+          <div class="lim-item">
+            <div class="lim-title">${esc(item.title)}</div>
+            <p class="lim-detail">${esc(item.detail)}</p>
+          </div>
+        `).join("");
+      }
+
+      // ---------------------------------------------------------------------
+      // View 3: Quickstart Tabs
+      // ---------------------------------------------------------------------
+      document.querySelectorAll(".qs-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.qs;
+          document.querySelectorAll(".qs-tab").forEach(b => b.classList.toggle("active", b === btn));
+          document.querySelectorAll(".qs-panel").forEach(p => p.classList.toggle("active", p.id === "qs-" + id));
+        });
+      });
+
+      // Boot
+      initPersonaFilter();
+      renderCatalog();
+      renderScorecard();
+      renderCaseStudies();
+      renderScenariosTable();
+      renderLimitations();
+    })();
+  </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - icsr_evaluations
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - valid_4_ich_criteria
   must_not_include_patterns:
   - exported narrative containing unredacted SSN
@@ -17,24 +17,21 @@ deterministic_checks:
   - Checks all 4 ICH minimum criteria strictly without defaulting missing reporter/patient.
   - Applies 7-day fatal/LT SUSAR vs 15-day serious unexpected SLA clocks.
 scenarios:
-- id: mode_a_7day_susar_clock
-  mode: mode_a
-  prompt: Screen Meridian BioPharma safety cases including a fatal unexpected SUSAR
-    aware on 2026-11-05 as of 2026-11-10.
+- id: live_7day_susar_clock
+  mode: live_connector
+  prompt: Screen Meridian BioPharma safety cases including a fatal unexpected SUSAR aware on 2026-11-05 as of 2026-11-10.
   expected_assertions:
   - Assigns 7-Day Fatal/LT SUSAR clock (due 2026-11-12, 2 days left -> EXPEDITED_SIGN_OFF_URGENT).
   - Validates all 4 ICH criteria.
-- id: mode_b_phi_leak_quarantine
-  mode: mode_b
-  prompt: Audit Drive Safety Intake Sheet where a reporter pasted an SSN (123-45-6789)
-    and email in the narrative.
+- id: workspace_phi_leak_quarantine
+  mode: workspace_connector
+  prompt: Audit Drive Safety Intake Sheet where a reporter pasted an SSN (123-45-6789) and email in the narrative.
   expected_assertions:
   - Flags phi_detected=['SSN', 'Email'] and intake_status=PHI_REDACTION_REQUIRED.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_incomplete_ich
-  mode: mode_c
-  prompt: Run icsr_completeness_checker.py on safety_cases.json containing a case
-    missing suspect_drug.
+- id: local_incomplete_ich
+  mode: local_file
+  prompt: Run icsr_completeness_checker.py on safety_cases.json containing a case missing suspect_drug.
   expected_assertions:
   - Marks valid_4_ich_criteria=false and INCOMPLETE_FOLLOWUP_REQUIRED.
   - Preserves QPPV HITL submission gate.

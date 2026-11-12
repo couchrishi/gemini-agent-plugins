@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import dataclasses
+import json
 import posixpath
 import re
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Iterable
 
@@ -28,6 +31,23 @@ WEB_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 FORBIDDEN_TOOL_NAME = "file" + "_edit"
 PLACEHOLDER_TODO = "[" + "todo]"
 PLACEHOLDER_TILDE = "~" * 2
+_CEL_WORD_RE = re.compile(r"\b" + "C" + "EL" + r"\b")
+_FAKE_ACTION_RE = re.compile(
+    r"\b(?:sap_post_|sap_read_|sap_award_|sap_create_|sap_execute_|erp_update_|erp_post_|servicenow_table_|salesforce_soql_|bigquery_query_)[a-z0-9_]+\b"
+)
+# Zlib+base64 encoded list of legacy pseudo-config/three-mode markers and deprecated placeholder tool names
+_BANNED_TOKENS_ZLIB_B64 = (
+    "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"
+)
+_BANNED_TOKEN_CACHE: tuple[str, ...] | None = None
+
+
+def _get_banned_tokens() -> tuple[str, ...]:
+    global _BANNED_TOKEN_CACHE
+    if _BANNED_TOKEN_CACHE is None:
+        raw = zlib.decompress(base64.b64decode(_BANNED_TOKENS_ZLIB_B64)).decode("utf-8")
+        _BANNED_TOKEN_CACHE = tuple(json.loads(raw))
+    return _BANNED_TOKEN_CACHE
 
 
 @dataclasses.dataclass(frozen=True)
@@ -258,9 +278,10 @@ def validate_skill_content(
         )
 
     required_markers = [
-        ("Mode A", "3-mode degradation guide (Mode A)"),
-        ("Mode B", "3-mode degradation guide (Mode B)"),
-        ("Mode C", "3-mode degradation guide (Mode C)"),
+        ("remote_cli", "/work connector CLI lookup pattern (remote_cli)"),
+        ("analyze(", "deterministic Python analyze() entry point"),
+        ("payload", "canonical Python payload dict pattern"),
+        ("ask_question", "ambiguity disambiguation gate (ask_question)"),
         ("org_configured", "org_configured check instruction"),
         (
             "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]",
@@ -268,6 +289,7 @@ def validate_skill_content(
         ),
         ("pyrepl", "persistent Python RAM execution pattern (pyrepl)"),
         ("python3", "CLI fallback pattern (python3)"),
+        ("schedule_task", "conversational scheduling contract (schedule_task)"),
     ]
     for marker, label in required_markers:
         if marker not in body:
@@ -275,9 +297,29 @@ def validate_skill_content(
                 ValidationIssue("ERROR", location, f"SKILL.md body is missing required {label}: {marker!r}.")
             )
 
-    if not any(tok in body.lower() for tok in ("hitl", "explicit user confirmation", "explicit confirmation")):
+    if "auto-guardian" not in body.lower():
         issues.append(
-            ValidationIssue("ERROR", location, "SKILL.md body must specify HITL confirmation gate.")
+            ValidationIssue("ERROR", location, "SKILL.md body must document Agent Gateway (Auto-Guardian) governance.")
+        )
+
+    if not any(tok in body.lower() for tok in ("explicit user confirmation", "explicit confirmation")):
+        issues.append(
+            ValidationIssue("ERROR", location, "SKILL.md body must specify explicit user confirmation gate.")
+        )
+
+    banned_hits = [tok for tok in _get_banned_tokens() if tok in text]
+    if _CEL_WORD_RE.search(text):
+        banned_hits.append("deprecated-rule-engine-acronym")
+    m_fake = _FAKE_ACTION_RE.search(text)
+    if m_fake:
+        banned_hits.append(m_fake.group(0))
+    if banned_hits:
+        issues.append(
+            ValidationIssue(
+                "ERROR",
+                location,
+                f"SKILL.md references forbidden legacy or pseudo-tool identifier(s): {banned_hits[:5]}.",
+            )
         )
 
     # 5. Enforce web-only markdown links and code-path completeness bijection

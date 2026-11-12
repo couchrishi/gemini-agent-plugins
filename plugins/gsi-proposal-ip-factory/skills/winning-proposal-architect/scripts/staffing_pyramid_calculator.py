@@ -237,13 +237,23 @@ def load_payload(
     input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
     *,
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
+    if isinstance(input_arg, (dict, list)):
+        if _ENTERPRISE_IO is not None:
+            return _ENTERPRISE_IO.apply_column_map_to_payload(
+                input_arg,
+                skill_id="winning-proposal-architect",
+                column_map=column_map,
+                sheet_map=sheet_map,
+            )
     if isinstance(input_arg, dict):
         return input_arg
     if isinstance(input_arg, list):
         return {"phases": input_arg}
     if _ENTERPRISE_IO is not None:
-        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="winning-proposal-architect", sheet=sheet)
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="winning-proposal-architect", sheet=sheet, column_map=column_map, sheet_map=sheet_map)
     p = Path(input_arg)
     if p.suffix.lower() == ".csv":
         with p.open("r", encoding="utf-8", newline="") as fh:
@@ -260,9 +270,29 @@ def analyze(
 
     *,
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
+    if _ENTERPRISE_IO is not None:
+        eff_col_map, eff_sheet_map = _ENTERPRISE_IO.merge_mappings(cfg, column_map=column_map, sheet_map=sheet_map)
+    else:
+        eff_col_map, eff_sheet_map = {}, {}
+    data = _strip_null_items(load_payload(payload, sheet=sheet, column_map=eff_col_map, sheet_map=eff_sheet_map))
+    if _ENTERPRISE_IO is not None:
+        schema_diag = _ENTERPRISE_IO.validate_payload_schema(data, skill_id="winning-proposal-architect")
+        if schema_diag["status"] == "SCHEMA_MAPPING_REQUIRED":
+            return _ENTERPRISE_IO.build_schema_error_result(
+                "winning-proposal-architect",
+                schema_diag,
+                org_configured=org_configured,
+                banner=banner,
+                source=payload,
+                config=cfg,
+                column_map=eff_col_map,
+                sheet_map=eff_sheet_map,
+                sheet=sheet,
+            )
 
     min_margin = _to_float(cfg.get("min_sow_gross_margin_pct"), 30.0)
     crit_margin = _to_float(cfg.get("critical_margin_floor_pct"), 20.0)
@@ -348,6 +378,8 @@ def analyze(
 
 
 def render_markdown(result: dict[str, Any]) -> str:
+    if result.get("status") == "SCHEMA_MAPPING_REQUIRED" and _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.format_schema_mapping_markdown(result)
     lines: list[str] = []
     if result.get("baseline_banner"):
         lines.extend([result["baseline_banner"], ""])
@@ -382,17 +414,35 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Compute GSI delivery staffing pyramid, leverage, and margin.")
     parser.add_argument("--input", required=True, type=Path, help="Path to proposal staffing JSON")
     parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
-    parser.add_argument("--config", type=Path, help="Optional config.json path")
+    parser.add_argument("--config", "--org-config", dest="config", type=Path, help="Optional config.json path")
+    parser.add_argument("--column-map", help="Optional JSON or k=v header/field mapping")
+    parser.add_argument("--sheet-map", help="Optional JSON or k=v worksheet/table mapping")
+    parser.add_argument("--inspect", action="store_true", help="Fast schema inspection (<100ms) with suggested column_map")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional output file path")
     args = parser.parse_args(argv)
-    result = analyze(args.input, config=args.config, sheet=args.sheet)
+    if args.inspect and _ENTERPRISE_IO is not None:
+        diag = _ENTERPRISE_IO.inspect_enterprise_source(
+            args.input,
+            skill_id="winning-proposal-architect",
+            config=args.config,
+            sheet=args.sheet,
+            column_map=args.column_map,
+            sheet_map=args.sheet_map,
+        )
+        out = json.dumps(diag, indent=2, default=str)
+        if args.output:
+            args.output.write_text(out + "\n", encoding="utf-8")
+        else:
+            print(out)
+        return 2 if diag.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
+    result = analyze(args.input, config=args.config, sheet=args.sheet, column_map=args.column_map, sheet_map=args.sheet_map)
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(out + "\n", encoding="utf-8")
     else:
         print(out)
-    return 0
+    return 2 if result.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
 
 
 if __name__ == "__main__":

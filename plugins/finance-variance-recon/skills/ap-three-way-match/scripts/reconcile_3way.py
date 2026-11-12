@@ -252,11 +252,16 @@ def load_config(config_arg: str | Path | dict[str, Any] | None) -> tuple[dict[st
     return cfg, org_cfg, ("" if org_cfg else BASELINE_BANNER)
 
 
-def _read_table(path: Path, sheet: str | None = None) -> list[dict[str, Any]]:
+def _read_table(
+    path: Path,
+    sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+) -> list[dict[str, Any]]:
     if _ENTERPRISE_IO is not None:
         return _ENTERPRISE_IO.read_enterprise_table(
             path,
             sheet=sheet,
+            column_map=column_map,
             fallback_keys=("rows", "items", "records", "invoices", "purchase_orders", "goods_receipts"),
         )
     if path.suffix.lower() == ".csv":
@@ -279,23 +284,42 @@ def load_payload(
     gr_path: str | Path | None = None,
     invoice_path: str | Path | None = None,
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
-    if isinstance(input_arg, dict):
-        data: dict[str, Any] = dict(input_arg)
-    elif input_arg is not None and _ENTERPRISE_IO is not None:
-        data = _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="ap-three-way-match", sheet=sheet)
-    elif input_arg is not None:
-        data = json.loads(Path(input_arg).read_text(encoding="utf-8"))
+    if input_arg is None:
+        data: dict[str, Any] = {}
+    elif isinstance(input_arg, (dict, list)):
+        if _ENTERPRISE_IO is not None:
+            data = _ENTERPRISE_IO.apply_column_map_to_payload(
+                input_arg,
+                skill_id="ap-three-way-match",
+                column_map=column_map,
+                sheet_map=sheet_map,
+            )
+        elif isinstance(input_arg, dict):
+            data = dict(input_arg)
+        else:
+            data = {"invoices": input_arg}
+    elif _ENTERPRISE_IO is not None:
+        data = _ENTERPRISE_IO.load_enterprise_payload(
+            input_arg,
+            skill_id="ap-three-way-match",
+            sheet=sheet,
+            column_map=column_map,
+            sheet_map=sheet_map,
+        )
     else:
-        data = {}
+        data = json.loads(Path(input_arg).read_text(encoding="utf-8"))
     if po_path is not None:
-        data["purchase_orders"] = _read_table(Path(po_path), sheet=sheet)
+        data["purchase_orders"] = _read_table(Path(po_path), sheet=sheet, column_map=column_map)
     if gr_path is not None:
-        data["goods_receipts"] = _read_table(Path(gr_path), sheet=sheet)
+        data["goods_receipts"] = _read_table(Path(gr_path), sheet=sheet, column_map=column_map)
     if invoice_path is not None:
-        data["invoices"] = _read_table(Path(invoice_path), sheet=sheet)
+        data["invoices"] = _read_table(Path(invoice_path), sheet=sheet, column_map=column_map)
+    if _ENTERPRISE_IO is not None and (po_path is not None or gr_path is not None or invoice_path is not None):
+        data = _ENTERPRISE_IO._rollup_nested_records(data, skill_id="ap-three-way-match")
     return data
-
 
 def _normalize_amount(
     raw_amount: float,
@@ -323,11 +347,30 @@ def analyze(
     po_path: str | Path | None = None,
     gr_path: str | Path | None = None,
     invoice_path: str | Path | None = None,
-
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
+    if _ENTERPRISE_IO is not None:
+        eff_col_map, eff_sheet_map = _ENTERPRISE_IO.merge_mappings(cfg, column_map=column_map, sheet_map=sheet_map)
+    else:
+        eff_col_map, eff_sheet_map = {}, {}
+    data = _strip_null_items(load_payload(payload, po_path=po_path, gr_path=gr_path, invoice_path=invoice_path, sheet=sheet, column_map=eff_col_map, sheet_map=eff_sheet_map))
+    if _ENTERPRISE_IO is not None:
+        schema_diag = _ENTERPRISE_IO.validate_payload_schema(data, skill_id="ap-three-way-match")
+        if schema_diag["status"] == "SCHEMA_MAPPING_REQUIRED":
+            return _ENTERPRISE_IO.build_schema_error_result(
+                "ap-three-way-match",
+                schema_diag,
+                org_configured=org_configured,
+                banner=banner,
+                source=payload if payload is not None else (invoice_path if invoice_path is not None else data),
+                config=cfg,
+                column_map=eff_col_map,
+                sheet_map=eff_sheet_map,
+                sheet=sheet,
+            )
 
     fx_rates = {str(k).upper(): (_to_opt_float(v) if _to_opt_float(v) is not None else 1.0) for k, v in _as_dict(data.get("fx_rates"), {"USD": 1.0}).items()}
     decimals_map = {str(k).upper(): (_to_opt_int(v) if _to_opt_int(v) is not None else 2) for k, v in _as_dict(data.get("decimal_places")).items()}
@@ -544,6 +587,8 @@ def analyze(
 
 
 def render_markdown(result: dict[str, Any]) -> str:
+    if result.get("status") == "SCHEMA_MAPPING_REQUIRED" and _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.format_schema_mapping_markdown(result)
     lines: list[str] = []
     if result.get("baseline_banner"):
         lines.extend([result["baseline_banner"], ""])
@@ -580,19 +625,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--gr", type=Path, help="Optional separate Goods Receipt JSON/CSV file")
     parser.add_argument("--invoice", type=Path, help="Optional separate Invoice JSON/CSV file")
     parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
-    parser.add_argument("--config", type=Path, help="Optional config.json path")
+    parser.add_argument("--config", "--org-config", dest="config", type=Path, help="Optional config.json path")
+    parser.add_argument("--column-map", help="Optional JSON or k=v header/field mapping")
+    parser.add_argument("--sheet-map", help="Optional JSON or k=v worksheet/table mapping")
+    parser.add_argument("--inspect", action="store_true", help="Fast schema inspection (<100ms) with suggested column_map")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional output file path")
     args = parser.parse_args(argv)
-    if args.input is None and args.invoice is None:
+    if args.input is None and args.invoice is None and args.po is None and args.gr is None:
         parser.error("Provide either --input or --po/--gr/--invoice files.")
-    result = analyze(args.input, config=args.config, po_path=args.po, gr_path=args.gr, invoice_path=args.invoice, sheet=args.sheet)
+    if args.inspect and _ENTERPRISE_IO is not None:
+        if args.input is not None:
+            inspect_target: Any = args.input
+        else:
+            inspect_target = {}
+            if args.po is not None:
+                inspect_target["purchase_orders"] = _read_table(args.po, sheet=args.sheet, column_map=args.column_map)
+            if args.gr is not None:
+                inspect_target["goods_receipts"] = _read_table(args.gr, sheet=args.sheet, column_map=args.column_map)
+            if args.invoice is not None:
+                inspect_target["invoices"] = _read_table(args.invoice, sheet=args.sheet, column_map=args.column_map)
+        diag = _ENTERPRISE_IO.inspect_enterprise_source(
+            inspect_target,
+            skill_id="ap-three-way-match",
+            config=args.config,
+            sheet=args.sheet,
+            column_map=args.column_map,
+            sheet_map=args.sheet_map,
+        )
+        out = json.dumps(diag, indent=2, default=str)
+        if args.output:
+            args.output.write_text(out + "\n", encoding="utf-8")
+        else:
+            print(out)
+        return 2 if diag.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
+    if not args.inspect and args.input is None and args.invoice is None:
+        parser.error("Provide either --input or --po/--gr/--invoice files.")
+    result = analyze(args.input, config=args.config, po_path=args.po, gr_path=args.gr, invoice_path=args.invoice, sheet=args.sheet, column_map=args.column_map, sheet_map=args.sheet_map)
     out = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(out + "\n", encoding="utf-8")
     else:
         print(out)
-    return 0
+    return 2 if result.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
 
 
 if __name__ == "__main__":

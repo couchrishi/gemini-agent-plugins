@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - campaign_evaluations
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - net_incremental_gm_usd
   must_not_include_patterns:
   - ignored cannibalization on deep discount
@@ -17,23 +17,20 @@ deterministic_checks:
   - Normalizes multi-week baseline to exact promo_days before lift calculation.
   - Deducts sibling cannibalization and promo execution cost cleanly.
 scenarios:
-- id: mode_a_cannibalization_net_loss
-  mode: mode_a
-  prompt: Evaluate Northstar Retail 7-day beverage promo with $18k cannibalization
-    loss and $12k media spend against 28-day baseline.
+- id: live_cannibalization_net_loss
+  mode: live_connector
+  prompt: Evaluate Northstar Retail 7-day beverage promo with $18k cannibalization loss and $12k media spend against 28-day baseline.
   expected_assertions:
-  - Normalizes 28d baseline to 7d run rate and classifies deep-discount net loss as
-    MARGIN_DESTRUCTIVE.
+  - Normalizes 28d baseline to 7d run rate and classifies deep-discount net loss as MARGIN_DESTRUCTIVE.
   - Calculates exact promo_roi_ratio.
-- id: mode_b_sheets_halo_attribution
-  mode: mode_b
-  prompt: Check Merchandising Promo Sheet with vendor coop funding and cross-category
-    basket halo.
+- id: workspace_sheets_halo_attribution
+  mode: workspace_connector
+  prompt: Check Merchandising Promo Sheet with vendor coop funding and cross-category basket halo.
   expected_assertions:
   - Includes vendor_funding_rebate_usd and halo_gm_gain_usd in net_incremental_gm_usd.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_promo_json
-  mode: mode_c
+- id: local_local_promo_json
+  mode: local_file
   prompt: Execute promo_lift_analyzer.py on promos.json.
   expected_assertions:
   - Ranks campaigns by net_incremental_gm_usd descending.
@@ -44,8 +41,7 @@ rubric:
   description: Scales baseline units, revenue, and GM to promo_days accurately.
 - criterion: net_margin_waterfall
   weight: 0.35
-  description: Combines direct incremental GM, halo, cannibalization, coop funding,
-    and execution cost.
+  description: Combines direct incremental GM, halo, cannibalization, coop funding, and execution cost.
 - criterion: baseline_and_hitl_discipline
   weight: 0.25
   description: Applies baseline disclosure and merchant HITL gate.

@@ -9,7 +9,7 @@ deterministic_checks:
   - defect_pareto
   - anomalous_supplier_lots
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - vital_80_driver
   must_not_include_patterns:
   - approved CapEx above payback hurdle automatically
@@ -18,22 +18,20 @@ deterministic_checks:
   - Computes cumulative % of scrap cost to tag vital 80% Pareto causes.
   - Isolates supplier lots >= 2.0x plant average scrap cost.
 scenarios:
-- id: mode_a_lot_spike_pareto
-  mode: mode_a
-  prompt: Analyze Apex Manufacturing CNC plant scrap events across supplier lots and
-    shifts.
+- id: live_lot_spike_pareto
+  mode: live_connector
+  prompt: Analyze Apex Manufacturing CNC plant scrap events across supplier lots and shifts.
   expected_assertions:
   - Identifies top 80% scrap drivers and flags lot >= 2x plant average.
   - Ranks anomalous_supplier_lots by ratio_to_avg.
-- id: mode_b_sheets_capex_payback
-  mode: mode_b
-  prompt: Evaluate Drive Quality Sheet proposing a $180k vision inspection cell saving
-    $120k/yr vs $300k saving $60k/yr.
+- id: workspace_sheets_capex_payback
+  mode: workspace_connector
+  prompt: Evaluate Drive Quality Sheet proposing a $180k vision inspection cell saving $120k/yr vs $300k saving $60k/yr.
   expected_assertions:
   - Marks 1.50yr proposal meets_payback_hurdle=true and 5.00yr false.
   - Applies baseline banner when org_configured is false.
-- id: mode_c_local_scrap_json
-  mode: mode_c
+- id: local_local_scrap_json
+  mode: local_file
   prompt: Run defect_pareto_correlator.py on quality_events.json.
   expected_assertions:
   - Reconciles sum of defect scrap_cost_usd to total cleanly.
@@ -41,8 +39,7 @@ scenarios:
 rubric:
 - criterion: pareto_and_lot_statistics
   weight: 0.45
-  description: Computes cost-weighted 80/20 cumulative shares and lot spike ratios
-    cleanly.
+  description: Computes cost-weighted 80/20 cumulative shares and lot spike ratios cleanly.
 - criterion: capex_payback_math
   weight: 0.3
   description: Evaluates CapEx payback years accurately against hurdle.

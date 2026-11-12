@@ -13,6 +13,7 @@
     "compliance"
   ],
   "description": "Evaluates citizen benefits/aid eligibility with strict missing-document cure holds (never silent denials) and SSN redaction, scores public procurement tenders after mandatory debarment/COI pass-fail gates, and validates research grant budgets (F&A indirect caps, unallowables, PI effort) plus accreditation evidence freshness.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "citizen-case-eligibility-triager",
@@ -40,11 +41,37 @@
     "commercial-contract-baseline.md",
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/public-sector-higher-ed-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-accreditation-evidence-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "ServiceNow",
+      "BigQuery",
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Box"
+    ],
+    "byo_mcp": [
+      "Grants Management & Procurement Portal MCP server"
+    ],
+    "connector_fetch_guidance": "Query citizen benefit case packets, sealed vendor tender matrices, and sponsored research budgets/PI effort logs from ServiceNow, BigQuery, Drive, or Grants/Procurement MCP servers via remote_cli mcp before Python compliance validation."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Issuing statutory citizen benefit eligibility determinations or cure notices via ServiceNow/Case MCP",
+      "Recording procurement tender award selections via customer Procurement Portal MCP",
+      "Submitting federal/sponsor grant budget certifications via customer Grants Management MCP"
+    ],
+    "python_code_guardrails": [
+      "Debarred/ineligible vendor hard disqualification blocking award when zero compliant bids exist",
+      "MTDC indirect-cost exemption exclusion (equipment/subawards >$25k), unallowable cost blocker, and PI >100% effort cap",
+      "Deterministic PENDING_CURE_NOTICE handling preventing silent denial of incomplete citizen packets"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-accreditation-evidence-watch",
+    "title": "Weekly Grant & Accreditation Evidence Watch",
+    "cron_expression": "0 8 * * 1",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly sponsored grant allowability and accreditation artifact freshness check via scripts/grant_accreditation_validator.py across active institutional packets."
+  }
 }

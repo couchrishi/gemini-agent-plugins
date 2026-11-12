@@ -1,48 +1,48 @@
 skill_id: pipeline-hygiene-slippage
 plugin_id: deal-desk-rfp-engine
-version: "1.0"
+version: '1.0'
 deterministic_checks:
   expected_script: scripts/pipeline_slippage_auditor.py
   required_output_keys:
-    - baseline_mode
-    - summary
-    - flagged_opportunities
+  - baseline_mode
+  - summary
+  - flagged_opportunities
   must_include_patterns:
-    - "[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]"
-    - "fx_normalized"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
+  - fx_normalized
   must_not_include_patterns:
-    - "summed mixed currencies without FX conversion"
-    - "updated CRM close date without approval"
+  - summed mixed currencies without FX conversion
+  - updated CRM close date without approval
   hitl_required_for_mutations: true
   trap_checks:
-    - "Normalizes multi-currency deals via fx_rates and isolates unmapped currencies."
-    - "Detects StageName vs is_closed contradictions and SOQL truncation."
+  - Normalizes multi-currency deals via fx_rates and isolates unmapped currencies.
+  - Detects StageName vs is_closed contradictions and SOQL truncation.
 scenarios:
-  - id: mode_a_multicurrency_pipeline
-    mode: mode_a
-    prompt: "Audit USD, EUR, and JPY Salesforce pipeline against $4M quota."
-    expected_assertions:
-      - "Converts EUR and JPY into USD using fx_rates before coverage calculation."
-      - "Flags SOQL batch truncation if totalSize > fetched."
-  - id: mode_b_commit_hygiene
-    mode: mode_b
-    prompt: "Inspect Revenue Ops Pipeline Sheet for single-threaded Commit deals."
-    expected_assertions:
-      - "Flags Commit deals with < 2 contacts, missing economic_buyer, or push_count >= 2."
-      - "Stamps baseline header when org_configured is false."
-  - id: mode_c_missing_fx_and_contradiction
-    mode: mode_c
-    prompt: "Audit pipeline.json containing unmapped AUD deal and closed-stage anomaly."
-    expected_assertions:
-      - "Emits FX_CONVERSION_GAP and STAGE_CONTRADICTION flags."
-      - "Excludes closed deals from open pipeline totals."
+- id: live_multicurrency_pipeline
+  mode: live_connector
+  prompt: Audit USD, EUR, and JPY Salesforce pipeline against $4M quota.
+  expected_assertions:
+  - Converts EUR and JPY into USD using fx_rates before coverage calculation.
+  - Flags SOQL batch truncation if totalSize > fetched.
+- id: workspace_commit_hygiene
+  mode: workspace_connector
+  prompt: Inspect Revenue Ops Pipeline Sheet for single-threaded Commit deals.
+  expected_assertions:
+  - Flags Commit deals with < 2 contacts, missing economic_buyer, or push_count >= 2.
+  - Stamps baseline header when org_configured is false.
+- id: local_missing_fx_and_contradiction
+  mode: local_file
+  prompt: Audit pipeline.json containing unmapped AUD deal and closed-stage anomaly.
+  expected_assertions:
+  - Emits FX_CONVERSION_GAP and STAGE_CONTRADICTION flags.
+  - Excludes closed deals from open pipeline totals.
 rubric:
-  - criterion: fx_and_denominator_rigor
-    weight: 0.4
-    description: Prevents nominal currency mixing and computes exact quota coverage ratio.
-  - criterion: slippage_and_meddpicc_detection
-    weight: 0.35
-    description: Catches stale stages, chronic pushes, single-threading, and missing buyer/next step.
-  - criterion: truncation_and_hitl_safety
-    weight: 0.25
-    description: Surfaces truncated SOQL fetches and blocks unapproved CRM mutations.
+- criterion: fx_and_denominator_rigor
+  weight: 0.4
+  description: Prevents nominal currency mixing and computes exact quota coverage ratio.
+- criterion: slippage_and_meddpicc_detection
+  weight: 0.35
+  description: Catches stale stages, chronic pushes, single-threading, and missing buyer/next step.
+- criterion: truncation_and_hitl_safety
+  weight: 0.25
+  description: Surfaces truncated SOQL fetches and blocks unapproved CRM mutations.

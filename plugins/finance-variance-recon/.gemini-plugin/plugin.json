@@ -3,8 +3,18 @@
   "name": "Finance Variance, 3-Way Match & AR Reconciliation",
   "version": "1.0.0",
   "category": "horizontal",
-  "segment_tags": ["cross-industry", "finance", "fp&a", "ap", "ar", "erp", "sap", "bigquery"],
+  "segment_tags": [
+    "cross-industry",
+    "finance",
+    "fp&a",
+    "ap",
+    "ar",
+    "erp",
+    "sap",
+    "bigquery"
+  ],
   "description": "Reconciles AP 3-way PO/GR/Invoice matches with SAP TCURX/SHKZG guards and duplicate/bank-change fraud holds, builds constant-currency P&L variance bridges without summary double-counting, and audits AR aging buckets with strict credit-memo isolation.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "ap-three-way-match",
@@ -32,11 +42,37 @@
   "shared_baselines": [
     "finance-materiality-baseline.md"
   ],
-  "agent_templates": [
-    "agents/finance-variance-recon-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-ap-grir-exception-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs",
+      "Gmail",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)"
+    ],
+    "byo_mcp": [
+      "SAP S/4HANA / Oracle ERP MCP server"
+    ],
+    "connector_fetch_guidance": "Pull PO, Goods Receipt, Invoice, GL actual/budget hierarchy, and AR open-item ledgers from BigQuery, Google Sheets, SharePoint, or customer SAP/Oracle ERP MCP servers via remote_cli mcp before running Python reconciliation engines."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Releasing AP invoice payment batches or posting GL/AP entries via customer ERP MCP",
+      "Updating vendor remittance or bank master records in ERP (never auto-executed from email)",
+      "Sending external customer AR collections or dunning emails via Gmail or Outlook"
+    ],
+    "python_code_guardrails": [
+      "TCURX zero/3-decimal scaling (JPY/KRW x100, KWD/BHD x0.1), SHKZG='H' sign inversion, and BEC bank-change FRAUD_HOLD",
+      "GL summary-vs-leaf exclusion preventing parent rollup double-counting beyond hierarchy_tolerance_amount",
+      "AR credit-memo isolation so negative credits never mask 90+ days past-due delinquency"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-ap-grir-exception-watch",
+    "title": "Daily AP & GR/IR Exception Watch",
+    "cron_expression": "0 6 * * 1-5",
+    "time_zone": "UTC",
+    "instruction": "Run the weekday morning AP 3-way match sweep using scripts/reconcile_3way.py across open vendor invoices, purchase orders, and goods receipts. Surface duplicate invoice suspects, bank-change holds, TCURX decimal mismatches, and price/quantity exceptions for AP Controller review without releasing payments."
+  }
 }

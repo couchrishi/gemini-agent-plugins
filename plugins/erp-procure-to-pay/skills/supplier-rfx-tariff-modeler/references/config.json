@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "default_currency": "USD",
   "gr_ir_aging_threshold_days": 60,
   "clearing_tolerance_usd": 5.0,

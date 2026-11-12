@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "min_images": 2,
   "low_price_ratio_threshold": 0.35,
   "high_price_multiplier_threshold": 4.0,

@@ -41,7 +41,7 @@
 
 1. **RaaS & WQL Pagination Completeness:** Workday REST/WQL APIs paginate via `offset` & `limit` (often `100` rows per page). Always compare returned count vs `total` and preserve `truncated=True` warnings inside `truncation_warnings`.
 2. **Structured Interview Calibration (`candidate_rubric_scorer.py`):** Flag interviewer panel spread whenever `max(scores) - min(scores) >= 2.0` (`max_score_spread`), require behavioral evidence `>= 40` characters (`min_evidence_chars`), and scan notes for protected-class bias terms (`age`, `family plans`, `maternity`, `culture fit` clichés).
-3. **Strict HITL Compensation & HRIS Mutation Hold:** Launching Workday merit cycles, approving pay exceptions, or syncing HRIS status updates requires `explicit_per_call` confirmation under `policy.cel`; only private Google Docs/Sheets summaries run automatically.
+3. **Strict HITL Compensation & HRIS Mutation Hold:** Updating compensation bands, advancing candidate offers, or syncing HRIS status updates via a connected Workday/ATS MCP server requires Agent Gateway (`Auto-Guardian`) approval and explicit HRBP/Lead confirmation; only read-only analysis and private summaries run automatically.
 
 ```python
 def annualize_worker_pay(raw_pay: float, pay_period: str, fx_rate: float, annual_hours: int = 2080) -> float:
@@ -73,7 +73,7 @@ def annualize_worker_pay(raw_pay: float, pay_period: str, fx_rate: float, annual
 1. Reconcile `raw_row_count - historical_snapshots_collapsed - future_dated_isolated - contingent_worker_isolated == unique_fte_count` before computing any department metric.
 2. Assert every hourly and monthly worker converts to annual USD prior to dividing by `band_midpoint_usd`.
 3. Verify `avg_compa_ratio` and `attrition_pct` return `None` in JSON and `"Suppressed (n < 5)"` in Markdown whenever a slice contains fewer than `5` employees.
-4. Route every compensation band adjustment, offer extension, or Workday mass-change behind `explicit_per_call` HITL approval.
+4. Route every compensation band adjustment, offer extension, or Workday mass-change behind Agent Gateway (`Auto-Guardian`) and explicit HITL confirmation.
 
 ## 6. Effective-Date Deduplication Reference Logic
 

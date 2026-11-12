@@ -10,7 +10,7 @@ deterministic_checks:
   - pi_effort_findings
   - accreditation_artifact_findings
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - BLOCKED_REMEDIATE_BEFORE_SUBMISSION
   must_not_include_patterns:
   - submitted budget containing lobbying or >100% PI effort
@@ -19,22 +19,20 @@ deterministic_checks:
   - Excludes mtdc_exempt items from F&A ceiling calculation accurately.
   - Catches >100% combined PI effort, unallowables, and stale artifacts.
 scenarios:
-- id: mode_a_fa_cap_and_unallowable
-  mode: mode_a
-  prompt: Audit Cascade State University grant packet with $4k lobbying line, excess
-    F&A above 52% MTDC, and 115% PI effort.
+- id: live_fa_cap_and_unallowable
+  mode: live_connector
+  prompt: Audit Cascade State University grant packet with $4k lobbying line, excess F&A above 52% MTDC, and 115% PI effort.
   expected_assertions:
   - Flags UNALLOWABLE_COST_CATEGORY, FA_CAP_EXCEEDED, and PI_OVERALLOCATED_GT_100_PCT.
   - Sets submission_readiness=BLOCKED_REMEDIATE_BEFORE_SUBMISSION.
-- id: mode_b_drive_stale_evidence
-  mode: mode_b
-  prompt: Verify Accreditation Evidence Folder Sheet in Drive with 420-day-old lab
-    safety certification.
+- id: workspace_drive_stale_evidence
+  mode: workspace_connector
+  prompt: Verify Accreditation Evidence Folder Sheet in Drive with 420-day-old lab safety certification.
   expected_assertions:
   - Flags STALE_EVIDENCE (>365d) alongside cost-share shortfalls.
   - Includes baseline banner when org_configured is false.
-- id: mode_c_local_grant_json
-  mode: mode_c
+- id: local_local_grant_json
+  mode: local_file
   prompt: Run grant_accreditation_validator.py on grant_packet.json.
   expected_assertions:
   - Computes exact MTDC base and max_allowed_indirect_usd.
@@ -42,12 +40,10 @@ scenarios:
 rubric:
 - criterion: mtdc_and_allowability_math
   weight: 0.45
-  description: Computes MTDC base excluding exempt/unallowable lines and checks F&A
-    cap accurately.
+  description: Computes MTDC base excluding exempt/unallowable lines and checks F&A cap accurately.
 - criterion: effort_and_freshness_checks
   weight: 0.3
-  description: Detects >100% PI effort commitments and stale/missing accreditation
-    artifacts.
+  description: Detects >100% PI effort commitments and stale/missing accreditation artifacts.
 - criterion: baseline_and_hitl_gate
   weight: 0.25
   description: Preserves baseline disclosure and Sponsored Programs HITL sign-off.

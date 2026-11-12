@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - landed_cost_models
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - annual_landed_cost_usd
   must_not_include_patterns:
   - awarded supplier without tariff duty calculation
@@ -17,22 +17,20 @@ deterministic_checks:
   - Applies shock tariffs selectively to shocked origin countries when configured.
   - Evaluates MOQ feasibility before ranking lowest unit FOB.
 scenarios:
-- id: mode_a_tariff_shock_sim
-  mode: mode_a
-  prompt: Model a +25% tariff shock on CN origin quotes vs VN and MX bids for Apex
-    Manufacturing.
+- id: live_tariff_shock_sim
+  mode: live_connector
+  prompt: Model a +25% tariff shock on CN origin quotes vs VN and MX bids for Apex Manufacturing.
   expected_assertions:
   - Shifts rank order accurately once landed duty is added.
   - Computes annual_savings_vs_worst_usd cleanly.
-- id: mode_b_sheets_moq_financing
-  mode: mode_b
-  prompt: Compare supplier quotes in our Drive RFx Sheet including Net 90 vs Net 30
-    financing value.
+- id: workspace_sheets_moq_financing
+  mode: workspace_connector
+  prompt: Compare supplier quotes in our Drive RFx Sheet including Net 90 vs Net 30 financing value.
   expected_assertions:
   - Adjusts landed cost for working-capital cost of capital and defect PPM.
   - Emits baseline banner when org_configured is false.
-- id: mode_c_local_rfx_rank
-  mode: mode_c
+- id: local_local_rfx_rank
+  mode: local_file
   prompt: Simulate landed_cost_simulator.py on rfx_bids.json with +15% tariff shock.
   expected_assertions:
   - Produces deterministic cost_rank and preserves HITL award gate.
@@ -40,8 +38,7 @@ scenarios:
 rubric:
 - criterion: landed_cost_formula_accuracy
   weight: 0.45
-  description: Includes FOB, freight, insurance, duties, working capital, and defect
-    risk.
+  description: Includes FOB, freight, insurance, duties, working capital, and defect risk.
 - criterion: shock_and_moq_logic
   weight: 0.3
   description: Models incremental tariffs and MOQ feasibility properly.

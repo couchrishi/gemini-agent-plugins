@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "lol_cap_months_min": 12,
   "lol_cap_months_max": 24,
   "super_cap_multiplier_max": 3.0,

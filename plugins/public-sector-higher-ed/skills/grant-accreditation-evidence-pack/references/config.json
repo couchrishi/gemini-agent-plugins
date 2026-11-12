@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "base_fpl_single_usd": 15060.0,
   "eligibility_fpl_multiplier": 2.0,
   "statutory_cure_window_days": 15,

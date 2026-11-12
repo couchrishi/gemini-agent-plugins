@@ -261,13 +261,23 @@ def load_payload(
     input_arg: str | Path | dict[str, Any] | list[dict[str, Any]],
     *,
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
+    if isinstance(input_arg, (dict, list)):
+        if _ENTERPRISE_IO is not None:
+            return _ENTERPRISE_IO.apply_column_map_to_payload(
+                input_arg,
+                skill_id="cross-source-knowledge-synthesis",
+                column_map=column_map,
+                sheet_map=sheet_map,
+            )
     if isinstance(input_arg, dict):
         return input_arg
     if isinstance(input_arg, list):
         return {"sources": input_arg}
     if _ENTERPRISE_IO is not None:
-        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="cross-source-knowledge-synthesis", sheet=sheet)
+        return _ENTERPRISE_IO.load_enterprise_payload(input_arg, skill_id="cross-source-knowledge-synthesis", sheet=sheet, column_map=column_map, sheet_map=sheet_map)
     p = Path(input_arg)
     if p.suffix.lower() == ".csv":
         with p.open("r", encoding="utf-8", newline="") as fh:
@@ -313,9 +323,29 @@ def analyze(
 
     *,
     sheet: str | None = None,
+    column_map: dict[str, str] | str | None = None,
+    sheet_map: dict[str, str] | str | None = None,
 ) -> dict[str, Any]:
-    data = _strip_null_items(load_payload(payload, sheet=sheet))
     cfg, org_configured, banner = load_config(config)
+    if _ENTERPRISE_IO is not None:
+        eff_col_map, eff_sheet_map = _ENTERPRISE_IO.merge_mappings(cfg, column_map=column_map, sheet_map=sheet_map)
+    else:
+        eff_col_map, eff_sheet_map = {}, {}
+    data = _strip_null_items(load_payload(payload, sheet=sheet, column_map=eff_col_map, sheet_map=eff_sheet_map))
+    if _ENTERPRISE_IO is not None:
+        schema_diag = _ENTERPRISE_IO.validate_payload_schema(data, skill_id="cross-source-knowledge-synthesis")
+        if schema_diag["status"] == "SCHEMA_MAPPING_REQUIRED":
+            return _ENTERPRISE_IO.build_schema_error_result(
+                "cross-source-knowledge-synthesis",
+                schema_diag,
+                org_configured=org_configured,
+                banner=banner,
+                source=payload,
+                config=cfg,
+                column_map=eff_col_map,
+                sheet_map=eff_sheet_map,
+                sheet=sheet,
+            )
     sources = data.get("sources") or data.get("records") or []
     draft_claims = _as_list(data.get("draft_claims"))
     metadata = _as_dict(data.get("metadata"))
@@ -470,6 +500,8 @@ def analyze(
 
 
 def render_markdown(result: dict[str, Any]) -> str:
+    if result.get("status") == "SCHEMA_MAPPING_REQUIRED" and _ENTERPRISE_IO is not None:
+        return _ENTERPRISE_IO.format_schema_mapping_markdown(result)
     lines: list[str] = []
     if result.get("baseline_banner"):
         lines.append(result["baseline_banner"])
@@ -514,18 +546,36 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit multi-source authority, conflicts, and citation coverage.")
     parser.add_argument("--input", required=True, type=Path, help="Path to JSON or CSV source dataset")
     parser.add_argument("--sheet", help="Optional .xlsx worksheet name when loading Excel workbooks")
-    parser.add_argument("--config", type=Path, help="Optional config.json path")
+    parser.add_argument("--config", "--org-config", dest="config", type=Path, help="Optional config.json path")
+    parser.add_argument("--column-map", help="Optional JSON or k=v header/field mapping")
+    parser.add_argument("--sheet-map", help="Optional JSON or k=v worksheet/table mapping")
+    parser.add_argument("--inspect", action="store_true", help="Fast schema inspection (<100ms) with suggested column_map")
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument("--output", type=Path, help="Optional file path to write output")
     args = parser.parse_args(argv)
+    if args.inspect and _ENTERPRISE_IO is not None:
+        diag = _ENTERPRISE_IO.inspect_enterprise_source(
+            args.input,
+            skill_id="cross-source-knowledge-synthesis",
+            config=args.config,
+            sheet=args.sheet,
+            column_map=args.column_map,
+            sheet_map=args.sheet_map,
+        )
+        out = json.dumps(diag, indent=2, default=str)
+        if args.output:
+            args.output.write_text(out + "\n", encoding="utf-8")
+        else:
+            print(out)
+        return 2 if diag.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
 
-    result = analyze(args.input, config=args.config, sheet=args.sheet)
+    result = analyze(args.input, config=args.config, sheet=args.sheet, column_map=args.column_map, sheet_map=args.sheet_map)
     rendered = json.dumps(result, indent=2) if args.format == "json" else render_markdown(result)
     if args.output:
         args.output.write_text(rendered + "\n", encoding="utf-8")
     else:
         print(rendered)
-    return 0
+    return 2 if result.get("status") == "SCHEMA_MAPPING_REQUIRED" else 0
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@
     "sap-pm"
   ],
   "description": "Optimizes critical spare-part safety stocks and reorder points via censored MTBF reliability modeling, builds 80/20 scrap defect Paretos with CapEx payback evaluation, and enforces strict EHS Permit-to-Work LOTO and gas-test safety gates.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "asset-reliability-spares-planner",
@@ -40,11 +41,34 @@
     "finance-materiality-baseline.md",
     "itsm-sla-severity-baseline.md"
   ],
-  "agent_templates": [
-    "agents/industrial-shopfloor-maintenance-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/daily-critical-spares-watch.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "BigQuery",
+      "Google Drive",
+      "Google Sheets",
+      "Google Docs"
+    ],
+    "byo_mcp": [
+      "SAP PM / Shopfloor Historian & EHS Permit MCP server"
+    ],
+    "connector_fetch_guidance": "Extract equipment work-order MTBF logs, spares inventory balances, QMS scrap batches, and EHS confined-space permit readings from BigQuery or customer SAP PM / Historian MCP servers via remote_cli mcp before Python safety and optimization runs."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Creating spare-parts purchase requisitions in customer SAP PM / ERP MCP",
+      "Signing or authorizing live Permit-to-Work (LOTO / confined space) clearances in EHS MCP"
+    ],
+    "python_code_guardrails": [
+      "Hard STOP_WORK_BLOCKED interlock whenever O2 < 19.5%/> 23.5%, LEL >= 10%, H2S/CO threshold breach, or missing LOTO verification",
+      "Zero-stock critical asset safety-stock floor and MTBF reorder-point calculation",
+      "Pareto 80/20 scrap concentration correlation and discounted CapEx payback bounds"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "daily-critical-spares-watch",
+    "title": "Daily Critical Spares ROP Watch",
+    "cron_expression": "0 6 * * 1-5",
+    "time_zone": "UTC",
+    "instruction": "Run the daily critical spare parts ROP check via scripts/mtbf_spares_optimizer.py across plant rotating equipment and flag zero-stock critical assets."
+  }
 }

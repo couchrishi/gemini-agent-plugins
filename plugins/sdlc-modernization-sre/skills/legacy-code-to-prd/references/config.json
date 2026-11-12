@@ -1,6 +1,8 @@
 {
   "org_configured": false,
   "organization_name": "Standard Baseline Tenant",
+  "sheet_map": {},
+  "column_map": {},
   "default_slo_availability_pct": 99.9,
   "complexity_hotspot_threshold": 15,
   "min_requirement_traceability_pct": 85.0,

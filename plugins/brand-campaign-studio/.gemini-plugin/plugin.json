@@ -12,6 +12,7 @@
     "compliance"
   ],
   "description": "Lints marketing copy against brand voice rules, prohibited claims, and channel limits, validates audience-by-channel multimodal campaign matrices, and audits global localization packs against do-not-translate glossaries.",
+  "license": "Apache-2.0",
   "skills": [
     {
       "id": "brand-voice-compliance-gate",
@@ -38,11 +39,36 @@
   "shared_baselines": [
     "commercial-contract-baseline.md"
   ],
-  "agent_templates": [
-    "agents/brand-campaign-studio-coworker.yaml"
-  ],
-  "schedules": [
-    "schedules/weekly-campaign-compliance-sweep.yaml"
-  ],
-  "license": "Apache-2.0"
+  "connectors": {
+    "managed_1p": [
+      "Google Drive",
+      "Google Docs",
+      "Google Sheets",
+      "Google Slides",
+      "Microsoft 365 (SharePoint, OneDrive, Outlook, Teams)",
+      "Slack"
+    ],
+    "byo_mcp": [
+      "Localization TMS & Brand CMS MCP server"
+    ],
+    "connector_fetch_guidance": "Query Google Drive, SharePoint, and Docs via remote_cli mcp or Workspace tools to pull brand guidelines, campaign copy decks, and locale translation sheets before running copy and glossary lint checks in Python."
+  },
+  "write_governance": {
+    "gateway_approval_actions": [
+      "Publishing public campaign copy or paid ad assets via CMS MCP or shared workspace channels",
+      "Sending external agency creative briefs or translation sign-offs over email or Slack"
+    ],
+    "python_code_guardrails": [
+      "Unverified superlative, ROI, and missing mandatory claim disclaimer blocker",
+      "Strict Do-Not-Translate (DNT) brand glossary and channel character-limit enforcement",
+      "Brand color/tone deviation and critical-path campaign dependency cycle checks"
+    ]
+  },
+  "scheduled_routine": {
+    "name": "weekly-campaign-compliance-sweep",
+    "title": "Weekly Campaign Compliance Sweep",
+    "cron_expression": "0 10 * * 2",
+    "time_zone": "UTC",
+    "instruction": "Run the weekly marketing compliance sweep via scripts/copy_compliance_linter.py across upcoming campaign drafts and flag missing disclaimers or prohibited claims."
+  }
 }

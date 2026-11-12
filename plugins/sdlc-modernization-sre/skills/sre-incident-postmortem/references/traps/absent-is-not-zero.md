@@ -53,7 +53,7 @@
    - Run numeric coercion helpers (`safe_float` / `safe_int`) only after testing explicit `None` and sentinel status branches.
 3. **Require numerator and denominator parity:** Check whether denominators cover the identical time window and entity cohort (`active_fte`, `polled_stores`, `closed_tickets`) as numerators before rendering percentages.
 
-## 4. Deterministic Programmatic Assertions (`Python` & `CEL`)
+## 4. Deterministic Programmatic Assertions (`Python` Engines)
 
 Every computation engine in this repository validates payload completeness inside `analyze()`:
 
@@ -78,7 +78,7 @@ def collect_truncation_warnings(data: dict, analyzed_count: int) -> list[str]:
     return warnings
 ```
 
-- **CEL Policy Integration:** Pair completeness checks with `policy.cel` guardrails (`pnl.hierarchy_break_count == 0`, `absent_scope_error == false`) before permitting executive publication or downstream ERP release.
+- **Python Fail-Closed Completeness Guard:** Propagate `truncation_warnings`, non-zero hierarchy break counts, and `UNVERIFIED_INSUFFICIENT_SCOPE` blocks cleanly in JSON/Markdown outputs before permitting executive publication or Agent Gateway write confirmation.
 - **Markdown Rendering Standard:** Surface non-empty `truncation_warnings` immediately below the baseline banner so reviewers see exact coverage denominators prior to acting on any metric.
 
 ## 5. Exact Envelope Fields & Verification Checklist Across Connectors

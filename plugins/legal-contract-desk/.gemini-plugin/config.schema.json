@@ -14,6 +14,22 @@
       "default": "Standard Baseline Tenant",
       "description": "Tenant organization name."
     },
+    "sheet_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "description": "Optional mapping from canonical table key (e.g. invoices) to customer worksheet tab name."
+    },
+    "column_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "description": "Optional mapping from customer column header or connector JSON field name to canonical engine field name."
+    },
     "lol_cap_months_min": {
       "type": "integer",
       "minimum": 1,
@@ -63,7 +79,12 @@
     },
     "approved_jurisdictions": {
       "type": "array",
-      "default": ["Delaware", "New York", "England and Wales", "Singapore"],
+      "default": [
+        "Delaware",
+        "New York",
+        "England and Wales",
+        "Singapore"
+      ],
       "description": "Approved governing law jurisdictions."
     },
     "max_control_evidence_days": {

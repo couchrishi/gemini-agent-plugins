@@ -8,7 +8,7 @@ deterministic_checks:
   - summary
   - credit_evaluations
   must_include_patterns:
-  - "[EVALUATED AGAINST STANDARD BASELINE \u2014 BIND ORG CONFIG TO CUSTOMIZE]"
+  - '[EVALUATED AGAINST STANDARD BASELINE — BIND ORG CONFIG TO CUSTOMIZE]'
   - underwriting_recommendation
   must_not_include_patterns:
   - auto-approved loan breaching base DSCR covenant
@@ -17,22 +17,20 @@ deterministic_checks:
   - Applies both operating-leverage EBITDA contraction and floating-rate +200bps shocks.
   - Distinguishes Watch vs Breach covenants deterministically.
 scenarios:
-- id: mode_a_rate_shock_breach
-  mode: mode_a
-  prompt: Stress-test Cymbal Financial's borrower spread with $12M EBITDA, $42M floating
-    debt, under -20% revenue and +200bps.
+- id: live_rate_shock_breach
+  mode: live_connector
+  prompt: Stress-test Cymbal Financial's borrower spread with $12M EBITDA, $42M floating debt, under -20% revenue and +200bps.
   expected_assertions:
   - Calculates exact Base vs Stress DSCR and Net Leverage.
   - Flags CREDIT_COMMITTEE_CONDITIONS when stress case breaches DSCR < 1.10x.
-- id: mode_b_sheets_spread_baseline
-  mode: mode_b
-  prompt: Check Borrower Credit Spread Sheet in Drive with 4.5x Net Leverage and 1.05x
-    Base DSCR.
+- id: workspace_sheets_spread_baseline
+  mode: workspace_connector
+  prompt: Check Borrower Credit Spread Sheet in Drive with 4.5x Net Leverage and 1.05x Base DSCR.
   expected_assertions:
   - Flags base_breach_count=1 and DECLINE_OR_RESTRUCTURE.
   - Includes standard baseline stamp when org_configured is false.
-- id: mode_c_local_credit_memo
-  mode: mode_c
+- id: local_local_credit_memo
+  mode: local_file
   prompt: Run credit_covenant_stress.py on borrowers.json and verify HITL gate.
   expected_assertions:
   - Outputs Base, Mild, and Severe stress tables accurately.
